@@ -1,0 +1,7 @@
+﻿Game analysis gui - chesskit-main src pages index.tsx
+
+play page gui: chesskit-main src pages play.tsx
+
+database page gui: chesskit-main src pages database.tsx
+
+src components has most of the boards and important details

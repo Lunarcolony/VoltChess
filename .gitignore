@@ -1,0 +1,22 @@
+# dependencies
+node_modules
+
+# next.js
+.next/
+out/
+
+# misc
+.DS_Store
+*.pem
+
+# env files
+.env*.local
+.env
+
+# ts build
+tsconfig.tsbuildinfo
+
+# CDK assets
+.cdk.staging
+cdk.out
+cdk.context.json
