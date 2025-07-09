@@ -85,24 +85,6 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
 
 
           <IconButton
-            sx={{
-          top: "auto",
-          right: 16,
-          bottom: 16,
-          left: "auto",
-          position: "fixed",
-        }}
-            onClick={switchDarkMode}
-            color="inherit"
-            edge="end"
-          >
-            {darkMode ? (
-              <Icon icon="mdi:brightness-7" />
-            ) : (
-              <Icon icon="mdi:brightness-4" />
-            )}
-          </IconButton>
-          <IconButton
             size="large"
             edge="end"
             color="inherit"
