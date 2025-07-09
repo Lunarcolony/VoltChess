@@ -167,42 +167,7 @@ export default function EngineSettingsDialog({ open, onClose }: Props) {
             />
           </Grid>
 
-          <Grid
-            container
-            justifyContent="center"
-            alignItems="center"
-            size={{ xs: 12, sm: 4, md: 3 }}
-          >
-            <FormControl variant="outlined">
-              <InputLabel id="dialog-select-label">Piece set</InputLabel>
-              <Select
-                labelId="dialog-select-label"
-                id="dialog-select"
-                displayEmpty
-                input={<OutlinedInput label="Piece set" />}
-                value={pieceSet}
-                onChange={(e) =>
-                  setPieceSet(e.target.value as (typeof PIECE_SETS)[number])
-                }
-                sx={{ width: 200, maxWidth: "100%" }}
-              >
-                {PIECE_SETS.map((name) => (
-                  <MenuItem key={name} value={name}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <Image
-                        loading="lazy"
-                        src={`/piece/${name}/${isDarkMode ? "w" : "b"}N.svg`}
-                        alt={`${name} knight`}
-                        width={24}
-                        height={24}
-                      />
-                      {name}
-                    </Box>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
+          
 
           <Grid
             container
