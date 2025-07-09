@@ -20,7 +20,8 @@
     "@mui/x-data-grid": "^7.23.5",
     "@sentry/nextjs": "^8.47.0",
     "@tanstack/react-query": "^5.75.5",
-    "chess.js": "^1.2.0",
+    "chess.js": "^1.4.0",
+    "chessboardjsx": "^2.4.7",
     "firebase": "^11.1.0",
     "framer-motion": "^12.23.0",
     "idb": "^8.0.1",
@@ -28,6 +29,7 @@
     "next": "15.2.4",
     "react": "18.3.1",
     "react-chessboard": "^4.7.3",
+    "react-confetti": "^6.4.0",
     "react-dom": "18.3.1",
     "recharts": "^2.15.0",
     "tinycolor2": "^1.6.0"
