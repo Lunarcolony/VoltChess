@@ -8,6 +8,10 @@ import {
   Container,
   useTheme,
 } from "@mui/material";
+import { motion } from "framer-motion";
+
+const MotionCard = motion(Card);
+const MotionBox = motion(Box);
 
 const Thanks: React.FC = () => {
   const theme = useTheme();
@@ -16,102 +20,152 @@ const Thanks: React.FC = () => {
     <Box
       sx={{
         minHeight: "100vh",
+        width: "100%",
+        background: "radial-gradient(ellipse at center, #0d0d0d 0%, #000000 100%)",
+        color: "white",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "background.default",
-        padding: 4,
+        py: 8,
+        px: 2,
+        position: "relative",
+        overflow: "hidden",
       }}
     >
-      <Container maxWidth="md">
-        <Box textAlign="center" mb={6}>
+      {/* Glowing background chess piece */}
+      <motion.div
+        initial={{ opacity: 0.1, scale: 0.9 }}
+        animate={{ opacity: 0.12, scale: [0.9, 1, 0.9] }}
+        transition={{ duration: 10, repeat: Infinity }}
+        style={{
+          position: "absolute",
+          fontSize: "25rem",
+          left: "50%",
+          top: "40%",
+          transform: "translate(-50%, -50%)",
+          color: "#8236ff",
+          filter: "blur(80px)",
+          zIndex: 0,
+          pointerEvents: "none",
+        }}
+      >
+        ♟️
+      </motion.div>
+
+      <Container maxWidth="md" sx={{ zIndex: 1 }}>
+        <MotionBox
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          textAlign="center"
+          mb={6}
+        >
           <Typography
             variant="h3"
             fontWeight="bold"
             gutterBottom
-            sx={{ color: "primary.contrastText" }}
+            sx={{
+              color: "#d4bfff",
+              textShadow: "0 0 10px #a16eff",
+              fontFamily: "Orbitron, sans-serif",
+            }}
           >
-            Thank You for Using VoltChess ♟️
+            ⚡ Thank You for Using VoltChess
           </Typography>
-          <Typography variant="subtitle1" color="text.secondary">
-            VoltChess wouldn't be possible without the incredible contributions
-            of open-source communities and developers.
+          <Typography variant="subtitle1" sx={{ color: "#ccc" }}>
+            Empowered by code, powered by community.
           </Typography>
-        </Box>
+        </MotionBox>
 
         <Grid container spacing={4}>
-          {/* Technologies & Resources */}
+          {/* Technologies */}
           <Grid xs={12} md={6}>
-            <Card
+            <MotionCard
+              whileHover={{ scale: 1.05, boxShadow: "0 0 20px #4bffef" }}
+              whileTap={{ scale: 0.97 }}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
               sx={{
-                bgcolor: theme.palette.background.paper,
+                bgcolor: "#1b1b1b",
+                border: "1px solid #4bffef33",
                 borderRadius: 4,
-                boxShadow: 6,
+                boxShadow: "0 0 10px #4bffef22",
+                backdropFilter: "blur(4px)",
               }}
             >
               <CardContent>
-                <Typography variant="h5" gutterBottom>
-                  🛠️ Technologies & Resources
+                <Typography variant="h5" gutterBottom sx={{ color: "#4bffef" }}>
+                  🛠️ Technologies
                 </Typography>
                 <Typography variant="body1" paragraph>
-                  • <strong>Stockfish</strong>: The world-class open-source
-                  chess engine powering VoltChess analysis.
+                  • <strong>Stockfish</strong>: Advanced chess engine for real-time analysis.
                 </Typography>
                 <Typography variant="body1" paragraph>
-                  • <strong>Chesskit</strong>: Provided architectural inspiration
-                  and integration examples.
+                  • <strong>Chesskit</strong>: UI + engine integration inspiration.
                 </Typography>
               </CardContent>
-            </Card>
+            </MotionCard>
           </Grid>
 
           {/* Contributors */}
           <Grid xs={12} md={6}>
-            <Card
+            <MotionCard
+              whileHover={{ scale: 1.05, boxShadow: "0 0 20px #ff4bf5" }}
+              whileTap={{ scale: 0.97 }}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
               sx={{
-                bgcolor: theme.palette.background.paper,
+                bgcolor: "#1b1b1b",
+                border: "1px solid #ff4bf533",
                 borderRadius: 4,
-                boxShadow: 6,
+                boxShadow: "0 0 10px #ff4bf522",
+                backdropFilter: "blur(4px)",
               }}
             >
               <CardContent>
-                <Typography variant="h5" gutterBottom>
-                  👨‍💻 Contributors
+                <Typography variant="h5" gutterBottom sx={{ color: "#ff4bf5" }}>
+                  🧑‍🚀 Contributors
                 </Typography>
                 <Typography variant="body1" paragraph>
-                  • <strong>Jithesh</strong>: Founder & lead developer of
-                  VoltChess.
+                  • <strong>Jithesh</strong>: Lead developer, architecture.
                 </Typography>
                 <Typography variant="body1" paragraph>
-                  • <strong>Nomoru</strong>: UI design and feature ideation.
+                  • <strong>Nomoru</strong>: UX design + animations.
                 </Typography>
                 <Typography variant="body1" paragraph>
-                  • <strong>Quartx</strong>: Engine integration and optimization.
+                  • <strong>Quartx</strong>: Engine integration wizardry.
                 </Typography>
               </CardContent>
-            </Card>
+            </MotionCard>
           </Grid>
 
           {/* Final Words */}
           <Grid xs={12}>
-            <Card
+            <MotionCard
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
               sx={{
-                bgcolor: theme.palette.background.paper,
+                bgcolor: "#1b1b1b",
                 borderRadius: 4,
-                boxShadow: 6,
+                boxShadow: "0 0 20px #ffffff22",
+                border: "1px solid #ffffff22",
               }}
             >
               <CardContent>
-                <Typography variant="h5" gutterBottom>
+                <Typography variant="h5" gutterBottom sx={{ color: "#fff" }}>
                   🚀 Final Words
                 </Typography>
                 <Typography variant="body1">
-                  VoltChess is a community-driven project. We thank every
-                  contributor, tester, and user. Keep playing, keep learning, and
-                  never stop improving your game!
+                  VoltChess is a community of creators. Stay sharp, stay curious,
+                  and may your games be legendary.
                 </Typography>
               </CardContent>
-            </Card>
+            </MotionCard>
           </Grid>
         </Grid>
       </Container>
