@@ -29,7 +29,7 @@ interface Props {
 
 export default function NavMenu({ open, onClose }: Props) {
   return (
-    <Drawer anchor="left" open={open} onClose={onClose}>
+    <Drawer anchor="right" open={open} onClose={onClose}>
       <Toolbar />
       <Box sx={{ width: 250, overflow: "hidden" }}>
         <List>

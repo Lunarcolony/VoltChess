@@ -61,6 +61,19 @@ const nextConfig = (phase: string): NextConfig => ({
             ],
           },
           {
+            source: "/Puzzle",
+            headers: [
+              {
+                key: "Cross-Origin-Embedder-Policy",
+                value: "require-corp",
+              },
+              {
+                key: "Cross-Origin-Opener-Policy",
+                value: "same-origin",
+              },
+            ],
+          },
+          {
             source: "/play",
             headers: [
               {

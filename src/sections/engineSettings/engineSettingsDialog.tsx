@@ -1,39 +1,36 @@
-import Slider from "@/components/slider";
-import { EngineName } from "@/types/enums";
 import {
-  MenuItem,
-  Select,
-  Button,
   Dialog,
   DialogTitle,
   DialogContent,
-  FormControl,
-  InputLabel,
-  OutlinedInput,
   DialogActions,
   Typography,
-  Grid2 as Grid,
-  Box,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
+  OutlinedInput,
+  Button,
+  Grid,
   useTheme,
 } from "@mui/material";
+import { useEffect } from "react";
+import { useAtom } from "jotai";
+import Slider from "@/components/slider";
+import ArrowOptions from "./arrowOptions";
+import { EngineName } from "@/types/enums";
 import {
   engineNameAtom,
   engineDepthAtom,
   engineMultiPvAtom,
   engineWorkersNbAtom,
 } from "../analysis/states";
-import ArrowOptions from "./arrowOptions";
+import { boardHueAtom } from "@/components/board/states";
 import { useAtomLocalStorage } from "@/hooks/useAtomLocalStorage";
-import { useEffect } from "react";
 import { isEngineSupported } from "@/lib/engine/shared";
 import { Stockfish16_1 } from "@/lib/engine/stockfish16_1";
-import { useAtom } from "jotai";
-import { boardHueAtom, pieceSetAtom } from "@/components/board/states";
-import Image from "next/image";
 import {
   DEFAULT_ENGINE,
   ENGINE_LABELS,
-  PIECE_SETS,
   STRONGEST_ENGINE,
 } from "@/constants";
 import { getRecommendedWorkersNb } from "@/lib/engine/worker";
@@ -44,24 +41,13 @@ interface Props {
 }
 
 export default function EngineSettingsDialog({ open, onClose }: Props) {
-  const [depth, setDepth] = useAtomLocalStorage(
-    "engine-depth",
-    engineDepthAtom
-  );
-  const [multiPv, setMultiPv] = useAtomLocalStorage(
-    "engine-multi-pv",
-    engineMultiPvAtom
-  );
-  const [engineName, setEngineName] = useAtomLocalStorage(
-    "engine-name",
-    engineNameAtom
-  );
+  const [depth, setDepth] = useAtomLocalStorage("engine-depth", engineDepthAtom);
+  const [multiPv, setMultiPv] = useAtomLocalStorage("engine-multi-pv", engineMultiPvAtom);
+  const [engineName, setEngineName] = useAtomLocalStorage("engine-name", engineNameAtom);
   const [boardHue, setBoardHue] = useAtom(boardHueAtom);
-  const [pieceSet, setPieceSet] = useAtom(pieceSetAtom);
   const [engineWorkersNb, setEngineWorkersNb] = useAtom(engineWorkersNbAtom);
 
   const theme = useTheme();
-  const isDarkMode = theme.palette.mode === "dark";
 
   useEffect(() => {
     if (!isEngineSupported(engineName)) {
@@ -71,53 +57,30 @@ export default function EngineSettingsDialog({ open, onClose }: Props) {
         setEngineName(EngineName.Stockfish11);
       }
     }
-  }, [setEngineName, engineName]);
+  }, [engineName, setEngineName]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle variant="h5" sx={{ paddingBottom: 1 }}>
-        Settings
-      </DialogTitle>
-      <DialogContent sx={{ paddingBottom: 0 }}>
-        <Grid
-          container
-          justifyContent="center"
-          alignItems="center"
-          paddingTop={1}
-          spacing={3}
-          size={12}
-        >
-          <Grid
-            container
-            justifyContent="center"
-            size={{ xs: 12, sm: 7, md: 8 }}
-          >
-            <Typography variant="body2">
-              {ENGINE_LABELS[DEFAULT_ENGINE].small} is the default engine if
-              your device support its requirements. It offers the best balance
-              between speed and strength.{" "}
-              {ENGINE_LABELS[STRONGEST_ENGINE].small} is the strongest engine
-              available, note that it requires a one time download of{" "}
-              {ENGINE_LABELS[STRONGEST_ENGINE].sizeMb}MB and is much more
-              compute intensive.
-            </Typography>
-          </Grid>
+      <DialogTitle sx={{ fontWeight: "bold", pb: 1 }}>Settings</DialogTitle>
 
-          <Grid
-            container
-            justifyContent="center"
-            size={{ xs: 12, sm: 5, md: 4 }}
-          >
-            <FormControl variant="outlined">
-              <InputLabel id="dialog-select-label">Engine</InputLabel>
+      <DialogContent>
+        <Typography variant="body2" sx={{ mb: 3 }}>
+          {ENGINE_LABELS[DEFAULT_ENGINE].small} is the default engine if your device supports its
+          requirements. It offers the best balance between speed and strength.{" "}
+          {ENGINE_LABELS[STRONGEST_ENGINE].small} is the strongest engine available, note that it
+          requires a one-time download of {ENGINE_LABELS[STRONGEST_ENGINE].sizeMb}MB and is much
+          more compute intensive.
+        </Typography>
+
+        <Grid container spacing={3}>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <InputLabel id="engine-select-label">Engine</InputLabel>
               <Select
-                labelId="dialog-select-label"
-                id="dialog-select"
-                displayEmpty
-                input={<OutlinedInput label="Engine" />}
+                labelId="engine-select-label"
                 value={engineName}
                 onChange={(e) => setEngineName(e.target.value as EngineName)}
-                sx={{ width: 280, maxWidth: "100%" }}
+                input={<OutlinedInput label="Engine" />}
               >
                 {Object.values(EngineName).map((engine) => (
                   <MenuItem
@@ -132,49 +95,23 @@ export default function EngineSettingsDialog({ open, onClose }: Props) {
             </FormControl>
           </Grid>
 
-          <Slider
-            label="Maximum depth"
-            value={depth}
-            setValue={setDepth}
-            min={10}
-            max={30}
-            marksFilter={2}
-          />
-
-          <Slider
-            label="Number of lines"
-            value={multiPv}
-            setValue={setMultiPv}
-            min={2}
-            max={6}
-            marksFilter={1}
-            size={6}
-          />
-
-          <ArrowOptions />
-
-          <Grid
-            container
-            justifyContent="center"
-            size={{ xs: 12, sm: 8, md: 9 }}
-          >
-            <Slider
-              label="Board hue"
-              value={boardHue}
-              setValue={setBoardHue}
-              min={0}
-              max={360}
-            />
+          <Grid item xs={12} sm={6}>
+            <Slider label="Maximum depth" value={depth} setValue={setDepth} min={10} max={30} marksFilter={2} />
           </Grid>
 
-          
+          <Grid item xs={12} sm={6}>
+            <Slider label="Number of lines" value={multiPv} setValue={setMultiPv} min={2} max={6} marksFilter={1} />
+          </Grid>
 
-          <Grid
-            container
-            justifyContent="center"
-            alignItems="center"
-            size={{ xs: 12, md: 11 }}
-          >
+          <Grid item xs={12} sm={6}>
+            <Slider label="Board hue" value={boardHue} setValue={setBoardHue} min={0} max={360} />
+          </Grid>
+
+          <Grid item xs={12}>
+            <ArrowOptions />
+          </Grid>
+
+          <Grid item xs={12}>
             <Slider
               label="Number of threads"
               value={engineWorkersNb}
@@ -184,20 +121,16 @@ export default function EngineSettingsDialog({ open, onClose }: Props) {
               marksFilter={1}
               infoContent={
                 <>
-                  More threads means faster analysis, but only if your device
-                  can handle them, otherwise it may have the opposite effect.
-                  The estimated optimal value for your device is{" "}
-                  {getRecommendedWorkersNb()}. Due to privacy restrictions in
-                  some browsers, this value might be underestimated. Don't
-                  hesitate to try different values to find the best one for your
-                  device.
+                  More threads means faster analysis, but only if your device can handle them. Try
+                  values between 1 and {getRecommendedWorkersNb()} for best performance.
                 </>
               }
             />
           </Grid>
         </Grid>
       </DialogContent>
-      <DialogActions sx={{ m: 1 }}>
+
+      <DialogActions>
         <Button variant="contained" onClick={onClose}>
           Close
         </Button>
