@@ -45,7 +45,7 @@ export default function LoadGame() {
       resetAndSetGamePgn(gameUrl.pgn);
       setEval(gameUrl.eval);
       setBoardOrientation(
-        gameUrl.black.name === "You" && gameUrl.site === "Chesskit.org"
+        gameUrl.black.name === "You" && gameUrl.site === "voltchess.com"
           ? false
           : true
       );
@@ -87,10 +87,10 @@ export default function LoadGame() {
 
   return (
     <LoadGameButton
-      label={isGameLoaded ? "Load another game" : "Load game"}
+      label={isGameLoaded ? "Load a new game" : "Load game"}
       size="small"
       setGame={async (game) => {
-        await router.push("/");
+        await router.push("/analysis");
         resetAndSetGamePgn(game.pgn());
       }}
     />

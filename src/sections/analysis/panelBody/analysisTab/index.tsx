@@ -60,9 +60,13 @@ export default function AnalysisTab(props: GridProps) {
           />
         )}
 
-        <MoveInfo />
 
-        <Opening />
+
+
+
+
+
+
 
         {isGameOver && (
           <Typography align="center" fontSize="0.9rem" noWrap>
@@ -75,3 +79,7 @@ export default function AnalysisTab(props: GridProps) {
     </Grid>
   );
 }
+
+        //<MoveInfo />
+
+        //<Opening />

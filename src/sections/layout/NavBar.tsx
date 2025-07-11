@@ -1,4 +1,4 @@
-import AppBar from "@mui/material/AppBar";
+ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -68,7 +68,7 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
             height={70}
           />
 
-          <NavLink href="https://github.com/Lunarcolony/VoltChess">
+          <NavLink href="/">
             <Typography
               variant="h6"
               component="div"
