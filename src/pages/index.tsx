@@ -20,6 +20,6 @@ import EngineSettingsButton from "@/sections/engineSettings/engineSettingsButton
 import GraphTab from "@/sections/analysis/panelBody/graphTab";
 import { PageTitle } from "@/components/pageTitle";
 
-export default function GameAnalysis() {
+export default function Home() {
 
 }
