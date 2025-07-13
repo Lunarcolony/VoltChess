@@ -1,8 +1,8 @@
  import Board from "@/sections/analysis/board";
 import PanelHeader from "@/sections/analysis/panelHeader";
 import PanelToolBar from "@/sections/analysis/panelToolbar";
-import AnalysisTab from "@/sections/analysis/panelBody/analysisTab";
-import ClassificationTab from "@/sections/analysis/panelBody/classificationTab";
+import AnalysisTab from "@/sections/analysis/panelBody/analysisTab/engine";
+import ClassificationTab from "@/sections/analysis/panelBody/classificationTab/moves";
 import { boardAtom, gameAtom, gameEvalAtom } from "@/sections/analysis/states";
 import {
   Box,
@@ -58,7 +58,7 @@ export default function GameAnalysis() {
         }}
         padding={2}
         style={{
-            maxWidth: "1000px",
+            maxWidth: "500px",
         }}
         rowGap={2}
         height={{ xs: tab === 1 ? "40rem" : "auto", lg: "calc(95vh - 60px)" }}

@@ -38,9 +38,44 @@ export default function AnalysisTab(props: GridProps) {
       {...props}
       sx={props.hidden ? { display: "none" } : props.sx}
     >
+      <Stack
+        justifyContent="center"
+        alignItems="center"
+        rowGap={1}
+        minWidth={gameEval ? "min(25rem, 95vw)" : undefined}
+      >
+        {gameEval && (
+          <PlayersMetric
+            title="Accuracy"
+            whiteValue={`${gameEval.accuracy.white.toFixed(1)} %`}
+            blackValue={`${gameEval.accuracy.black.toFixed(1)} %`}
+          />
+        )}
+
+        {gameEval?.estimatedElo && (
+          <PlayersMetric
+            title="Game Rating"
+            whiteValue={Math.round(gameEval.estimatedElo.white)}
+            blackValue={Math.round(gameEval.estimatedElo.black)}
+          />
+        )}
 
 
-      <EngineLines size={{ lg: gameEval ? undefined : 12 }} />
+
+
+
+
+
+
+
+        {isGameOver && (
+          <Typography align="center" fontSize="0.9rem" noWrap>
+            Game is over
+          </Typography>
+        )}
+      </Stack>
+
+
     </Grid>
   );
 }

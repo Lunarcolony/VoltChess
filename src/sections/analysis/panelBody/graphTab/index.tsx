@@ -90,7 +90,7 @@ export default function GraphTab(props: GridProps) {
       alignItems="center"
       minHeight="min(10rem, 8vh)"
       height={{ xs: "8rem", lg: "none" }}
-      maxHeight="10rem"
+      maxHeight="5rem"
       {...props}
       sx={props.hidden ? { display: "none" } : props.sx}
       size={12}

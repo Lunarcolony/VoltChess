@@ -71,6 +71,7 @@ export default function ClassificationRow({ classification }: Props) {
   return (
     <Grid
       container
+      gap={1}
       justifyContent="space-evenly"
       alignItems="center"
       wrap="nowrap"

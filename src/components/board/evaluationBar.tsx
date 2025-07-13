@@ -35,7 +35,7 @@ export default function EvaluationBar({
       container
       justifyContent="center"
       alignItems="center"
-      width="3rem"
+      width="2.5rem"
       height={height}
       border="1px solid black"
       borderRadius="2px"
