@@ -1,160 +1,195 @@
-﻿import { useEffect, useState } from "react";
-import * as React from "react";
+﻿import Head from "next/head";
 import { useRouter } from "next/router";
+import { useEffect, useCallback } from "react";
+import { useAtomValue, useSetAtom } from "jotai";
+import { Chess } from "chess.js";
+
 import {
   Box,
-  Divider,
-  Grid2 as Grid,
-  Button,
+  Container,
   Typography,
-  useTheme,
+  Grid,
+  Divider,
 } from "@mui/material";
 
-import Board from "@/sections/analysis/board";
-import PanelHeader from "@/sections/analysis/panelHeader";
-import PanelToolBar from "@/sections/analysis/panelToolbar";
-import AnalysisTab from "@/sections/analysis/panelBody/analysisTab/accuracy";
-import AnalyzeButton from "@/sections/analysis/panelHeader/treegame";
-import ClassificationTab from "@/sections/analysis/panelBody/classificationTab/report";
-import GraphTab from "@/sections/analysis/panelBody/graphTab";
-import EngineSettingsButton from "@/sections/engineSettings/engineSettingsButton";
+import LoadGameButton from "@/sections/loadGame/startanalyzing";
+import { useChessActions } from "@/hooks/useChessActions";
+import { useGameDatabase } from "@/hooks/useGameDatabase";
+import { decodeBase64 } from "@/lib/helpers";
 
-import { PageTitle } from "@/components/pageTitle";
-import LinearProgressBar from "@/components/LinearProgressBar";
+import {
+  gameAtom,
+  boardAtom,
+  boardOrientationAtom,
+  gameEvalAtom,
+  evaluationProgressAtom,
+} from "@/sections/analysis/states";
 
-import { boardAtom, gameAtom, gameEvalAtom } from "@/sections/analysis/states";
-import { useAtomValue } from "jotai";
-import { evaluationProgressAtom } from "../sections/analysis/states";
+import type { Game } from "@/types/game";
 
-export default function Homes() {
-  const theme = useTheme();
-  const [value, setValue] = React.useState(0);
+export default function Home() {
   const router = useRouter();
+  const game = useAtomValue(gameAtom);
+  const evaluationProgress = useAtomValue(evaluationProgressAtom);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
-  };
+  const { setPgn: setGamePgn } = useChessActions(gameAtom);
+  const { resetToStartingPosition: resetBoard } = useChessActions(boardAtom);
+  const { gameFromUrl } = useGameDatabase();
+  const setEval = useSetAtom(gameEvalAtom);
+  const setBoardOrientation = useSetAtom(boardOrientationAtom);
+
+  const resetAndSetGamePgn = useCallback(
+    (pgn: string) => {
+      resetBoard(pgn);
+      setEval(undefined);
+      setGamePgn(pgn);
+    },
+    [resetBoard, setGamePgn, setEval]
+  );
+
+  const { pgn: pgnParam, orientation: orientationParam } = router.query;
+
+  useEffect(() => {
+    const loadGameFromIdParam = (gameUrl: Game) => {
+      const gameFromDb = new Chess();
+      gameFromDb.loadPgn(gameUrl.pgn);
+      if (game.history().join() === gameFromDb.history().join()) return;
+
+      resetAndSetGamePgn(gameUrl.pgn);
+      setEval(gameUrl.eval);
+      setBoardOrientation(
+        gameUrl.black.name === "You" && gameUrl.site === "voltchess.com"
+          ? false
+          : true
+      );
+    };
+
+    const loadGameFromPgnParam = (encodedPgn: string) => {
+      const decodedPgn = decodeBase64(encodedPgn);
+      if (!decodedPgn) return;
+
+      const parsedGame = new Chess();
+      parsedGame.loadPgn(decodedPgn);
+      if (game.history().join() === parsedGame.history().join()) return;
+
+      resetAndSetGamePgn(decodedPgn);
+      setBoardOrientation(orientationParam !== "black");
+    };
+
+    if (gameFromUrl) {
+      loadGameFromIdParam(gameFromUrl);
+    } else if (typeof pgnParam === "string") {
+      loadGameFromPgnParam(pgnParam);
+    }
+  }, [
+    gameFromUrl,
+    pgnParam,
+    orientationParam,
+    game,
+    resetAndSetGamePgn,
+    setEval,
+    setBoardOrientation,
+  ]);
+
+  const isGameLoaded =
+    gameFromUrl !== undefined ||
+    (!!game.getHeaders().White && game.getHeaders().White !== "?") ||
+    game.history().length > 0;
+
+  if (evaluationProgress) return null;
 
   return (
-    <Grid container gap={4} justifyContent="space-evenly" alignItems="start">
-      <PageTitle title="VoltChess Game Analysis" />
+    <>
+      <Head>
+        <title>VoltChess — Free Online Chess Analyzer</title>
+        <meta
+          name="description"
+          content="VoltChess is the best free chess analysis website. Upload PGNs, review your games with advanced AI, and find the perfect alternative to Chess.com's Game Review."
+        />
+        <meta
+          name="keywords"
+          content="free chess analyzer, PGN review, voltchess, chess.com game review alternative, open source chess analysis, AI chess game review, upload pgn free"
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
 
-      <Board />
+      <Container maxWidth="md" sx={{ py: 10 }}>
+        <Typography
+          variant="h2"
+          fontWeight="bold"
+          textAlign="center"
+          gutterBottom
+          sx={{
+            background: "linear-gradient(90deg, #3b9ac6, #7fddff)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          VoltChess ⚡
+        </Typography>
 
-      <Grid
-        container
-        justifyContent="start"
-        alignItems="center"
-        borderRadius={1}
-        border={1}
-        borderColor="secondary.main"
-        overflow="auto"
-        sx={{
-          backgroundColor: "secondary.main",
-          borderColor: "primary.main",
-          borderWidth: 3,
-          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
-        }}
-        padding={2}
-        style={{ maxWidth: "500px" }}
-        rowGap={2}
-        height={{
-          xs: value === 1 ? "40rem" : "auto",
-          lg: "calc(95vh - 60px)",
-        }}
-        display="flex"
-        flexDirection="column"
-        flexWrap="nowrap"
-        size={{
-          xs: 12,
-          lg: "grow",
-        }}
-      >
-        <AnalyzeButton />
+        <Typography
+          variant="h6"
+          color="text.secondary"
+          textAlign="center"
+          maxWidth="600px"
+          mx="auto"
+          mb={4}
+        >
+          A free alternative to Chess.com's Game Review. Upload your PGN and get instant, AI-powered chess insights — blunders, inaccuracies, and the best moves — for free, forever.
+        </Typography>
 
-        {/* Title */}
-        <Grid container justifyContent="center" alignItems="center" columnGap={1}>
-          <Typography variant="h5" align="center">
-            Game Analysis
-          </Typography>
+        <Box textAlign="center" mt={6}>
+          <LoadGameButton
+            label={isGameLoaded ? "Load a new game" : "Start Analyzing"}
+            size="large"
+            setGame={async (game) => {
+              await router.push("/analysis");
+              resetAndSetGamePgn(game.pgn());
+            }}
+          />
+        </Box>
+
+        <Divider sx={{ my: 8 }} />
+
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={6}>
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+              Why Choose VoltChess?
+            </Typography>
+            <Typography>
+              VoltChess is a powerful, user-friendly PGN analysis tool that delivers in-depth insights for beginners and advanced players alike. Whether you're prepping for a tournament or just reviewing a casual game, our free chess analyzing tool will help you learn, grow, and dominate.
+            </Typography>
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+              Built for Speed & Accuracy
+            </Typography>
+            <Typography>
+              Unlike many bulky chess tools, VoltChess is optimized for instant results. Our engine-powered backend quickly evaluates your position, highlights inaccuracies, and gives you the clarity you need — faster than traditional chess sites.
+            </Typography>
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+              100% Free. No Account Needed.
+            </Typography>
+            <Typography>
+              No signup. No paywall. No limits. VoltChess is completely free to use. Just upload your PGN file and instantly start analyzing your chess games without any hassle.
+            </Typography>
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+              Perfect Alternative to Chess.com Game Review
+            </Typography>
+            <Typography>
+              Looking for a free Chess.com Game Review replacement? VoltChess delivers many of the same features — and more — without any subscriptions or ads.
+            </Typography>
+          </Grid>
         </Grid>
-
-        <Box width="100%">
-          <Divider sx={{ marginX: "5%", marginBottom: 2.5 }} />
-
-          {/* Graph */}
-          <GraphTab />
-
-          {/* Spacer */}
-          <Grid container justifyContent="center" alignItems="center" columnGap={1}>
-            <Typography variant="h5" align="center">
-              ‎ ‎ ‎ ‎ ‎ ‎
-            </Typography>
-          </Grid>
-
-          {/* Accuracy Tab */}
-          <AnalysisTab />
-
-          {/* Spacer */}
-          <Grid container justifyContent="center" alignItems="center" columnGap={1}>
-            <Typography variant="h5" align="center">
-              ‎ ‎ ‎ ‎ ‎ ‎
-            </Typography>
-          </Grid>
-
-          {/* Classification Tab */}
-          <ClassificationTab />
-
-          {/* Spacer */}
-          <Grid container justifyContent="center" alignItems="center" columnGap={1}>
-            <Typography variant="h5" align="center">
-              ‎ ‎ ‎ ‎ ‎ ‎
-            </Typography>
-          </Grid>
-
-          {/* Game Review Button */}
-          <Grid container justifyContent="center" alignItems="center" columnGap={1}>
-            <Button
-              variant="contained"
-              size="large"
-              onClick={() => router.push("/reanalysis")}
-              sx={{
-                backgroundColor: "#3b9ac6",
-                textTransform: "none",
-                fontWeight: "bold",
-                fontSize: "1rem",
-                borderRadius: "12px",
-                paddingX: "28px",
-                paddingY: "14px",
-                boxShadow: "0 8px 20px rgba(0, 0, 0, 0.3)",
-                transition: "all 0.2s ease-in-out",
-                transform: "translateY(0)",
-                "&:hover": {
-                  backgroundColor: "#3385ad",
-                  boxShadow: "0 12px 24px rgba(0, 0, 0, 0.35)",
-                  transform: "translateY(-2px)",
-                },
-                "&:active": {
-                  transform: "translateY(1px)",
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-                },
-              }}
-            >
-              <Typography fontSize="1rem" fontWeight={600}>
-                Game Review
-              </Typography>
-            </Button>
-          </Grid>
-        </Box>
-
-        {/* Toolbar */}
-        <Box width="100%">
-          <Divider sx={{ marginX: "5%", marginBottom: 2.5 }} />
-          <PanelToolBar key="review-panel-toolbar" />
-        </Box>
-      </Grid>
-
-      <EngineSettingsButton />
-    </Grid>
+      </Container>
+    </>
   );
 }

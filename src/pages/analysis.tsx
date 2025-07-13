@@ -1,42 +1,40 @@
- import Board from "@/sections/analysis/board";
-import PanelHeader from "@/sections/analysis/panelHeader";
-import PanelToolBar from "@/sections/analysis/panelToolbar";
-import AnalysisTab from "@/sections/analysis/panelBody/analysisTab";
-import ClassificationTab from "@/sections/analysis/panelBody/classificationTab";
-import { boardAtom, gameAtom, gameEvalAtom } from "@/sections/analysis/states";
+﻿import { useEffect, useState } from "react";
+import * as React from "react";
+import { useRouter } from "next/router";
 import {
   Box,
   Divider,
   Grid2 as Grid,
-  Tab,
-  Tabs,
-  useMediaQuery,
+  Button,
+  Typography,
   useTheme,
 } from "@mui/material";
-import { useAtomValue } from "jotai";
-import { useEffect, useState } from "react";
-import { Icon } from "@iconify/react";
-import EngineSettingsButton from "@/sections/engineSettings/engineSettingsButton";
+
+import Board from "@/sections/analysis/board";
+import PanelHeader from "@/sections/analysis/panelHeader";
+import PanelToolBar from "@/sections/analysis/panelToolbar";
+import AnalysisTab from "@/sections/analysis/panelBody/analysisTab/accuracy";
+import AnalyzeButton from "@/sections/analysis/panelHeader/treegame";
+import ClassificationTab from "@/sections/analysis/panelBody/classificationTab/report";
 import GraphTab from "@/sections/analysis/panelBody/graphTab";
+import EngineSettingsButton from "@/sections/engineSettings/engineSettingsButton";
+
 import { PageTitle } from "@/components/pageTitle";
+import LinearProgressBar from "@/components/LinearProgressBar";
 
-export default function GameAnalysis() {
+import { boardAtom, gameAtom, gameEvalAtom } from "@/sections/analysis/states";
+import { useAtomValue } from "jotai";
+import { evaluationProgressAtom } from "../sections/analysis/states";
+
+export default function Homes() {
   const theme = useTheme();
-  const [tab, setTab] = useState(0);
-  const isLgOrGreater = useMediaQuery(theme.breakpoints.up("lg"));
+  const [value, setValue] = React.useState(0);
+  const router = useRouter();
 
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
 
-  const gameEval = useAtomValue(gameEvalAtom);
-  const game = useAtomValue(gameAtom);
-  const board = useAtomValue(boardAtom);
-
-  const showMovesTab = game.history().length > 0 || board.history().length > 0;
-
-  useEffect(() => {
-    if (tab === 1 && !showMovesTab) setTab(0);
-    if (tab === 2 && !gameEval) setTab(0);
-  }, [showMovesTab, gameEval, tab]);
-  
   return (
     <Grid container gap={4} justifyContent="space-evenly" alignItems="start">
       <PageTitle title="VoltChess Game Analysis" />
@@ -47,21 +45,23 @@ export default function GameAnalysis() {
         container
         justifyContent="start"
         alignItems="center"
-        borderRadius={2}
+        borderRadius={1}
         border={1}
-        borderColor={"secondary.main"}
+        borderColor="secondary.main"
+        overflow="auto"
         sx={{
           backgroundColor: "secondary.main",
           borderColor: "primary.main",
-          borderWidth: 2,
+          borderWidth: 3,
           boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
         }}
         padding={2}
-        style={{
-            maxWidth: "1000px",
-        }}
+        style={{ maxWidth: "500px" }}
         rowGap={2}
-        height={{ xs: tab === 1 ? "40rem" : "auto", lg: "calc(95vh - 60px)" }}
+        height={{
+          xs: value === 1 ? "40rem" : "auto",
+          lg: "calc(95vh - 60px)",
+        }}
         display="flex"
         flexDirection="column"
         flexWrap="nowrap"
@@ -70,111 +70,88 @@ export default function GameAnalysis() {
           lg: "grow",
         }}
       >
-        {isLgOrGreater ? (
-          <Box width="100%">
-            <PanelHeader key="analysis-panel-header" />
-            <Divider sx={{ marginX: "5%", marginTop: 2.5 }} />
-          </Box>
-        ) : (
-          <PanelToolBar key="review-panel-toolbar" />
-        )}
+        <AnalyzeButton />
 
-        {!isLgOrGreater && !gameEval && <Divider sx={{ marginX: "5%" }} />}
-        {!isLgOrGreater && !gameEval && (
-          <PanelHeader key="analysis-panel-header" />
-        )}
+        {/* Title */}
+        <Grid container justifyContent="center" alignItems="center" columnGap={1}>
+          <Typography variant="h5" align="center">
+            Game Analysis
+          </Typography>
+        </Grid>
 
-        {!isLgOrGreater && (
-          <Box
-            width="95%"
-            sx={{
-              borderBottom: 1,
-              borderColor: "divider",
-              marginX: { sm: "5%", xs: undefined },
-            }}
-          >
-            <Tabs
-              value={tab}
-              onChange={(_, newValue) => setTab(newValue)}
-              aria-label="basic tabs example"
-              variant="fullWidth"
-              sx={{ minHeight: 0 }}
+        <Box width="100%">
+          <Divider sx={{ marginX: "5%", marginBottom: 2.5 }} />
+
+          {/* Graph */}
+          <GraphTab />
+
+          {/* Spacer */}
+          <Grid container justifyContent="center" alignItems="center" columnGap={1}>
+            <Typography variant="h5" align="center">
+              ‎ ‎ ‎ ‎ ‎ ‎
+            </Typography>
+          </Grid>
+
+          {/* Accuracy Tab */}
+          <AnalysisTab />
+
+          {/* Spacer */}
+          <Grid container justifyContent="center" alignItems="center" columnGap={1}>
+            <Typography variant="h5" align="center">
+              ‎ ‎ ‎ ‎ ‎ ‎
+            </Typography>
+          </Grid>
+
+          {/* Classification Tab */}
+          <ClassificationTab />
+
+          {/* Spacer */}
+          <Grid container justifyContent="center" alignItems="center" columnGap={1}>
+            <Typography variant="h5" align="center">
+              ‎ ‎ ‎ ‎ ‎ ‎
+            </Typography>
+          </Grid>
+
+          {/* Game Review Button */}
+          <Grid container justifyContent="center" alignItems="center" columnGap={1}>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={() => router.push("/reanalysis")}
+              sx={{
+                backgroundColor: "#3b9ac6",
+                textTransform: "none",
+                fontWeight: "bold",
+                fontSize: "1rem",
+                borderRadius: "12px",
+                paddingX: "28px",
+                paddingY: "14px",
+                boxShadow: "0 8px 20px rgba(0, 0, 0, 0.3)",
+                transition: "all 0.2s ease-in-out",
+                transform: "translateY(0)",
+                "&:hover": {
+                  backgroundColor: "#3385ad",
+                  boxShadow: "0 12px 24px rgba(0, 0, 0, 0.35)",
+                  transform: "translateY(-2px)",
+                },
+                "&:active": {
+                  transform: "translateY(1px)",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                },
+              }}
             >
-              <Tab
-                label="Analysis"
-                id="tab0"
-                icon={<Icon icon="mdi:magnify" height={15} />}
-                iconPosition="start"
-                sx={{
-                  textTransform: "none",
-                  minHeight: 15,
-                  padding: "5px 0em 12px",
-                }}
-                disableFocusRipple
-              />
+              <Typography fontSize="1rem" fontWeight={600}>
+                Game Review
+              </Typography>
+            </Button>
+          </Grid>
+        </Box>
 
-              <Tab
-                label="Moves"
-                id="tab1"
-                icon={<Icon icon="mdi:format-list-bulleted" height={15} />}
-                iconPosition="start"
-                sx={{
-                  textTransform: "none",
-                  minHeight: 15,
-                  display: showMovesTab ? undefined : "none",
-                  padding: "5px 0em 12px",
-                }}
-                disableFocusRipple
-              />
-
-              <Tab
-                label="Graph"
-                id="tab2"
-                icon={<Icon icon="mdi:chart-line" height={15} />}
-                iconPosition="start"
-                sx={{
-                  textTransform: "none",
-                  minHeight: 15,
-                  display: gameEval ? undefined : "none",
-                  padding: "5px 0em 12px",
-                }}
-                disableFocusRipple
-              />
-            </Tabs>
-          </Box>
-        )}
-
-        <GraphTab
-          role="tabpanel"
-          hidden={tab !== 2 && !isLgOrGreater}
-          id="tabContent2"
-        />
-
-        <AnalysisTab
-          role="tabpanel"
-          hidden={tab !== 0 && !isLgOrGreater}
-          id="tabContent0"
-        />
-
-        <ClassificationTab
-          role="tabpanel"
-          hidden={tab !== 1 && !isLgOrGreater}
-          id="tabContent1"
-        />
-
-        {isLgOrGreater && (
-          <Box width="100%">
-            <Divider sx={{ marginX: "5%", marginBottom: 1.5 }} />
-            <PanelToolBar key="review-panel-toolbar" />
-          </Box>
-        )}
-
-        {!isLgOrGreater && gameEval && (
-          <Box width="100%">
-            <Divider sx={{ marginX: "5%", marginBottom: 2.5 }} />
-            <PanelHeader key="analysis-panel-header" />
-          </Box>
-        )}
+        {/* Toolbar */}
+        <Box width="100%">
+          <Divider sx={{ marginX: "5%", marginBottom: 2.5 }} />
+          <PanelToolBar key="review-panel-toolbar" />
+        </Box>
       </Grid>
 
       <EngineSettingsButton />

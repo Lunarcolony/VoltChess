@@ -1,15 +1,15 @@
 import { Icon } from "@iconify/react";
-import { Grid2 as Grid, Typography } from "@mui/material";
+import { Grid2 as Grid, Typography, Button} from "@mui/material";
 import GamePanel from "./gamePanel";
 import LoadGame from "./loadGame";
-import AnalyzeButton from "./analyzeButton";
+import AnalyzeButton from "./treegame";
 import LinearProgressBar from "@/components/LinearProgressBar";
 import { useAtomValue } from "jotai";
 import { evaluationProgressAtom } from "../states";
-
+import { useRouter } from "next/router";
 export default function PanelHeader() {
   const evaluationProgress = useAtomValue(evaluationProgressAtom);
-
+  const router = useRouter();
   return (
     <Grid
       container
@@ -40,10 +40,21 @@ export default function PanelHeader() {
         columnGap={12}
         size={12}
       >
-        <GamePanel />
         <LoadGame />
-        <AnalyzeButton />
+              {/* Game Review Button */}
+              <Grid container justifyContent="center" alignItems="center" columnGap={1}>
+                  <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => router.push("/analysis")}
+                  >
+                      <Typography fontSize="0.9em" fontWeight="500" lineHeight="1.4em">
+                          Game report
+                      </Typography>
+                  </Button>
+              </Grid>
         <LinearProgressBar value={evaluationProgress} label="Analyzing..." />
+        <AnalyzeButton />
       </Grid>
     </Grid>
   );

@@ -13,7 +13,7 @@ import {
 
 const MenuOptions = [
   { text: "Play", icon: "streamline:chess-pawn", href: "/play" },
-  { text: "Analysis", icon: "streamline:magnifying-glass-solid", href: "/analysis" },
+  { text: "Analysis", icon: "streamline:magnifying-glass-solid", href: "/reanalysis" },
   {
     text: "Database",
     icon: "streamline:database",

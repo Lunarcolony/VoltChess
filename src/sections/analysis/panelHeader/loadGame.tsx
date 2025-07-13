@@ -90,7 +90,7 @@ export default function LoadGame() {
       label={isGameLoaded ? "Load a new game" : "Load game"}
       size="small"
       setGame={async (game) => {
-        await router.push("/");
+        await router.push("/analysis");
         resetAndSetGamePgn(game.pgn());
       }}
     />
