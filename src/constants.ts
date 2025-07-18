@@ -1,5 +1,6 @@
 import { EngineName, MoveClassification } from "./types/enums";
-
+export const ACCESS_TOKEN = 'access';
+export const REFRESH_TOKEN = 'refresh';
 export const MAIN_THEME_COLOR = "#3B9AC6";
 export const LINEAR_PROGRESS_BAR_COLOR = "#3B9AC6";
 
@@ -61,45 +62,5 @@ export const ENGINE_LABELS: Record<
 };
 
 export const PIECE_SETS = [
-  "alpha",
-  "anarcandy",
-  "caliente",
-  "california",
-  "cardinal",
-  "cburnett",
-  "celtic",
-  "chess7",
-  "chessnut",
-  "chicago",
-  "companion",
-  "cooke",
-  "dubrovny",
-  "fantasy",
-  "firi",
-  "fresca",
-  "gioco",
-  "governor",
-  "horsey",
-  "icpieces",
-  "iowa",
-  "kiwen-suwi",
-  "kosal",
-  "leipzig",
-  "letter",
   "maestro",
-  "merida",
-  "monarchy",
-  "mpchess",
-  "oslo",
-  "pirouetti",
-  "pixel",
-  "reillycraig",
-  "rhosgfx",
-  "riohacha",
-  "shapes",
-  "spatial",
-  "staunty",
-  "symmetric",
-  "tatiana",
-  "xkcd",
 ] as const satisfies string[];
