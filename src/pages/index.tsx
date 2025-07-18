@@ -110,7 +110,6 @@ export default function Home() {
       {/* Hero Section */}
       <Box
         sx={{
-          minHeight: "100vh",
           width: "100vw",
           display: "flex",
           flexDirection: "column",
@@ -147,7 +146,7 @@ export default function Home() {
           sx={{
             width: { xs: "100%", md: "90%" },
             maxWidth: 1400,
-            minHeight: { xs: "100vh", md: "80vh" },
+            minHeight: { xs: "100vh", md: "79vh" },
             px: { xs: 2, md: 6 },
             py: { xs: 6, md: 10 },
           }}
