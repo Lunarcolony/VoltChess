@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useAtomValue } from "jotai";
 import { boardAtom, currentPositionAtom, gameAtom } from "../../../states";
 import { useChessActions } from "@/hooks/useChessActions";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { isInViewport } from "@/lib/helpers";
 import { CLASSIFICATION_COLORS } from "@/constants";
 import PrettyMoveSan from "@/components/prettyMoveSan";
@@ -30,15 +30,30 @@ export default function MoveItem({
 
   const isCurrentMove = position?.currentMoveIdx === moveIdx;
 
+  const itemRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!isCurrentMove) return;
-    const moveItem = document.getElementById(`move-${moveIdx}`);
+    const moveItem = itemRef.current;
     if (!moveItem) return;
-
     const movePanel = document.getElementById("moves-panel");
-    if (!movePanel || !isInViewport(movePanel)) return;
-
-    moveItem.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (!movePanel) return;
+    // Manual scroll: only scroll the moves panel, not the whole page
+    const itemRect = moveItem.getBoundingClientRect();
+    const panelRect = movePanel.getBoundingClientRect();
+    const offsetTop = moveItem.offsetTop;
+    const offsetBottom = offsetTop + moveItem.offsetHeight;
+    if (offsetTop < movePanel.scrollTop) {
+      movePanel.scrollTop =
+        offsetTop -
+        panelRect.height / 2 +
+        moveItem.offsetHeight / 2;
+    } else if (offsetBottom > movePanel.scrollTop + panelRect.height) {
+      movePanel.scrollTop =
+        offsetBottom -
+        panelRect.height / 2 -
+        moveItem.offsetHeight / 2;
+    }
   }, [isCurrentMove, moveIdx]);
 
   const handleClick = () => {
@@ -70,6 +85,7 @@ export default function MoveItem({
         borderRadius: 1,
       })}
       id={`move-${moveIdx}`}
+      ref={itemRef}
     >
       {color && (
         <Image

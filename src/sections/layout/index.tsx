@@ -36,7 +36,19 @@ export default function Layout({ children }: PropsWithChildren) {
         darkMode={isDarkMode}
         switchDarkMode={() => setDarkMode((val) => !val)}
       />
-      <main style={{ margin: "2vh 1vw" }}>{children}</main>
+      <main
+        style={{
+          margin: "2vh 1vw",
+          minHeight: "100vh",
+          width: "100vw",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          zIndex: -1,
+          background: "linear-gradient(135deg, #232526 0%, #414345 100%)",
+        }}
+      />
+      <div style={{ position: "relative", zIndex: 1 }}>{children}</div>
     </ThemeProvider>
   );
 }

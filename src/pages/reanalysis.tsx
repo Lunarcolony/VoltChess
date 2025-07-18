@@ -1,8 +1,9 @@
- import Board from "@/sections/analysis/board";
+import Board from "@/sections/analysis/board";
 import PanelHeader from "@/sections/analysis/panelHeader";
 import PanelToolBar from "@/sections/analysis/panelToolbar";
 import AnalysisTab from "@/sections/analysis/panelBody/analysisTab/engine";
 import ClassificationTab from "@/sections/analysis/panelBody/classificationTab/moves";
+import GraphTab from "@/sections/analysis/panelBody/graphTab";
 import { boardAtom, gameAtom, gameEvalAtom } from "@/sections/analysis/states";
 import {
   Box,
@@ -12,19 +13,17 @@ import {
   Tabs,
   useMediaQuery,
   useTheme,
+  Paper,
 } from "@mui/material";
 import { useAtomValue } from "jotai";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, Fragment } from "react";
 import { Icon } from "@iconify/react";
-import EngineSettingsButton from "@/sections/engineSettings/engineSettingsButton";
-import GraphTab from "@/sections/analysis/panelBody/graphTab";
 import { PageTitle } from "@/components/pageTitle";
 
 export default function GameAnalysis() {
   const theme = useTheme();
-  const [tab, setTab] = useState(0);
+  const [tab, setTab] = useState<number>(0);
   const isLgOrGreater = useMediaQuery(theme.breakpoints.up("lg"));
-
 
   const gameEval = useAtomValue(gameEvalAtom);
   const game = useAtomValue(gameAtom);
@@ -34,150 +33,174 @@ export default function GameAnalysis() {
 
   useEffect(() => {
     if (tab === 1 && !showMovesTab) setTab(0);
-    if (tab === 2 && !gameEval) setTab(0);
   }, [showMovesTab, gameEval, tab]);
-  
+
+  const tabs = useMemo(
+    () => [
+      {
+        label: "Analysis",
+        icon: <Icon icon="mdi:magnify" height={18} />,
+        show: true,
+      },
+      {
+        label: "Moves",
+        icon: <Icon icon="mdi:format-list-bulleted" height={18} />,
+        show: showMovesTab,
+      },
+      {
+        label: "Graph",
+        icon: <Icon icon="mdi:chart-line" height={18} />,
+        show: true,
+      },
+    ],
+    [showMovesTab]
+  );
+
   return (
-    <Grid container gap={4} justifyContent="space-evenly" alignItems="start">
-      <PageTitle title="VoltChess Game Analysis" />
-
-      <Board />
-
+    <Fragment>
       <Grid
         container
-        justifyContent="start"
-        alignItems="center"
-        borderRadius={2}
-        border={1}
-        borderColor={"secondary.main"}
+        gap={4}
+        justifyContent="space-evenly"
+        alignItems="start"
         sx={{
-          backgroundColor: "secondary.main",
-          borderColor: "primary.main",
-          borderWidth: 2,
-          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
-        }}
-        padding={2}
-        style={{
-            maxWidth: "500px",
-        }}
-        rowGap={2}
-        height={{ xs: tab === 1 ? "40rem" : "auto", lg: "calc(95vh - 60px)" }}
-        display="flex"
-        flexDirection="column"
-        flexWrap="nowrap"
-        size={{
-          xs: 12,
-          lg: "grow",
+          background: "linear-gradient(135deg, #232526 0%, #414345 100%)",
+          padding: { xs: 2, md: 4 },
         }}
       >
-        {isLgOrGreater ? (
-          <Box width="100%">
-            <PanelHeader key="analysis-panel-header" />
-            <Divider sx={{ marginX: "5%", marginTop: 2.5 }} />
-          </Box>
-        ) : (
-          <PanelToolBar key="review-panel-toolbar" />
-        )}
+        <PageTitle title="VoltChess Game Analysis" />
 
-        {!isLgOrGreater && !gameEval && <Divider sx={{ marginX: "5%" }} />}
-        {!isLgOrGreater && !gameEval && (
-          <PanelHeader key="analysis-panel-header" />
-        )}
+        <Board />
 
-        {!isLgOrGreater && (
+        <Grid
+          container
+          justifyContent="start"
+          alignItems="center"
+          component={Paper}
+          elevation={6}
+          borderRadius={4}
+          sx={{
+            background: "rgba(40, 44, 52, 0.85)",
+            backdropFilter: "blur(8px)",
+            border: "1.5px solid #3a3f4b",
+            boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+            maxWidth: 500,
+            padding: 3,
+            rowGap: 2,
+            height: { xs: "40rem", lg: "calc(95vh - 90px)" },
+            maxHeight: { xs: "40rem", lg: "calc(95vh - 90px)" },
+            display: "flex",
+            flexDirection: "column",
+            flexWrap: "nowrap",
+            overflow: "auto",
+            transition: "box-shadow 0.2s",
+          }}
+        >
+          {isLgOrGreater ? (
+            <Box width="100%">
+              <PanelHeader />
+              <Divider sx={{ marginX: "5%", marginTop: 2.5 }} />
+            </Box>
+          ) : (
+            <PanelToolBar />
+          )}
+
+          {!isLgOrGreater && !gameEval && <Divider sx={{ marginX: "5%" }} />}
+          {!isLgOrGreater && !gameEval && <PanelHeader />}
+
+          {!isLgOrGreater && (
+            <Box
+              width="95%"
+              sx={{
+                borderBottom: 1,
+                borderColor: "divider",
+                marginX: { sm: "5%", xs: undefined },
+                marginBottom: 1,
+              }}
+            >
+              <Tabs
+                value={tab}
+                onChange={(_, newValue) => setTab(newValue)}
+                aria-label="analysis tabs"
+                variant="fullWidth"
+                sx={{ minHeight: 0 }}
+              >
+                {tabs.map(
+                  (t, idx) =>
+                    t.show && (
+                      <Tab
+                        key={t.label}
+                        label={t.label}
+                        id={`tab${idx}`}
+                        icon={t.icon}
+                        iconPosition="start"
+                        sx={{
+                          textTransform: "none",
+                          minHeight: 20,
+                          padding: "8px 0em 14px",
+                          borderRadius: 2,
+                          transition: "background 0.2s",
+                          "&:hover": {
+                            background: "rgba(255,255,255,0.05)",
+                          },
+                        }}
+                        disableFocusRipple
+                      />
+                    )
+                )}
+              </Tabs>
+            </Box>
+          )}
+
           <Box
-            width="95%"
             sx={{
-              borderBottom: 1,
-              borderColor: "divider",
-              marginX: { sm: "5%", xs: undefined },
+              flex: 1,
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              borderRadius: 3,
+              background: "rgba(255,255,255,0.01)",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+              padding: 2,
+              minHeight: 0,
             }}
           >
-            <Tabs
-              value={tab}
-              onChange={(_, newValue) => setTab(newValue)}
-              aria-label="basic tabs example"
-              variant="fullWidth"
-              sx={{ minHeight: 0 }}
-            >
-              <Tab
-                label="Analysis"
-                id="tab0"
-                icon={<Icon icon="mdi:magnify" height={15} />}
-                iconPosition="start"
-                sx={{
-                  textTransform: "none",
-                  minHeight: 15,
-                  padding: "5px 0em 12px",
-                }}
-                disableFocusRipple
-              />
-
-              <Tab
-                label="Moves"
-                id="tab1"
-                icon={<Icon icon="mdi:format-list-bulleted" height={15} />}
-                iconPosition="start"
-                sx={{
-                  textTransform: "none",
-                  minHeight: 15,
-                  display: showMovesTab ? undefined : "none",
-                  padding: "5px 0em 12px",
-                }}
-                disableFocusRipple
-              />
-
-              <Tab
-                label="Graph"
-                id="tab2"
-                icon={<Icon icon="mdi:chart-line" height={15} />}
-                iconPosition="start"
-                sx={{
-                  textTransform: "none",
-                  minHeight: 15,
-                  display: gameEval ? undefined : "none",
-                  padding: "5px 0em 12px",
-                }}
-                disableFocusRipple
-              />
-            </Tabs>
+            <AnalysisTab
+              role="tabpanel"
+              hidden={tab !== 0 && !isLgOrGreater}
+              id="tabContent0"
+            />
+            <Divider sx={{ marginY: 2 }} />
+            <ClassificationTab
+              role="tabpanel"
+              hidden={tab !== 1 && !isLgOrGreater}
+              id="tabContent1"
+            />
+            <Divider sx={{ marginY: 2 }} />
+            <GraphTab
+              role="tabpanel"
+              hidden={tab !== 2 && !isLgOrGreater}
+              id="tabContent2"
+            />
           </Box>
-        )}
 
-        <GraphTab
-          role="tabpanel"
-          hidden={tab !== 2 && !isLgOrGreater}
-          id="tabContent2"
-        />
+          {isLgOrGreater && (
+            <Box width="100%">
+              <Divider sx={{ marginX: "5%", marginBottom: 1.5 }} />
+              <PanelToolBar />
+            </Box>
+          )}
 
-        <AnalysisTab
-          role="tabpanel"
-          hidden={tab !== 0 && !isLgOrGreater}
-          id="tabContent0"
-        />
+          {!isLgOrGreater && gameEval && (
+            <Box width="100%">
+              <Divider sx={{ marginX: "5%", marginBottom: 2.5 }} />
+              <PanelHeader />
+            </Box>
+          )}
+        </Grid>
 
-        <ClassificationTab
-          role="tabpanel"
-          hidden={tab !== 1 && !isLgOrGreater}
-          id="tabContent1"
-        />
-
-        {isLgOrGreater && (
-          <Box width="100%">
-            <Divider sx={{ marginX: "5%", marginBottom: 1.5 }} />
-            <PanelToolBar key="review-panel-toolbar" />
-          </Box>
-        )}
-
-        {!isLgOrGreater && gameEval && (
-          <Box width="100%">
-            <Divider sx={{ marginX: "5%", marginBottom: 2.5 }} />
-            <PanelHeader key="analysis-panel-header" />
-          </Box>
-        )}
       </Grid>
-
-      <EngineSettingsButton />
-    </Grid>
+    </Fragment>
   );
 }
