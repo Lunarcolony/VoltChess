@@ -1,14 +1,9 @@
 import {
   Grid2 as Grid,
   Grid2Props as GridProps,
-  Stack,
-  Typography,
 } from "@mui/material";
 import { useAtomValue } from "jotai";
 import { boardAtom, gameAtom, gameEvalAtom } from "../../states";
-import PlayersMetric from "./playersMetric";
-import MoveInfo from "./moveInfo";
-import Opening from "./opening";
 import EngineLines from "./engineLines";
 
 export default function AnalysisTab(props: GridProps) {

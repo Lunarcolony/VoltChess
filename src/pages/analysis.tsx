@@ -5,7 +5,6 @@ import {
   Grid2 as Grid,
   Button,
   Typography,
-  useTheme,
   Paper,
 } from "@mui/material";
 
@@ -19,7 +18,7 @@ import GraphTab from "@/sections/analysis/panelBody/graphTab";
 import { PageTitle } from "@/components/pageTitle";
 
 export default function Homes() {
-  const theme = useTheme();
+
   const router = useRouter();
 
   return (
