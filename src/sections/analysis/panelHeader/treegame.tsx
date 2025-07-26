@@ -112,5 +112,27 @@ export default function AnalyzeButton() {
     }
   }, [gameEval, readyToAnalyse, handleAnalyze]);
 
-
+  return (
+    <LoadingButton
+      loading={!!evaluationProgress}
+      loadingPosition="start"
+      startIcon={<Icon icon="mdi:chart-line" />}
+      variant="contained"
+      onClick={handleAnalyze}
+      disabled={!readyToAnalyse}
+      sx={{
+        backgroundColor: "#4caf50",
+        "&:hover": {
+          backgroundColor: "#45a049",
+        },
+        textTransform: "none",
+        fontWeight: "bold",
+        borderRadius: "8px",
+      }}
+    >
+      <Typography variant="button" fontWeight={600}>
+        {evaluationProgress ? `Analyzing... ${Math.round(evaluationProgress * 100)}%` : "Analyze Game"}
+      </Typography>
+    </LoadingButton>
+  );
 }
