@@ -4,11 +4,14 @@ import { PHASE_PRODUCTION_BUILD } from "next/constants";
 
 const nextConfig = (phase: string): NextConfig => ({
   output: phase === PHASE_PRODUCTION_BUILD ? "export" : undefined,
-  trailingSlash: false,
+  trailingSlash: true,
   reactStrictMode: true,
   images: {
     unoptimized: true,
   },
+  // GitHub Pages configuration
+  basePath: process.env.NODE_ENV === "production" ? "/VoltChess" : "",
+  assetPrefix: process.env.NODE_ENV === "production" ? "/VoltChess/" : "",
   headers:
     phase === PHASE_PRODUCTION_BUILD
       ? undefined

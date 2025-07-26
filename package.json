@@ -8,7 +8,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint && tsc --noEmit",
-    "deploy": "npm run lint && npm run build && cdk deploy"
+    "deploy": "npm run lint && npm run build && cdk deploy",
+    "export": "next build && next export",
+    "gh-pages": "npm run export && gh-pages -d out",
+    "deploy-gh": "npm run export && gh-pages -d out"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -55,6 +58,7 @@
     "eslint-plugin-deprecation": "^3.0.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.2.1",
+    "gh-pages": "^6.1.1",
     "typescript": "^5.7.2"
   }
 }
