@@ -14,13 +14,14 @@ import LoadGameButton from "@/sections/loadGame/loadGameButton";
 import { useGameDatabase } from "@/hooks/useGameDatabase";
 import { useRouter } from "next/router";
 import { PageTitle } from "@/components/pageTitle";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const gridLocaleText: GridLocaleText = {
   ...GRID_DEFAULT_LOCALE_TEXT,
   noRowsLabel: "No games found",
 };
 
-export default function GameDatabase() {
+function GameDatabase() {
   const { games, deleteGame } = useGameDatabase(true);
   const router = useRouter();
 
@@ -214,3 +215,13 @@ export default function GameDatabase() {
     </Grid>
   );
 }
+
+// Wrap the page export with ProtectedRoute
+const ProtectedGameDatabase = (props) => (
+  <ProtectedRoute>
+    <GameDatabase {...props} />
+  </ProtectedRoute>
+);
+
+export default ProtectedGameDatabase;
+

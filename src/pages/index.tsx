@@ -4,12 +4,13 @@ import { useEffect, useCallback } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Chess } from "chess.js";
 
-import { Box, Container, Typography, Grid, Divider } from "@mui/material";
+import { Box, Typography, Grid } from "@mui/material";
 
 import LoadGameButton from "@/sections/loadGame/startanalyzing";
 import { useChessActions } from "@/hooks/useChessActions";
 import { useGameDatabase } from "@/hooks/useGameDatabase";
 import { decodeBase64 } from "@/lib/helpers";
+import { ACCESS_TOKEN } from "@/constants";
 
 import {
   gameAtom,
@@ -21,7 +22,7 @@ import {
 
 import type { Game } from "@/types/game";
 
-export default function Home() {
+function Home() {
   const router = useRouter();
   const game = useAtomValue(gameAtom);
   const evaluationProgress = useAtomValue(evaluationProgressAtom);
@@ -41,6 +42,27 @@ export default function Home() {
     [resetBoard, setGamePgn, setEval]
   );
 
+  // Check if user is authenticated
+  const isAuthenticated = () => {
+    if (typeof window !== "undefined") {
+      return !!localStorage.getItem(ACCESS_TOKEN);
+    }
+    return false;
+  };
+
+  // Handle start analyzing with authentication check
+  const handleStartAnalyzing = async (game: Chess) => {
+    if (!isAuthenticated()) {
+      // Redirect to login if not authenticated
+      router.push("/login");
+      return;
+    }
+
+    // If authenticated, proceed with analysis
+    await router.push("/analysis");
+    resetAndSetGamePgn(game.pgn());
+  };
+
   const { pgn: pgnParam, orientation: orientationParam } = router.query;
 
   useEffect(() => {
@@ -52,9 +74,7 @@ export default function Home() {
       resetAndSetGamePgn(gameUrl.pgn);
       setEval(gameUrl.eval);
       setBoardOrientation(
-        gameUrl.black.name === "You" && gameUrl.site === "voltchess.com"
-          ? false
-          : true
+        !(gameUrl.black.name === "You" && gameUrl.site === "voltchess.com")
       );
     };
 
@@ -178,10 +198,7 @@ export default function Home() {
               <LoadGameButton
                 label={isGameLoaded ? "Load a new game" : "Start Analyzing"}
                 size="large"
-                setGame={async (game) => {
-                  await router.push("/analysis");
-                  resetAndSetGamePgn(game.pgn());
-                }}
+                setGame={handleStartAnalyzing}
                 sx={{
                   fontWeight: 700,
                   fontSize: "1.2rem",
@@ -362,3 +379,6 @@ export default function Home() {
     </>
   );
 }
+
+// Export the Home component directly (no ProtectedRoute wrapper)
+export default Home;

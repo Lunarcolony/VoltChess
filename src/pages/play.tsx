@@ -6,8 +6,9 @@ import GameSettingsButton from "@/sections/play/gameSettings/gameSettingsButton"
 import { isGameInProgressAtom } from "@/sections/play/states";
 import { Grid2 as Grid } from "@mui/material";
 import { useAtomValue } from "jotai";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
-export default function Play() {
+function Play() {
   const isGameInProgress = useAtomValue(isGameInProgressAtom);
 
   return (
@@ -45,5 +46,13 @@ export default function Play() {
         <GameRecap />
       </Grid>
     </Grid>
+  );
+}
+
+export default function ProtectedPlay() {
+  return (
+    <ProtectedRoute>
+      <Play />
+    </ProtectedRoute>
   );
 }

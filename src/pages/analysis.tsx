@@ -14,11 +14,11 @@ import AnalysisTab from "@/sections/analysis/panelBody/analysisTab/accuracy";
 import AnalyzeButton from "@/sections/analysis/panelHeader/treegame";
 import ClassificationTab from "@/sections/analysis/panelBody/classificationTab/report";
 import GraphTab from "@/sections/analysis/panelBody/graphTab";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 import { PageTitle } from "@/components/pageTitle";
 
-export default function Homes() {
-
+function Homes() {
   const router = useRouter();
 
   return (
@@ -64,7 +64,12 @@ export default function Homes() {
         <AnalyzeButton />
 
         {/* Title */}
-        <Grid container justifyContent="center" alignItems="center" columnGap={1}>
+        <Grid
+          container
+          justifyContent="center"
+          alignItems="center"
+          columnGap={1}
+        >
           <Typography variant="h5" align="center" sx={{ fontWeight: 600 }}>
             Game Analysis
           </Typography>
@@ -93,7 +98,12 @@ export default function Homes() {
         </Box>
 
         {/* Game Review Button */}
-        <Grid container justifyContent="center" alignItems="center" columnGap={1}>
+        <Grid
+          container
+          justifyContent="center"
+          alignItems="center"
+          columnGap={1}
+        >
           <Button
             variant="contained"
             size="large"
@@ -133,5 +143,13 @@ export default function Homes() {
         </Box>
       </Grid>
     </Grid>
+  );
+}
+
+export default function ProtectedAnalysis() {
+  return (
+    <ProtectedRoute>
+      <Homes />
+    </ProtectedRoute>
   );
 }

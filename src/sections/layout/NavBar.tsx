@@ -1,4 +1,4 @@
- import AppBar from "@mui/material/AppBar";
+import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -59,8 +59,6 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
         enableColorOnDark
       >
         <Toolbar variant="dense">
-         
-
           <Image
             src="/favicon-32x32.png"
             alt="VoltChess logo"
@@ -82,7 +80,6 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
             </Typography>
           </NavLink>
           
-
 
           <IconButton
             size="large"

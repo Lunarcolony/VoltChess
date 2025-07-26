@@ -19,8 +19,9 @@ import { useAtomValue } from "jotai";
 import { useEffect, useState, useMemo, Fragment } from "react";
 import { Icon } from "@iconify/react";
 import { PageTitle } from "@/components/pageTitle";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
-export default function GameAnalysis() {
+function ReanalysisPage() {
   const theme = useTheme();
   const [tab, setTab] = useState<number>(0);
   const isLgOrGreater = useMediaQuery(theme.breakpoints.up("lg"));
@@ -199,8 +200,15 @@ export default function GameAnalysis() {
             </Box>
           )}
         </Grid>
-
       </Grid>
     </Fragment>
+  );
+}
+
+export default function ProtectedReanalysis() {
+  return (
+    <ProtectedRoute>
+      <ReanalysisPage />
+    </ProtectedRoute>
   );
 }
