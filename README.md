@@ -1,86 +1,77 @@
-<div align="center">
-  <a href="https://github.com/GuillaumeSD/Chesskit">
-    <img width="120" height="120" src="https://github.com/GuillaumeSD/Chesskit/blob/main/public/android-chrome-192x192.png" alt="Logo">
-  </a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VoltChess</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: radial-gradient(circle, #0f172a, #000);
+    }
+    .animate-fade {
+      animation: fadeIn 1.5s ease-in-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="text-white font-sans">
 
-<h3 align="center">Chesskit</h3>
-  <p align="center">
-    The Ultimate Chess Web App
-    <br />
-    <a href="https://chesskit.org/" target="_blank" rel="noopener noreferrer"><strong>chesskit.org</strong></a>
-    <br />
-    <a href="https://discord.com/invite/Yr99abAcUr" target="_blank" rel="noopener noreferrer">Discord Server</a>
-    ·
-    <a href="https://chesskit.notion.site/4cf7823836724432b71aa8932ba7d5bb" target="_blank" rel="noopener noreferrer">Features Backlog</a>
-  </p>
-</div>
-<br />
+  <!-- Hero -->
+  <section class="text-center py-20 px-4 animate-fade">
+    <h1 class="text-5xl font-bold text-yellow-400 mb-4">VoltChess ⚡</h1>
+    <p class="text-lg text-gray-300 max-w-2xl mx-auto">
+      A powerful, open-source chess platform with a beautiful GUI and real-time Stockfish analysis.
+    </p>
+    <div class="mt-6 space-x-4">
+      <a href="https://github.com/Lunarcolony/VoltChess" target="_blank" class="bg-yellow-400 hover:bg-yellow-300 text-black px-5 py-2 rounded-md font-medium">GitHub</a>
+      <a href="https://discord.gg/yourdiscordlink" target="_blank" class="bg-gray-700 hover:bg-gray-600 px-5 py-2 rounded-md font-medium">Join Discord</a>
+      <a href="https://voltchess.vercel.app" target="_blank" class="bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-md font-medium">Try Demo</a>
+    </div>
+  </section>
 
-Chesskit is an open-source chess website to play, view, analyze and review your chess games for free on any device with Stockfish !
+  <!-- Features -->
+  <section class="max-w-5xl mx-auto px-4 py-12 animate-fade">
+    <h2 class="text-3xl font-bold text-center mb-10">⚙️ Features</h2>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+        <h3 class="text-xl font-semibold mb-2 text-yellow-300">Stockfish Integration</h3>
+        <p class="text-gray-400">Analyze positions in real-time using the powerful Stockfish engine.</p>
+      </div>
+      <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+        <h3 class="text-xl font-semibold mb-2 text-yellow-300">React-based UI</h3>
+        <p class="text-gray-400">Sleek and responsive interface built using React and modern web technologies.</p>
+      </div>
+      <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+        <h3 class="text-xl font-semibold mb-2 text-yellow-300">Community Driven</h3>
+        <p class="text-gray-400">Contribute on GitHub and join the growing community of chess developers.</p>
+      </div>
+      <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+        <h3 class="text-xl font-semibold mb-2 text-yellow-300">No Login Needed</h3>
+        <p class="text-gray-400">Play and analyze without any account — open and instant.</p>
+      </div>
+      <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+        <h3 class="text-xl font-semibold mb-2 text-yellow-300">Multiplatform Ready</h3>
+        <p class="text-gray-400">Works on desktop and mobile seamlessly, so you can play anywhere.</p>
+      </div>
+      <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+        <h3 class="text-xl font-semibold mb-2 text-yellow-300">Future Plans</h3>
+        <p class="text-gray-400">Opening explorer, friend system, Discord bots, tournaments and more.</p>
+      </div>
+    </div>
+  </section>
 
-## Mission
+  <!-- Footer -->
+  <footer class="text-center py-6 text-sm text-gray-500 animate-fade">
+    <p>&copy; 2025 VoltChess by Jatash and the community. Built with ♟️ and ⚡.</p>
+  </footer>
 
-Chesskit aims to offer all the chess related features it can, while being free and open-source. It is designed to be easy to use, fast, and reliable.
-
-## Features
-
-- Load and review games from [chess.com](https://chess.com) and [lichess.org](https://lichess.org)
-- Analysis board with live engine evaluation, custom arrows, evaluation graph, ...
-- Moves classification (Brilliant, Great, Good, Mistake, Blunder, ...)
-- Chess960 and Puzzles support
-- Play against Stockfish at any elo
-- Store your games in your browser database
-
-<img src="https://github.com/GuillaumeSD/Chesskit/blob/main/assets/showcase.png" />
-
-## Stack
-
-Built with [Next.js](https://nextjs.org/docs), [React](https://react.dev/learn/describing-the-ui), [Material UI](https://mui.com/material-ui/getting-started/overview/), and [TypeScript](https://www.typescriptlang.org/docs/handbook/typescript-from-scratch.html).
-
-Deployed on AWS with [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/home.html), see it live [here](https://chesskit.org).
-
-## Running the app in dev mode
-
-> [!IMPORTANT]  
-> At least [Node.js](https://nodejs.org) 22.11 is required.
-
-Install the dependencies :
-
-```bash
-npm i
-```
-
-Run the development server :
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in the browser to see the app running.
-
-The app will automatically refresh on any source file change.
-
-## Lint
-
-Run it with :
-
-```bash
-npm run lint
-```
-
-## Contribute
-
-See [contributing](CONTRIBUTING.md) for details on how to contribute to the project.
-
-## Deploy
-
-To deploy the app, install [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) and [authenticate](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html), then run :
-
-```bash
-npm run deploy
-```
-
-## License
-
-Chesskit is licensed under the GNU Affero General Public License 3. See [copying](COPYING.md) for
-details.
+  <script>
+    // Just a basic console greeting
+    console.log("Welcome to VoltChess!");
+  </script>
+</body>
+</html>
