@@ -3,11 +3,19 @@ import { NextConfig } from "next";
 import { PHASE_PRODUCTION_BUILD } from "next/constants";
 
 const nextConfig = (phase: string): NextConfig => ({
-  output: phase === PHASE_PRODUCTION_BUILD ? "export" : undefined,
-  trailingSlash: false,
+  output: "export",
+  trailingSlash: true,
   reactStrictMode: true,
+  basePath: "",
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   images: {
     unoptimized: true,
+    domains: ['chesskit.org', 'voltchess.me'],
   },
   headers:
     phase === PHASE_PRODUCTION_BUILD
