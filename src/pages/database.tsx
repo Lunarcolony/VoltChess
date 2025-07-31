@@ -217,10 +217,11 @@ function GameDatabase() {
 }
 
 // Wrap the page export with ProtectedRoute
-const ProtectedGameDatabase = (props: any) => (
+const ProtectedGameDatabase = (props) => (
   <ProtectedRoute>
     <GameDatabase {...props} />
   </ProtectedRoute>
 );
 
 export default ProtectedGameDatabase;
+
