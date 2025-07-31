@@ -3,11 +3,7 @@ import { useRouter } from "next/router";
 import { jwtDecode } from "jwt-decode";
 import { ACCESS_TOKEN } from "../constants";
 
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-}
-
-function ProtectedRoute({ children }: ProtectedRouteProps) {
+function ProtectedRoute({ children }) {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState<null | boolean>(null);
 
