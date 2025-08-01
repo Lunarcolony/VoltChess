@@ -1,4 +1,3 @@
-import { Icon } from "@iconify/react";
 import {
   engineDepthAtom,
   engineMultiPvAtom,
@@ -12,13 +11,11 @@ import {
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { getEvaluateGameParams } from "@/lib/chess";
 import { useGameDatabase } from "@/hooks/useGameDatabase";
-import { LoadingButton } from "@mui/lab";
 import { useEngine } from "@/hooks/useEngine";
 import { logAnalyticsEvent } from "@/lib/firebase";
 import { SavedEvals } from "@/types/eval";
 import { useEffect, useCallback } from "react";
 import { usePlayersData } from "@/hooks/usePlayersData";
-import { Typography } from "@mui/material";
 import { useCurrentPosition } from "../hooks/useCurrentPosition";
 
 export default function AnalyzeButton() {
@@ -112,5 +109,5 @@ export default function AnalyzeButton() {
     }
   }, [gameEval, readyToAnalyse, handleAnalyze]);
 
-
+  return null;
 }

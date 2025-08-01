@@ -1,6 +1,5 @@
 import { Icon } from "@iconify/react";
 import { Grid2 as Grid, Typography, Button} from "@mui/material";
-import GamePanel from "./gamePanel";
 import LoadGame from "./loadGame";
 import AnalyzeButton from "./treegame";
 import LinearProgressBar from "@/components/LinearProgressBar";

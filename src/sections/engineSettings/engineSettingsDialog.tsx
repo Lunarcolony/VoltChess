@@ -11,7 +11,6 @@ import {
   OutlinedInput,
   Button,
   Grid,
-  useTheme,
 } from "@mui/material";
 import { useEffect } from "react";
 import { useAtom } from "jotai";
@@ -46,8 +45,6 @@ export default function EngineSettingsDialog({ open, onClose }: Props) {
   const [engineName, setEngineName] = useAtomLocalStorage("engine-name", engineNameAtom);
   const [boardHue, setBoardHue] = useAtom(boardHueAtom);
   const [engineWorkersNb, setEngineWorkersNb] = useAtom(engineWorkersNbAtom);
-
-  const theme = useTheme();
 
   useEffect(() => {
     if (!isEngineSupported(engineName)) {

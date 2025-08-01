@@ -1,4 +1,4 @@
-import { Button, Typography } from "@mui/material";
+import { Button, Typography, SxProps, Theme } from "@mui/material";
 import { useState } from "react";
 import NewGameDialog from "./loadGameDialog";
 import { Chess } from "chess.js";
@@ -7,9 +7,10 @@ interface Props {
   setGame?: (game: Chess) => Promise<void>;
   label?: string;
   size?: "small" | "medium" | "large";
+  sx?: SxProps<Theme>;
 }
 
-export default function LoadGameButton({ setGame, label, size }: Props) {
+export default function LoadGameButton({ setGame, label, size, sx }: Props) {
   const [openDialog, setOpenDialog] = useState(false);
 
   return (
@@ -27,6 +28,7 @@ export default function LoadGameButton({ setGame, label, size }: Props) {
           borderRadius: "16px",
           boxShadow: "0 10px 25px rgba(0, 0, 0, 0.2)",
           textTransform: "none",
+          ...sx,
           transition: "all 0.25s ease-in-out",
           ":hover": {
             transform: "scale(1.05)",

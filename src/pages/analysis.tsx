@@ -11,7 +11,7 @@ import {
 import Board from "@/sections/analysis/board";
 import PanelToolBar from "@/sections/analysis/panelToolbar";
 import AnalysisTab from "@/sections/analysis/panelBody/analysisTab/accuracy";
-import AnalyzeButton from "@/sections/analysis/panelHeader/treegame";
+import AnalyzeButton from "@/sections/analysis/panelHeader/analyzeButton";
 import ClassificationTab from "@/sections/analysis/panelBody/classificationTab/report";
 import GraphTab from "@/sections/analysis/panelBody/graphTab";
 import ProtectedRoute from "@/components/ProtectedRoute";

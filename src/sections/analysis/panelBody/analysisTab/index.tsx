@@ -1,29 +1,13 @@
 import {
   Grid2 as Grid,
   Grid2Props as GridProps,
-  Stack,
-  Typography,
 } from "@mui/material";
 import { useAtomValue } from "jotai";
-import { boardAtom, gameAtom, gameEvalAtom } from "../../states";
-import PlayersMetric from "./playersMetric";
-import MoveInfo from "./moveInfo";
-import Opening from "./opening";
+import { gameEvalAtom } from "../../states";
 import EngineLines from "./engineLines";
 
 export default function AnalysisTab(props: GridProps) {
   const gameEval = useAtomValue(gameEvalAtom);
-  const game = useAtomValue(gameAtom);
-  const board = useAtomValue(boardAtom);
-
-  const boardHistory = board.history();
-  const gameHistory = game.history();
-
-  const isGameOver =
-    boardHistory.length > 0 &&
-    (board.isCheckmate() ||
-      board.isDraw() ||
-      boardHistory.join() === gameHistory.join());
 
   return (
     <Grid

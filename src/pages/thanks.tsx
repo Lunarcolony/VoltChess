@@ -6,7 +6,6 @@ import {
   CardContent,
   Box,
   Container,
-  useTheme,
 } from "@mui/material";
 import { motion } from "framer-motion";
 
@@ -14,7 +13,6 @@ const MotionCard = motion(Card);
 const MotionBox = motion(Box);
 
 const Thanks: React.FC = () => {
-  const theme = useTheme();
 
   return (
     <Box
@@ -79,7 +77,7 @@ const Thanks: React.FC = () => {
 
         <Grid container spacing={4}>
           {/* Technologies */}
-          <Grid xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <MotionCard
               whileHover={{ scale: 1.05, boxShadow: "0 0 20px #4bffef" }}
               whileTap={{ scale: 0.97 }}
@@ -109,7 +107,7 @@ const Thanks: React.FC = () => {
           </Grid>
 
           {/* Contributors */}
-          <Grid xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <MotionCard
               whileHover={{ scale: 1.05, boxShadow: "0 0 20px #ff4bf5" }}
               whileTap={{ scale: 0.97 }}
@@ -142,7 +140,7 @@ const Thanks: React.FC = () => {
           </Grid>
 
           {/* Final Words */}
-          <Grid xs={12}>
+          <Grid size={12}>
             <MotionCard
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}

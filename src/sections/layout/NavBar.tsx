@@ -9,37 +9,16 @@ import { Icon } from "@iconify/react";
 import { useRouter } from "@/hooks/useRouter";
 import NavLink from "@/components/NavLink";
 
-import { styled } from "@mui/material/styles";
 import React from 'react';
-import {
-    Drawer,
-    List,
-    ListItem,
-    ListItemText,
-    ListItemIcon,
-    CssBaseline,
-} from '@mui/material';
 
-
-const drawerWidth = 220;
 interface Props {
   darkMode: boolean;
   switchDarkMode: () => void;
 }
 
 // Styled component to make the link look like a button
-const StyledIconButtonLink = styled("a")({
-    color: "inherit",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    textDecoration: "none", // Remove underline from link
-    "&:hover": {
-        cursor: "pointer", // Change cursor on hover
-    },
-});
 
-export default function NavBar({ darkMode, switchDarkMode }: Props) {
+export default function NavBar({ darkMode, switchDarkMode: _switchDarkMode }: Props) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const router = useRouter();
 

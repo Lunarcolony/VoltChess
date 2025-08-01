@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import { viteSingleFile } from 'vite-plugin-singlefile'
 import path from 'path'
 
-// https://vitejs.dev/config/
+// Configuration for GitHub Pages deployment
 export default defineConfig({
   plugins: [react(), viteSingleFile()],
   resolve: {
@@ -11,7 +11,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  base: './', // Use relative paths for static deployment
+  // For GitHub Pages: use repository name if deploying to username.github.io/repository-name
+  // Change this to './' for local testing or if deploying to a custom domain
+  base: process.env.NODE_ENV === 'production' ? '/VoltChess/' : './',
   server: {
     port: 3000,
     headers: {
@@ -25,11 +27,10 @@ export default defineConfig({
     rollupOptions: {
       output: {
         inlineDynamicImports: true,
-        manualChunks: undefined, // Disable code splitting for single file output
+        manualChunks: undefined,
       },
     },
-    cssCodeSplit: false, // Inline CSS into JS bundle
-    // Ensure all assets are copied to output
+    cssCodeSplit: false,
     copyPublicDir: true,
   },
   publicDir: 'public',

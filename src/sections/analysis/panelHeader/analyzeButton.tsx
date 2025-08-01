@@ -112,19 +112,4 @@ export default function AnalyzeButton() {
     }
   }, [gameEval, readyToAnalyse, handleAnalyze]);
 
-  if (evaluationProgress) return null;
-
-  return (
-    <LoadingButton
-      variant="contained"
-      size="small"
-      startIcon={<Icon icon="streamline:magnifying-glass-solid" height={12} />}
-      onClick={handleAnalyze}
-      disabled={!readyToAnalyse}
-    >
-      <Typography fontSize="0.9em" fontWeight="500" lineHeight="1.4em">
-        {gameEval ? "Analyze again" : "Analyze"}
-      </Typography>
-    </LoadingButton>
-  );
 }

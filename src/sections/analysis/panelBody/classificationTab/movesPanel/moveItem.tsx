@@ -5,7 +5,6 @@ import { useAtomValue } from "jotai";
 import { boardAtom, currentPositionAtom, gameAtom } from "../../../states";
 import { useChessActions } from "@/hooks/useChessActions";
 import { useEffect, useRef } from "react";
-import { isInViewport } from "@/lib/helpers";
 import { CLASSIFICATION_COLORS } from "@/constants";
 import PrettyMoveSan from "@/components/prettyMoveSan";
 
@@ -39,7 +38,6 @@ export default function MoveItem({
     const movePanel = document.getElementById("moves-panel");
     if (!movePanel) return;
     // Manual scroll: only scroll the moves panel, not the whole page
-    const itemRect = moveItem.getBoundingClientRect();
     const panelRect = movePanel.getBoundingClientRect();
     const offsetTop = moveItem.offsetTop;
     const offsetBottom = offsetTop + moveItem.offsetHeight;

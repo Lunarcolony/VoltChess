@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:github": "tsc && vite build --config vite.config.github.ts",
+    "build:static": "tsc && vite build --config vite.config.ts",
     "start": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 && tsc --noEmit",
     "deploy": "npm run lint && npm run build && cdk deploy"
@@ -56,6 +58,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.12",
     "typescript": "^5.7.2",
-    "vite": "^7.0.5"
+    "vite": "^7.0.5",
+    "vite-plugin-singlefile": "^2.3.0"
   }
 }
