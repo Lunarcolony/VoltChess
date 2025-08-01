@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint && tsc --noEmit",
-    "deploy": "npm run lint && npm run build && cdk deploy"
+    "deploy": "npm run lint && npm run build && cdk deploy",
+    "export": "next export"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
