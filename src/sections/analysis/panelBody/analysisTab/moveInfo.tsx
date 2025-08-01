@@ -4,7 +4,7 @@ import { boardAtom, currentPositionAtom } from "../../states";
 import { useMemo } from "react";
 import { moveLineUciToSan } from "@/lib/chess";
 import { MoveClassification } from "@/types/enums";
-import Image from "next/image";
+
 import PrettyMoveSan from "@/components/prettyMoveSan";
 
 export default function MoveInfo() {
@@ -61,7 +61,7 @@ export default function MoveInfo() {
     >
       {moveClassification && (
         <Stack direction="row" alignItems="center" spacing={1}>
-          <Image
+          <img
             src={`/icons/${moveClassification}.png`}
             alt="move-icon"
             width={16}
@@ -87,7 +87,7 @@ export default function MoveInfo() {
 
       {showBestMoveLabel && (
         <Stack direction="row" alignItems="center" spacing={1}>
-          <Image
+          <img
             src={"/icons/best.png"}
             alt="move-icon"
             width={16}

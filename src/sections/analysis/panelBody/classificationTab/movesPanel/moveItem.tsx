@@ -1,6 +1,6 @@
 import { MoveClassification } from "@/types/enums";
 import { Grid2 as Grid } from "@mui/material";
-import Image from "next/image";
+
 import { useAtomValue } from "jotai";
 import { boardAtom, currentPositionAtom, gameAtom } from "../../../states";
 import { useChessActions } from "@/hooks/useChessActions";
@@ -88,7 +88,7 @@ export default function MoveItem({
       ref={itemRef}
     >
       {color && (
-        <Image
+        <img
           src={`/icons/${moveClassification}.png`}
           alt="move-icon"
           width={14}

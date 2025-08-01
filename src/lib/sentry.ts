@@ -1,7 +1,7 @@
-import * as Sentry from "@sentry/nextjs";
+import * as Sentry from "@sentry/react";
 
 export const isSentryEnabled = () =>
-  !!process.env.NEXT_PUBLIC_SENTRY_DSN && Sentry.isInitialized();
+  !!import.meta.env.VITE_SENTRY_DSN && Sentry.isInitialized();
 
 export const logErrorToSentry = (
   error: unknown,

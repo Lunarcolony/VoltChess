@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "@/hooks/useRouter";
 import { jwtDecode } from "jwt-decode";
 import { ACCESS_TOKEN } from "../constants";
 

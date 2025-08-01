@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useRouter } from "next/router";
-import Link from "next/link";
+import { useRouter } from "@/hooks/useRouter";
+import Link from "@/components/Link";
 import api from "../api";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 

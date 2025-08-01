@@ -3,7 +3,7 @@ import { Grid2 as Grid, Typography } from "@mui/material";
 import { useAtomValue } from "jotai";
 import { boardAtom, gameAtom, gameEvalAtom } from "../../../states";
 import { useMemo } from "react";
-import Image from "next/image";
+
 import { capitalize } from "@/lib/helpers";
 import { useChessActions } from "@/hooks/useChessActions";
 import { CLASSIFICATION_COLORS } from "@/constants";
@@ -98,7 +98,7 @@ export default function ClassificationRow({ classification }: Props) {
         gap={1}
         wrap="nowrap"
       >
-        <Image
+        <img
           src={`/icons/${classification}.png`}
           alt="move-icon"
           width={18}

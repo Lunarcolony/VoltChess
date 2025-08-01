@@ -1,7 +1,7 @@
 import { CurrentPosition } from "@/types/eval";
 import { MoveClassification } from "@/types/enums";
 import { PrimitiveAtom, atom, useAtomValue } from "jotai";
-import Image from "next/image";
+
 import { CSSProperties, forwardRef, useMemo } from "react";
 import {
   CustomSquareProps,
@@ -65,7 +65,7 @@ export function getSquareRenderer({
           {highlightSquareStyle && <div style={highlightSquareStyle} />}
           {playableSquareStyle && <div style={playableSquareStyle} />}
           {moveClassification && showPlayerMoveIcon && square === toSquare && (
-            <Image
+            <img
               src={`/icons/${moveClassification}.png`}
               alt="move-icon"
               width={35}

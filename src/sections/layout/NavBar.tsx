@@ -6,9 +6,9 @@ import IconButton from "@mui/material/IconButton";
 import { useEffect, useState } from "react";
 import NavMenu from "./NavMenu";
 import { Icon } from "@iconify/react";
-import { useRouter } from "next/router";
+import { useRouter } from "@/hooks/useRouter";
 import NavLink from "@/components/NavLink";
-import Image from "next/image";
+
 import { styled } from "@mui/material/styles";
 import React from 'react';
 import {
@@ -59,7 +59,7 @@ export default function NavBar({ darkMode, switchDarkMode }: Props) {
         enableColorOnDark
       >
         <Toolbar variant="dense">
-          <Image
+          <img
             src="/favicon-32x32.png"
             alt="VoltChess logo"
             width={70}

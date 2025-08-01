@@ -12,7 +12,7 @@ import { useCallback, useMemo } from "react";
 import { blue, red } from "@mui/material/colors";
 import LoadGameButton from "@/sections/loadGame/loadGameButton";
 import { useGameDatabase } from "@/hooks/useGameDatabase";
-import { useRouter } from "next/router";
+import { useRouter } from "@/hooks/useRouter";
 import { PageTitle } from "@/components/pageTitle";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -119,7 +119,7 @@ function GameDatabase() {
               }
               label="Open Evaluation"
               onClick={() =>
-                router.push({ pathname: "/", query: { gameId: id } })
+                router.push(`/?gameId=${id}`)
               }
               color="inherit"
               key={`${id}-open-eval-button`}

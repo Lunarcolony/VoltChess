@@ -6,7 +6,7 @@ import AnalyzeButton from "./treegame";
 import LinearProgressBar from "@/components/LinearProgressBar";
 import { useAtomValue } from "jotai";
 import { evaluationProgressAtom } from "../states";
-import { useRouter } from "next/router";
+import { useRouter } from "@/hooks/useRouter";
 export default function PanelHeader() {
   const evaluationProgress = useAtomValue(evaluationProgressAtom);
   const router = useRouter();

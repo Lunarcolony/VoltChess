@@ -5,12 +5,10 @@ import {
   TypographyProps,
   useTheme,
 } from "@mui/material";
-import localFont from "next/font/local";
 import { useMemo } from "react";
+import './chess-font.css';
 
-const chessFont = localFont({
-  src: "./chess_merida_unicode.ttf",
-});
+
 
 interface Props {
   san: string;
@@ -47,7 +45,7 @@ export default function PrettyMoveSan({
       {icon && (
         <Typography
           component="span"
-          fontFamily={chessFont.style.fontFamily}
+          sx={{ fontFamily: 'chess-merida' }}
           {...typographyProps}
         >
           {icon}

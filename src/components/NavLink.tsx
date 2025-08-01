@@ -1,5 +1,5 @@
 import { Link as MuiLink } from "@mui/material";
-import NextLink from "next/link";
+import Link from "@/components/Link";
 import { ReactNode } from "react";
 
 export default function NavLink({
@@ -11,7 +11,7 @@ export default function NavLink({
 }) {
   return (
     <MuiLink
-      component={NextLink}
+      component={Link}
       href={href}
       underline="none"
       color="inherit"

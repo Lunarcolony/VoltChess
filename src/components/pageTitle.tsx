@@ -1,4 +1,4 @@
-import Head from "next/head";
+import Head from "@/components/Head";
 
 export const PageTitle = ({ title }: { title: string }) => {
   return (

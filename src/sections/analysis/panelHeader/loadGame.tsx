@@ -11,7 +11,7 @@ import {
 import { useGameDatabase } from "@/hooks/useGameDatabase";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Chess } from "chess.js";
-import { useRouter } from "next/router";
+import { useRouter } from "@/hooks/useRouter";
 import { decodeBase64 } from "@/lib/helpers";
 import { Game } from "@/types/game";
 

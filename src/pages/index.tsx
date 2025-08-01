@@ -1,5 +1,5 @@
-﻿import Head from "next/head";
-import { useRouter } from "next/router";
+﻿import Head from "@/components/Head";
+import { useRouter } from "@/hooks/useRouter";
 import { useEffect, useCallback } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Chess } from "chess.js";

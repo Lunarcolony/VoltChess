@@ -2,7 +2,7 @@ import { useGameDatabase } from "@/hooks/useGameDatabase";
 import { Icon } from "@iconify/react";
 import { Grid2 as Grid, IconButton, Tooltip } from "@mui/material";
 import { useAtomValue } from "jotai";
-import { useRouter } from "next/router";
+import { useRouter } from "@/hooks/useRouter";
 import { boardAtom, gameAtom, gameEvalAtom } from "../states";
 import { getGameToSave } from "@/lib/chess";
 
@@ -26,14 +26,7 @@ export default function SaveButton() {
       await setGameEval(gameId, gameEval);
     }
 
-    router.replace(
-      {
-        query: { gameId: gameId },
-        pathname: router.pathname,
-      },
-      undefined,
-      { shallow: true, scroll: false }
-    );
+    router.replace(`${router.pathname}?gameId=${gameId}`);
   };
 
   return (

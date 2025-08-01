@@ -1,11 +1,12 @@
-import * as Sentry from "@sentry/nextjs";
+import * as Sentry from "@sentry/react";
 
 if (
-  process.env.NEXT_PUBLIC_SENTRY_DSN &&
+  import.meta.env.VITE_SENTRY_DSN &&
+  typeof window !== "undefined" &&
   document.location.hostname !== "localhost"
 ) {
   Sentry.init({
-    dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+    dsn: import.meta.env.VITE_SENTRY_DSN,
     environment: "production",
     integrations: [
       Sentry.replayIntegration({

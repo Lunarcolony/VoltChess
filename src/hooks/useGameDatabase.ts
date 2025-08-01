@@ -4,7 +4,7 @@ import { Game } from "@/types/game";
 import { Chess } from "chess.js";
 import { openDB, DBSchema, IDBPDatabase } from "idb";
 import { atom, useAtom } from "jotai";
-import { useRouter } from "next/router";
+import { useRouter } from "@/hooks/useRouter";
 import { useCallback, useEffect, useState } from "react";
 
 interface GameDatabaseSchema extends DBSchema {

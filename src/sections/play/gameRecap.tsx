@@ -4,7 +4,7 @@ import { Button, Grid2 as Grid, Typography } from "@mui/material";
 import { Color } from "@/types/enums";
 import { setGameHeaders } from "@/lib/chess";
 import { useGameDatabase } from "@/hooks/useGameDatabase";
-import { useRouter } from "next/router";
+import { useRouter } from "@/hooks/useRouter";
 
 export default function GameRecap() {
   const game = useAtomValue(gameAtom);
@@ -35,7 +35,7 @@ export default function GameRecap() {
     });
     const gameId = await addGame(gameToAnalysis);
 
-    router.push({ pathname: "/", query: { gameId } });
+    router.push(`/?gameId=${gameId}`);
   };
 
   return (
