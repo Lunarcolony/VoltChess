@@ -15,7 +15,7 @@ const nextConfig = (phase: string): NextConfig => ({
   trailingSlash: true,
   reactStrictMode: true,
   basePath: isProd ? base : "",
-  assetPrefix: isProd ? base + "/" : "",
+  assetPrefix: isProd ? "/" : "",
   eslint: {
     ignoreDuringBuilds: true,
   },
