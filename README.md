@@ -22,13 +22,16 @@
   <!-- Hero -->
   <section class="text-center py-20 px-4 animate-fade">
     <h1 class="text-5xl font-bold text-yellow-400 mb-4">VoltChess ⚡</h1>
+    <h2 class="text-2xl font-semibold text-blue-400 mb-4">Free Chess Analyzer with AI & Stockfish</h2>
     <p class="text-lg text-gray-300 max-w-2xl mx-auto">
-      A powerful, open-source chess platform with a beautiful GUI and real-time Stockfish analysis.
+      The ultimate free chess analysis platform with AI feedback powered by Stockfish. 
+      Upload PGN files, analyze games, find blunders, and improve your chess rating. 
+      The best free alternative to Chess.com Game Review.
     </p>
     <div class="mt-6 space-x-4">
       <a href="https://github.com/Lunarcolony/VoltChess" target="_blank" class="bg-yellow-400 hover:bg-yellow-300 text-black px-5 py-2 rounded-md font-medium">GitHub</a>
       <a href="https://discord.gg/yourdiscordlink" target="_blank" class="bg-gray-700 hover:bg-gray-600 px-5 py-2 rounded-md font-medium">Join Discord</a>
-      <a href="https://voltchess.vercel.app" target="_blank" class="bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-md font-medium">Try Demo</a>
+      <a href="https://voltchess.me" target="_blank" class="bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-md font-medium">Try Free Now</a>
     </div>
   </section>
 

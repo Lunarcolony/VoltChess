@@ -1,7 +1,7 @@
 import { Icon } from "@iconify/react";
 import { Grid2 as Grid, Typography, Button} from "@mui/material";
 import LoadGame from "./loadGame";
-import AnalyzeButton from "./treegame";
+import AnalyzeButton from "./analyzeButton";
 import LinearProgressBar from "@/components/LinearProgressBar";
 import { useAtomValue } from "jotai";
 import { evaluationProgressAtom } from "../states";

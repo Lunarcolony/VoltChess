@@ -45,7 +45,7 @@ export default function LoadGame() {
       resetAndSetGamePgn(gameUrl.pgn);
       setEval(gameUrl.eval);
       setBoardOrientation(
-        gameUrl.black.name === "You" && gameUrl.site === "voltchess.com"
+        gameUrl.black.name === "You" && gameUrl.site === "voltchess.me"
           ? false
           : true
       );

@@ -1,9 +1,8 @@
 import axios from 'axios';
 import { ACCESS_TOKEN } from "@/constants";
-
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000'
-}); // <-- Changed this from comma to semicolon
+  baseURL: 'http://192.168.1.100:8000' // Replace with your server's local network IP
+});
 
 api.interceptors.request.use(
   (config) => {
