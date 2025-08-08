@@ -11,7 +11,7 @@ import LoadGameButton from "@/sections/loadGame/startanalyzing";
 import { useChessActions } from "@/hooks/useChessActions";
 import { useGameDatabase } from "@/hooks/useGameDatabase";
 import { decodeBase64 } from "@/lib/helpers";
-import { ACCESS_TOKEN } from "@/constants";
+import { isUserAuthenticated } from "@/lib/auth";
 
 import {
   gameAtom,
@@ -43,17 +43,9 @@ function Home() {
     [resetBoard, setGamePgn, setEval]
   );
 
-  // Check if user is authenticated
-  const isAuthenticated = () => {
-    if (typeof window !== "undefined") {
-      return !!localStorage.getItem(ACCESS_TOKEN);
-    }
-    return false;
-  };
-
   // Handle start analyzing with authentication check
   const handleStartAnalyzing = async (game: Chess) => {
-    if (!isAuthenticated()) {
+    if (!isUserAuthenticated()) {
       // Redirect to login if not authenticated
       router.push("/login");
       return;

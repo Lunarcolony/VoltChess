@@ -1,7 +1,7 @@
 import { useEffect, useState, ReactNode } from "react";
 import { useRouter } from "@/hooks/useRouter";
 import { jwtDecode } from "jwt-decode";
-import { ACCESS_TOKEN } from "../constants";
+import { ACCESS_TOKEN, ENABLE_AUTHENTICATION } from "../constants";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -12,6 +12,12 @@ function ProtectedRoute({ children }: ProtectedRouteProps) {
   const [isAuthorized, setIsAuthorized] = useState<null | boolean>(null);
 
   useEffect(() => {
+    // If authentication is disabled, allow access to all routes
+    if (!ENABLE_AUTHENTICATION) {
+      setIsAuthorized(true);
+      return;
+    }
+
     const token = typeof window !== "undefined" ? localStorage.getItem(ACCESS_TOKEN) : null;
     if (!token) {
       setIsAuthorized(false);
