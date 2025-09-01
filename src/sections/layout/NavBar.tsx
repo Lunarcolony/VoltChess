@@ -9,8 +9,6 @@ import { Icon } from "@iconify/react";
 import { useRouter } from "@/hooks/useRouter";
 import NavLink from "@/components/NavLink";
 
-import React from 'react';
-
 interface Props {
   darkMode: boolean;
   switchDarkMode: () => void;
@@ -18,12 +16,15 @@ interface Props {
 
 // Styled component to make the link look like a button
 
-export default function NavBar({ darkMode, switchDarkMode: _switchDarkMode }: Props) {
+export default function NavBar({
+  darkMode,
+  switchDarkMode: _switchDarkMode,
+}: Props) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-      setDrawerOpen(false);
+    setDrawerOpen(false);
   }, [router.pathname]);
 
   return (
@@ -58,7 +59,6 @@ export default function NavBar({ darkMode, switchDarkMode: _switchDarkMode }: Pr
               VoltChess
             </Typography>
           </NavLink>
-          
 
           <IconButton
             size="large"
@@ -76,8 +76,6 @@ export default function NavBar({ darkMode, switchDarkMode: _switchDarkMode }: Pr
     </Box>
   );
 }
-
-
 
 //<StyledIconButtonLink
 //    href="https://discord.gg/Yr99abAcUr"

@@ -6,9 +6,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { useMemo } from "react";
-import './chess-font.css';
-
-
+import "./chess-font.css";
 
 interface Props {
   san: string;
@@ -45,7 +43,7 @@ export default function PrettyMoveSan({
       {icon && (
         <Typography
           component="span"
-          sx={{ fontFamily: 'chess-merida' }}
+          sx={{ fontFamily: "chess-merida" }}
           {...typographyProps}
         >
           {icon}

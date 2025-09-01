@@ -27,11 +27,7 @@ import { boardHueAtom } from "@/components/board/states";
 import { useAtomLocalStorage } from "@/hooks/useAtomLocalStorage";
 import { isEngineSupported } from "@/lib/engine/shared";
 import { Stockfish16_1 } from "@/lib/engine/stockfish16_1";
-import {
-  DEFAULT_ENGINE,
-  ENGINE_LABELS,
-  STRONGEST_ENGINE,
-} from "@/constants";
+import { DEFAULT_ENGINE, ENGINE_LABELS, STRONGEST_ENGINE } from "@/constants";
 import { getRecommendedWorkersNb } from "@/lib/engine/worker";
 
 interface Props {
@@ -40,9 +36,18 @@ interface Props {
 }
 
 export default function EngineSettingsDialog({ open, onClose }: Props) {
-  const [depth, setDepth] = useAtomLocalStorage("engine-depth", engineDepthAtom);
-  const [multiPv, setMultiPv] = useAtomLocalStorage("engine-multi-pv", engineMultiPvAtom);
-  const [engineName, setEngineName] = useAtomLocalStorage("engine-name", engineNameAtom);
+  const [depth, setDepth] = useAtomLocalStorage(
+    "engine-depth",
+    engineDepthAtom
+  );
+  const [multiPv, setMultiPv] = useAtomLocalStorage(
+    "engine-multi-pv",
+    engineMultiPvAtom
+  );
+  const [engineName, setEngineName] = useAtomLocalStorage(
+    "engine-name",
+    engineNameAtom
+  );
   const [boardHue, setBoardHue] = useAtom(boardHueAtom);
   const [engineWorkersNb, setEngineWorkersNb] = useAtom(engineWorkersNbAtom);
 
@@ -62,11 +67,12 @@ export default function EngineSettingsDialog({ open, onClose }: Props) {
 
       <DialogContent>
         <Typography variant="body2" sx={{ mb: 3 }}>
-          {ENGINE_LABELS[DEFAULT_ENGINE].small} is the default engine if your device supports its
-          requirements. It offers the best balance between speed and strength.{" "}
-          {ENGINE_LABELS[STRONGEST_ENGINE].small} is the strongest engine available, note that it
-          requires a one-time download of {ENGINE_LABELS[STRONGEST_ENGINE].sizeMb}MB and is much
-          more compute intensive.
+          {ENGINE_LABELS[DEFAULT_ENGINE].small} is the default engine if your
+          device supports its requirements. It offers the best balance between
+          speed and strength. {ENGINE_LABELS[STRONGEST_ENGINE].small} is the
+          strongest engine available, note that it requires a one-time download
+          of {ENGINE_LABELS[STRONGEST_ENGINE].sizeMb}MB and is much more compute
+          intensive.
         </Typography>
 
         <Grid container spacing={3}>
@@ -93,15 +99,35 @@ export default function EngineSettingsDialog({ open, onClose }: Props) {
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <Slider label="Maximum depth" value={depth} setValue={setDepth} min={10} max={30} marksFilter={2} />
+            <Slider
+              label="Maximum depth"
+              value={depth}
+              setValue={setDepth}
+              min={10}
+              max={30}
+              marksFilter={2}
+            />
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <Slider label="Number of lines" value={multiPv} setValue={setMultiPv} min={2} max={6} marksFilter={1} />
+            <Slider
+              label="Number of lines"
+              value={multiPv}
+              setValue={setMultiPv}
+              min={2}
+              max={6}
+              marksFilter={1}
+            />
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <Slider label="Board hue" value={boardHue} setValue={setBoardHue} min={0} max={360} />
+            <Slider
+              label="Board hue"
+              value={boardHue}
+              setValue={setBoardHue}
+              min={0}
+              max={360}
+            />
           </Grid>
 
           <Grid item xs={12}>
@@ -118,8 +144,9 @@ export default function EngineSettingsDialog({ open, onClose }: Props) {
               marksFilter={1}
               infoContent={
                 <>
-                  More threads means faster analysis, but only if your device can handle them. Try
-                  values between 1 and {getRecommendedWorkersNb()} for best performance.
+                  More threads means faster analysis, but only if your device
+                  can handle them. Try values between 1 and{" "}
+                  {getRecommendedWorkersNb()} for best performance.
                 </>
               }
             />

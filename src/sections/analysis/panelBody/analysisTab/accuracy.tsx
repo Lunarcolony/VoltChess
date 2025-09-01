@@ -8,7 +8,6 @@ import { useAtomValue } from "jotai";
 import { boardAtom, gameAtom, gameEvalAtom } from "../../states";
 import PlayersMetric from "./playersMetric";
 
-
 export default function AnalysisTab(props: GridProps) {
   const gameEval = useAtomValue(gameEvalAtom);
   const game = useAtomValue(gameAtom);
@@ -58,26 +57,16 @@ export default function AnalysisTab(props: GridProps) {
           />
         )}
 
-
-
-
-
-
-
-
-
         {isGameOver && (
           <Typography align="center" fontSize="0.9rem" noWrap>
             Game is over
           </Typography>
         )}
       </Stack>
-
-
     </Grid>
   );
 }
 
-        //<MoveInfo />
+//<MoveInfo />
 
-        //<Opening />
+//<Opening />

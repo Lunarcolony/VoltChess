@@ -13,13 +13,19 @@ import {
 
 const MenuOptions = [
   { text: "Play", icon: "streamline:chess-pawn", href: "/play" },
-  { text: "Analysis", icon: "streamline:magnifying-glass-solid", href: "/reanalysis" },
+  { text: "Puzzles", icon: "streamline:puzzle-piece", href: "/puzzles" },
+  { text: "Openings", icon: "streamline:book-open", href: "/openings" },
+  {
+    text: "Analysis",
+    icon: "streamline:magnifying-glass-solid",
+    href: "/reanalysis",
+  },
   {
     text: "Database",
     icon: "streamline:database",
     href: "/database",
-    },
-  { text: "Thanks", icon: "name the icon here", href: "/thanks" },
+  },
+  { text: "Thanks", icon: "streamline:heart-2", href: "/thanks" },
 ];
 
 interface Props {

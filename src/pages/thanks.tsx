@@ -1,25 +1,19 @@
 ﻿import React from "react";
 import { Grid2 as Grid } from "@mui/material";
-import {
-  Typography,
-  Card,
-  CardContent,
-  Box,
-  Container,
-} from "@mui/material";
+import { Typography, Card, CardContent, Box, Container } from "@mui/material";
 import { motion } from "framer-motion";
 
 const MotionCard = motion(Card);
 const MotionBox = motion(Box);
 
 const Thanks: React.FC = () => {
-
   return (
     <Box
       sx={{
         minHeight: "100vh",
         width: "100%",
-        background: "radial-gradient(ellipse at center, #0d0d0d 0%, #000000 100%)",
+        background:
+          "radial-gradient(ellipse at center, #0d0d0d 0%, #000000 100%)",
         color: "white",
         display: "flex",
         alignItems: "center",
@@ -97,10 +91,12 @@ const Thanks: React.FC = () => {
                   🛠️ Technologies
                 </Typography>
                 <Typography variant="body1" paragraph>
-                  • <strong>Stockfish</strong>: Advanced chess engine for real-time analysis.
+                  • <strong>Stockfish</strong>: Advanced chess engine for
+                  real-time analysis.
                 </Typography>
                 <Typography variant="body1" paragraph>
-                  • <strong>Chesskit</strong>: UI + engine integration inspiration.
+                  • <strong>Chesskit</strong>: UI + engine integration
+                  inspiration.
                 </Typography>
               </CardContent>
             </MotionCard>
@@ -159,8 +155,8 @@ const Thanks: React.FC = () => {
                   🚀 Final Words
                 </Typography>
                 <Typography variant="body1">
-                  VoltChess is a community of creators. Stay sharp, stay curious,
-                  and may your games be legendary.
+                  VoltChess is a community of creators. Stay sharp, stay
+                  curious, and may your games be legendary.
                 </Typography>
               </CardContent>
             </MotionCard>

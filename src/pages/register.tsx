@@ -72,7 +72,7 @@ export default function Register() {
           <input
             type="text"
             value={username}
-            onChange={e => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value)}
             required
             style={{ width: "100%", marginBottom: 12, padding: 8 }}
           />
@@ -82,7 +82,7 @@ export default function Register() {
           <input
             type="email"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
             required
             style={{ width: "100%", marginBottom: 12, padding: 8 }}
           />
@@ -92,7 +92,7 @@ export default function Register() {
           <input
             type="password"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             required
             style={{ width: "100%", marginBottom: 12, padding: 8 }}
           />
@@ -102,7 +102,7 @@ export default function Register() {
           <input
             type="password"
             value={confirmPassword}
-            onChange={e => setConfirmPassword(e.target.value)}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             required
             style={{ width: "100%", marginBottom: 12, padding: 8 }}
           />
@@ -110,16 +110,21 @@ export default function Register() {
 
         {/* Terms and Conditions Checkbox */}
         <div style={{ marginBottom: 16 }}>
-          <label style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+          <label
+            style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
+          >
             <input
               type="checkbox"
               checked={acceptTerms}
-              onChange={e => setAcceptTerms(e.target.checked)}
+              onChange={(e) => setAcceptTerms(e.target.checked)}
               style={{ marginRight: 8 }}
             />
             <span>
               I accept the{" "}
-              <Link href="/terms-and-conditions" style={{ color: "#007bff", textDecoration: "underline" }}>
+              <Link
+                href="/terms-and-conditions"
+                style={{ color: "#007bff", textDecoration: "underline" }}
+              >
                 Terms and Conditions
               </Link>
             </span>
@@ -127,7 +132,9 @@ export default function Register() {
         </div>
 
         {error && <div style={{ color: "red", marginBottom: 12 }}>{error}</div>}
-        {success && <div style={{ color: "green", marginBottom: 12 }}>{success}</div>}
+        {success && (
+          <div style={{ color: "green", marginBottom: 12 }}>{success}</div>
+        )}
 
         <button
           type="submit"
@@ -139,7 +146,7 @@ export default function Register() {
             color: "white",
             border: "none",
             borderRadius: 4,
-            cursor: loading ? "not-allowed" : "pointer"
+            cursor: loading ? "not-allowed" : "pointer",
           }}
         >
           {loading ? "Registering..." : "Register"}
@@ -148,8 +155,17 @@ export default function Register() {
 
       {/* Navigation Links */}
       <div style={{ marginTop: 16, textAlign: "center" }}>
-        <p>Already have an account? <Link href="/login" style={{ color: "#007bff" }}>Login here</Link></p>
-        <p><Link href="/" style={{ color: "#007bff" }}>← Back to Home</Link></p>
+        <p>
+          Already have an account?{" "}
+          <Link href="/login" style={{ color: "#007bff" }}>
+            Login here
+          </Link>
+        </p>
+        <p>
+          <Link href="/" style={{ color: "#007bff" }}>
+            ← Back to Home
+          </Link>
+        </p>
       </div>
     </div>
   );

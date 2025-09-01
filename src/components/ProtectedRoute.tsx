@@ -18,7 +18,8 @@ function ProtectedRoute({ children }: ProtectedRouteProps) {
       return;
     }
 
-    const token = typeof window !== "undefined" ? localStorage.getItem(ACCESS_TOKEN) : null;
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem(ACCESS_TOKEN) : null;
     if (!token) {
       setIsAuthorized(false);
       router.replace("/login");

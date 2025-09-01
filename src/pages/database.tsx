@@ -118,9 +118,7 @@ function GameDatabase() {
                 <Icon icon="streamline:magnifying-glass-solid" width="20px" />
               }
               label="Open Evaluation"
-              onClick={() =>
-                router.push(`/?gameId=${id}`)
-              }
+              onClick={() => router.push(`/?gameId=${id}`)}
               color="inherit"
               key={`${id}-open-eval-button`}
             />,
@@ -224,4 +222,3 @@ const ProtectedGameDatabase = (props: any) => (
 );
 
 export default ProtectedGameDatabase;
-

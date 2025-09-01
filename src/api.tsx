@@ -1,7 +1,7 @@
-import axios from 'axios';
+import axios from "axios";
 import { ACCESS_TOKEN } from "@/constants";
 const api = axios.create({
-  baseURL: 'http://192.168.1.100:8000' // Replace with your server's local network IP
+  baseURL: "http://192.168.1.100:8000", // Replace with your server's local network IP
 });
 
 api.interceptors.request.use(
