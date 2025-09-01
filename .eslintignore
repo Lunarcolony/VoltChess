@@ -1,0 +1,10 @@
+# Ignore config files with path resolution issues
+vite.config.github.ts
+vite.config.ts
+
+# Ignore large engine files
+public/engines/
+
+# Ignore build artifacts
+dist/
+build/

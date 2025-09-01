@@ -18,7 +18,11 @@ interface Shortcut {
 }
 
 const shortcuts: Shortcut[] = [
-  { key: "?", description: "Show/hide keyboard shortcuts", category: "navigation" },
+  {
+    key: "?",
+    description: "Show/hide keyboard shortcuts",
+    category: "navigation",
+  },
   { key: "←", description: "Previous move", category: "analysis" },
   { key: "→", description: "Next move", category: "analysis" },
   { key: "↑", description: "Go to first move", category: "analysis" },

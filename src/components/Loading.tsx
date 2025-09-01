@@ -21,7 +21,12 @@ export function LoadingSpinner({
     return (
       <Box sx={{ p: 3 }}>
         <Skeleton variant="text" width="60%" height={40} sx={{ mb: 2 }} />
-        <Skeleton variant="rectangular" width="100%" height={300} sx={{ mb: 2 }} />
+        <Skeleton
+          variant="rectangular"
+          width="100%"
+          height={300}
+          sx={{ mb: 2 }}
+        />
         <Skeleton variant="text" width="40%" height={30} />
       </Box>
     );
@@ -63,7 +68,13 @@ export function LoadingSpinner({
           <Typography variant="h6" color="text.secondary">
             {message}
           </Typography>
-          <Box sx={{ display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: 0.5 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(8, 1fr)",
+              gap: 0.5,
+            }}
+          >
             {Array.from({ length: 64 }, (_, i) => (
               <Skeleton
                 key={i}
@@ -71,7 +82,8 @@ export function LoadingSpinner({
                 width={40}
                 height={40}
                 sx={{
-                  bgcolor: (i + Math.floor(i / 8)) % 2 === 0 ? "#f0d9b5" : "#b58863",
+                  bgcolor:
+                    (i + Math.floor(i / 8)) % 2 === 0 ? "#f0d9b5" : "#b58863",
                   opacity: 0.3,
                 }}
               />

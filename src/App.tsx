@@ -23,10 +23,7 @@ function App() {
       <Layout>
         <Suspense
           fallback={
-            <LoadingSpinner
-              message="Loading VoltChess..."
-              variant="skeleton"
-            />
+            <LoadingSpinner message="Loading VoltChess..." variant="skeleton" />
           }
         >
           <Routes>
@@ -39,7 +36,10 @@ function App() {
             <Route path="/puzzles" element={<Puzzles />} />
             <Route path="/reanalysis" element={<Reanalysis />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+            <Route
+              path="/terms-and-conditions"
+              element={<TermsAndConditions />}
+            />
             <Route path="/thanks" element={<Thanks />} />
           </Routes>
         </Suspense>
