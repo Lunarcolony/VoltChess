@@ -49,7 +49,7 @@ export default function Login() {
           <input
             type="text"
             value={username}
-            onChange={e => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value)}
             required
             style={{ width: "100%", marginBottom: 12, padding: 8 }}
           />
@@ -59,7 +59,7 @@ export default function Login() {
           <input
             type="password"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             required
             style={{ width: "100%", marginBottom: 12, padding: 8 }}
           />
@@ -75,7 +75,7 @@ export default function Login() {
             color: "white",
             border: "none",
             borderRadius: 4,
-            cursor: loading ? "not-allowed" : "pointer"
+            cursor: loading ? "not-allowed" : "pointer",
           }}
         >
           {loading ? "Logging in..." : "Login"}
@@ -84,8 +84,17 @@ export default function Login() {
 
       {/* Navigation Links */}
       <div style={{ marginTop: 16, textAlign: "center" }}>
-        <p>Don't have an account? <Link href="/register" style={{ color: "#007bff" }}>Register here</Link></p>
-        <p><Link href="/" style={{ color: "#007bff" }}>← Back to Home</Link></p>
+        <p>
+          Don't have an account?{" "}
+          <Link href="/register" style={{ color: "#007bff" }}>
+            Register here
+          </Link>
+        </p>
+        <p>
+          <Link href="/" style={{ color: "#007bff" }}>
+            ← Back to Home
+          </Link>
+        </p>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ VoltChess supports flexible authentication configuration. You can easily enable 
 ## How to Configure Authentication
 
 ### Method 1: Environment Variable (Recommended)
+
 1. Create a `.env` file in the root directory (or copy from `.env.example`)
 2. Set the `VITE_ENABLE_AUTHENTICATION` variable:
 
@@ -17,6 +18,7 @@ VITE_ENABLE_AUTHENTICATION=true
 ```
 
 ### Method 2: Direct Code Modification
+
 1. Open `src/constants.ts`
 2. Modify the `ENABLE_AUTHENTICATION` constant:
 
@@ -40,13 +42,15 @@ When `ENABLE_AUTHENTICATION` is set to `false`:
 ## Protected Routes
 
 The following routes are protected by authentication (when enabled):
+
 - `/analysis` - Chess game analysis page
-- `/play` - Play chess page  
+- `/play` - Play chess page
 - `/reanalysis` - Re-analyze saved games
 
 ## Public Routes (Always Accessible)
 
 These routes are always accessible regardless of authentication settings:
+
 - `/` - Home page
 - `/login` - Login page
 - `/register` - Registration page

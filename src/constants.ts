@@ -1,6 +1,6 @@
 import { EngineName, MoveClassification } from "./types/enums";
-export const ACCESS_TOKEN = 'access';
-export const REFRESH_TOKEN = 'refresh';
+export const ACCESS_TOKEN = "access";
+export const REFRESH_TOKEN = "refresh";
 export const MAIN_THEME_COLOR = "#3B9AC6";
 export const LINEAR_PROGRESS_BAR_COLOR = "#3B9AC6";
 
@@ -8,8 +8,8 @@ export const LINEAR_PROGRESS_BAR_COLOR = "#3B9AC6";
 // Set this to false to disable authentication and allow users to access all pages without logging in
 // Set this to true to enable authentication and require users to log in for protected routes
 // Can be overridden by VITE_ENABLE_AUTHENTICATION environment variable
-export const ENABLE_AUTHENTICATION = import.meta.env.VITE_ENABLE_AUTHENTICATION 
-  ? import.meta.env.VITE_ENABLE_AUTHENTICATION === 'false' 
+export const ENABLE_AUTHENTICATION = import.meta.env.VITE_ENABLE_AUTHENTICATION
+  ? import.meta.env.VITE_ENABLE_AUTHENTICATION === "false"
   : true;
 
 export const CLASSIFICATION_COLORS: Record<MoveClassification, string> = {
@@ -69,6 +69,4 @@ export const ENGINE_LABELS: Record<
   },
 };
 
-export const PIECE_SETS = [
-  "maestro",
-] as const satisfies string[];
+export const PIECE_SETS = ["maestro"] as const satisfies string[];

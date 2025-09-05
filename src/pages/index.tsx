@@ -1,11 +1,16 @@
 ﻿import Head from "@/components/Head";
-import { SchemaOrg, chessSoftwareSchema, chessAnalysisServiceSchema } from "@/components/SchemaOrg";
+import {
+  SchemaOrg,
+  chessSoftwareSchema,
+  chessAnalysisServiceSchema,
+} from "@/components/SchemaOrg";
 import { useRouter } from "@/hooks/useRouter";
 import { useEffect, useCallback } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Chess } from "chess.js";
 
 import { Box, Typography, Grid } from "@mui/material";
+import { Button } from "@mui/material";
 
 import LoadGameButton from "@/sections/loadGame/startanalyzing";
 import { useChessActions } from "@/hooks/useChessActions";
@@ -109,9 +114,11 @@ function Home() {
     <>
       <SchemaOrg data={chessSoftwareSchema} />
       <SchemaOrg data={chessAnalysisServiceSchema} />
-      
+
       <Head>
-        <title>VoltChess — Free Chess Analyzer with AI | Best Chess.com Alternative</title>
+        <title>
+          VoltChess — Free Chess Analyzer with AI | Best Chess.com Alternative
+        </title>
         <meta
           name="description"
           content="Free chess analysis tool with AI feedback powered by Stockfish. Upload PGN files, get instant game analysis, find blunders and missed opportunities. No account required. Better alternative to Chess.com Game Review."
@@ -121,11 +128,20 @@ function Home() {
           content="free chess analyzer, chess analysis tool, AI chess feedback, stockfish chess engine, chess.com alternative, PGN analyzer, chess game review, chess blunder finder, chess mistakes analysis, online chess analysis, chess improvement tool, chess AI, chess engine analysis, chess position analyzer, chess tactics analyzer, free chess review, chess study tool"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content="VoltChess — Free Chess Analyzer with AI | Best Chess.com Alternative" />
-        <meta property="og:description" content="Free chess analysis tool with AI feedback powered by Stockfish. Upload PGN files, get instant game analysis, find blunders and missed opportunities. No account required." />
+        <meta
+          property="og:title"
+          content="VoltChess — Free Chess Analyzer with AI | Best Chess.com Alternative"
+        />
+        <meta
+          property="og:description"
+          content="Free chess analysis tool with AI feedback powered by Stockfish. Upload PGN files, get instant game analysis, find blunders and missed opportunities. No account required."
+        />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://voltchess.me/" />
-        <meta property="og:image" content="https://voltchess.me/social-networks-1200x630.png" />
+        <meta
+          property="og:image"
+          content="https://voltchess.me/social-networks-1200x630.png"
+        />
         <link rel="canonical" href="https://voltchess.me/" />
       </Head>
 
@@ -205,9 +221,12 @@ function Home() {
               color="text.secondary"
               sx={{ mb: 4, maxWidth: 500 }}
             >
-              Get instant chess game analysis with AI feedback. Upload your PGN files and discover blunders, inaccuracies, and brilliant moves. No registration required - the best free alternative to Chess.com Game Review.
+              Get instant chess game analysis with AI feedback. Upload your PGN
+              files and discover blunders, inaccuracies, and brilliant moves. No
+              registration required - the best free alternative to Chess.com
+              Game Review.
             </Typography>
-            <Box mt={4}>
+            <Box mt={4} sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
               <LoadGameButton
                 label={isGameLoaded ? "Load a new game" : "Start Analyzing"}
                 size="large"
@@ -234,6 +253,29 @@ function Home() {
                   },
                 }}
               />
+              <Button
+                variant="outlined"
+                size="large"
+                onClick={() => router.push("/puzzles")}
+                sx={{
+                  fontWeight: 700,
+                  fontSize: "1rem",
+                  borderRadius: 3,
+                  px: 4,
+                  py: 2,
+                  border: "2px solid #3b9ac6",
+                  color: "#3b9ac6",
+                  backgroundColor: "transparent",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    backgroundColor: "#3b9ac6",
+                    color: "#fff",
+                    boxShadow: "0 0 16px 4px rgba(59, 154, 198, 0.3)",
+                  },
+                }}
+              >
+                🧩 Try Puzzles
+              </Button>
             </Box>
           </Grid>
           {/* Right: Illustration or Feature List */}
@@ -269,7 +311,9 @@ function Home() {
                     Chess.com Alternative
                   </Typography>
                   <Typography color="text.secondary" fontSize="1rem">
-                    Advanced chess analysis tool with Stockfish engine. Better than paid chess analysis platforms - completely free with no restrictions.
+                    Advanced chess analysis tool with Stockfish engine. Better
+                    than paid chess analysis platforms - completely free with no
+                    restrictions.
                   </Typography>
                 </Box>
               </Grid>
@@ -303,7 +347,8 @@ function Home() {
                     AI Chess Analysis
                   </Typography>
                   <Typography color="text.secondary" fontSize="1rem">
-                    Powered by Stockfish engine with AI feedback. Find blunders, missed tactics, and improve your chess rating instantly.
+                    Powered by Stockfish engine with AI feedback. Find blunders,
+                    missed tactics, and improve your chess rating instantly.
                   </Typography>
                 </Box>
               </Grid>
@@ -337,7 +382,9 @@ function Home() {
                     Free PGN Analyzer
                   </Typography>
                   <Typography color="text.secondary" fontSize="1rem">
-                    Upload chess games in PGN format for instant analysis. No account registration, no subscription fees, completely free forever.
+                    Upload chess games in PGN format for instant analysis. No
+                    account registration, no subscription fees, completely free
+                    forever.
                   </Typography>
                 </Box>
               </Grid>
@@ -379,76 +426,115 @@ function Home() {
             </Grid>
           </Grid>
         </Grid>
-        
+
         {/* SEO Content Section */}
-        <Box sx={{ 
-          width: "100%", 
-          maxWidth: 1200, 
-          mx: "auto", 
-          px: { xs: 2, md: 4 }, 
-          py: 6,
-          zIndex: 1
-        }}>
-          <Typography 
-            variant="h3" 
-            component="h3" 
-            align="center" 
-            sx={{ 
-              mb: 4, 
+        <Box
+          sx={{
+            width: "100%",
+            maxWidth: 1200,
+            mx: "auto",
+            px: { xs: 2, md: 4 },
+            py: 6,
+            zIndex: 1,
+          }}
+        >
+          <Typography
+            variant="h3"
+            component="h3"
+            align="center"
+            sx={{
+              mb: 4,
               fontWeight: 700,
-              color: "#7fddff"
+              color: "#7fddff",
             }}
           >
             Why Choose VoltChess for Chess Analysis?
           </Typography>
-          
+
           <Grid container spacing={4}>
             <Grid item xs={12} md={6}>
-              <Typography variant="h5" component="h4" sx={{ mb: 2, color: "#3b9ac6", fontWeight: 600 }}>
+              <Typography
+                variant="h5"
+                component="h4"
+                sx={{ mb: 2, color: "#3b9ac6", fontWeight: 600 }}
+              >
                 🎯 Advanced Chess Engine Analysis
               </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 3, lineHeight: 1.6 }}>
-                Our chess analyzer uses the powerful Stockfish engine to provide accurate position evaluation, 
-                tactical analysis, and move recommendations. Get professional-level chess analysis that rivals 
-                expensive chess software and premium platforms.
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                sx={{ mb: 3, lineHeight: 1.6 }}
+              >
+                Our chess analyzer uses the powerful Stockfish engine to provide
+                accurate position evaluation, tactical analysis, and move
+                recommendations. Get professional-level chess analysis that
+                rivals expensive chess software and premium platforms.
               </Typography>
-              
-              <Typography variant="h5" component="h4" sx={{ mb: 2, color: "#3b9ac6", fontWeight: 600 }}>
+
+              <Typography
+                variant="h5"
+                component="h4"
+                sx={{ mb: 2, color: "#3b9ac6", fontWeight: 600 }}
+              >
                 🚀 Free Chess Game Review Tool
               </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 3, lineHeight: 1.6 }}>
-                Analyze your chess games completely free without any limitations. Upload PGN files from 
-                Chess.com, Lichess, or any chess platform and get instant feedback on your moves. 
-                No premium subscription required.
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                sx={{ mb: 3, lineHeight: 1.6 }}
+              >
+                Analyze your chess games completely free without any
+                limitations. Upload PGN files from Chess.com, Lichess, or any
+                chess platform and get instant feedback on your moves. No
+                premium subscription required.
               </Typography>
             </Grid>
-            
+
             <Grid item xs={12} md={6}>
-              <Typography variant="h5" component="h4" sx={{ mb: 2, color: "#3b9ac6", fontWeight: 600 }}>
+              <Typography
+                variant="h5"
+                component="h4"
+                sx={{ mb: 2, color: "#3b9ac6", fontWeight: 600 }}
+              >
                 🔍 Find Chess Blunders & Mistakes
               </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 3, lineHeight: 1.6 }}>
-                Identify blunders, inaccuracies, and missed tactical opportunities in your games. 
-                Our AI-powered analysis helps you understand where you went wrong and how to improve 
-                your chess rating and playing strength.
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                sx={{ mb: 3, lineHeight: 1.6 }}
+              >
+                Identify blunders, inaccuracies, and missed tactical
+                opportunities in your games. Our AI-powered analysis helps you
+                understand where you went wrong and how to improve your chess
+                rating and playing strength.
               </Typography>
-              
-              <Typography variant="h5" component="h4" sx={{ mb: 2, color: "#3b9ac6", fontWeight: 600 }}>
+
+              <Typography
+                variant="h5"
+                component="h4"
+                sx={{ mb: 2, color: "#3b9ac6", fontWeight: 600 }}
+              >
                 📊 Visual Analysis Dashboard
               </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                View your game analysis with interactive charts, move accuracy graphs, and detailed 
-                position evaluation. Track your improvement over time and identify patterns in your play. 
-                Perfect for chess students and competitive players.
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                sx={{ lineHeight: 1.6 }}
+              >
+                View your game analysis with interactive charts, move accuracy
+                graphs, and detailed position evaluation. Track your improvement
+                over time and identify patterns in your play. Perfect for chess
+                students and competitive players.
               </Typography>
             </Grid>
           </Grid>
         </Box>
-        
+
         {/* Footer */}
         <Box sx={{ mt: 8, mb: 2, zIndex: 1 }}>
           <Typography variant="body2" color="text.secondary" align="center">
-            &copy; {new Date().getFullYear()} VoltChess - Free Chess Analyzer. All rights reserved.
+            &copy; {new Date().getFullYear()} VoltChess - Free Chess Analyzer.
+            All rights reserved.
           </Typography>
         </Box>
       </Box>

@@ -43,14 +43,10 @@ export default function MoveItem({
     const offsetBottom = offsetTop + moveItem.offsetHeight;
     if (offsetTop < movePanel.scrollTop) {
       movePanel.scrollTop =
-        offsetTop -
-        panelRect.height / 2 +
-        moveItem.offsetHeight / 2;
+        offsetTop - panelRect.height / 2 + moveItem.offsetHeight / 2;
     } else if (offsetBottom > movePanel.scrollTop + panelRect.height) {
       movePanel.scrollTop =
-        offsetBottom -
-        panelRect.height / 2 -
-        moveItem.offsetHeight / 2;
+        offsetBottom - panelRect.height / 2 - moveItem.offsetHeight / 2;
     }
   }, [isCurrentMove, moveIdx]);
 

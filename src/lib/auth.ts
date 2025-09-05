@@ -9,7 +9,7 @@ export const isUserAuthenticated = (): boolean => {
   if (!ENABLE_AUTHENTICATION) {
     return true;
   }
-  
+
   // If authentication is enabled, check for valid token
   if (typeof window !== "undefined") {
     return !!localStorage.getItem(ACCESS_TOKEN);
@@ -31,7 +31,10 @@ export const getAuthStatus = (): string => {
   if (!ENABLE_AUTHENTICATION) {
     return "Authentication disabled - all routes accessible";
   }
-  
-  const hasToken = typeof window !== "undefined" ? !!localStorage.getItem(ACCESS_TOKEN) : false;
+
+  const hasToken =
+    typeof window !== "undefined"
+      ? !!localStorage.getItem(ACCESS_TOKEN)
+      : false;
   return hasToken ? "User authenticated" : "User not authenticated";
 };

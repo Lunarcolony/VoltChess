@@ -33,8 +33,8 @@ function Homes() {
         overflow: "auto",
       }}
     >
-      <PageTitle 
-        title="Chess Game Analysis - VoltChess Free AI Chess Analyzer" 
+      <PageTitle
+        title="Chess Game Analysis - VoltChess Free AI Chess Analyzer"
         description="Analyze your chess games with AI feedback. Get move accuracy, find blunders, and see tactical opportunities. Free Stockfish analysis with interactive evaluation charts."
       />
 
@@ -64,8 +64,6 @@ function Homes() {
           transition: "box-shadow 0.2s",
         }}
       >
-
-
         {/* Title */}
         <Grid
           container

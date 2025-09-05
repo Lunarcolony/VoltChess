@@ -1,4 +1,3 @@
-
 import {
   engineDepthAtom,
   engineMultiPvAtom,
@@ -19,7 +18,7 @@ import { SavedEvals } from "@/types/eval";
 import { useEffect, useCallback } from "react";
 import { usePlayersData } from "@/hooks/usePlayersData";
 import { useCurrentPosition } from "../hooks/useCurrentPosition";
-import {  Grid2 as Grid, Divider } from "@mui/material";
+import { Grid2 as Grid, Divider } from "@mui/material";
 
 export default function AnalyzeButton() {
   const engineName = useAtomValue(engineNameAtom);
@@ -112,9 +111,9 @@ export default function AnalyzeButton() {
     }
   }, [gameEval, readyToAnalyse, handleAnalyze]);
 
-return (
-  <Grid>
-    <Divider sx={{ marginX: "5%", marginBottom: 2.5 }} />
-  </Grid>
-);
+  return (
+    <Grid>
+      <Divider sx={{ marginX: "5%", marginBottom: 2.5 }} />
+    </Grid>
+  );
 }

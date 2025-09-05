@@ -1,8 +1,11 @@
-import { Link as RouterLink, LinkProps as RouterLinkProps } from 'react-router-dom'
+import {
+  Link as RouterLink,
+  LinkProps as RouterLinkProps,
+} from "react-router-dom";
 
-interface LinkProps extends Omit<RouterLinkProps, 'to'> {
-  href: string
-  children: React.ReactNode
+interface LinkProps extends Omit<RouterLinkProps, "to"> {
+  href: string;
+  children: React.ReactNode;
 }
 
 const Link: React.FC<LinkProps> = ({ href, children, ...props }) => {
@@ -10,7 +13,7 @@ const Link: React.FC<LinkProps> = ({ href, children, ...props }) => {
     <RouterLink to={href} {...props}>
       {children}
     </RouterLink>
-  )
-}
+  );
+};
 
-export default Link
+export default Link;

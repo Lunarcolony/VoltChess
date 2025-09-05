@@ -1,5 +1,5 @@
 @font-face {
-  font-family: 'chess-merida';
-  src: url('./chess_merida_unicode.ttf') format('truetype');
+  font-family: "chess-merida";
+  src: url("./chess_merida_unicode.ttf") format("truetype");
   font-display: swap;
 }

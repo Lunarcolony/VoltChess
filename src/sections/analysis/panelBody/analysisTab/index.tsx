@@ -1,7 +1,4 @@
-import {
-  Grid2 as Grid,
-  Grid2Props as GridProps,
-} from "@mui/material";
+import { Grid2 as Grid, Grid2Props as GridProps } from "@mui/material";
 import { useAtomValue } from "jotai";
 import { gameEvalAtom } from "../../states";
 import EngineLines from "./engineLines";
@@ -22,13 +19,11 @@ export default function AnalysisTab(props: GridProps) {
       {...props}
       sx={props.hidden ? { display: "none" } : props.sx}
     >
-
-
       <EngineLines size={{ lg: gameEval ? undefined : 12 }} />
     </Grid>
   );
 }
 
-        //<MoveInfo />
+//<MoveInfo />
 
-        //<Opening />
+//<Opening />
