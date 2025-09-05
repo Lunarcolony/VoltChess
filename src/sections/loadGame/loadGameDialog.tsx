@@ -21,6 +21,7 @@ import { Chess } from "chess.js";
 import { useRef, useState } from "react";
 import GamePgnInput from "./gamePgnInput";
 import ChessComInput from "./chessComInput";
+import ImageInput from "./imageInput";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import LichessInput from "./lichessInput";
 import { useSetAtom } from "jotai";
@@ -147,6 +148,10 @@ export default function NewGameDialog({ open, onClose, setGame }: Props) {
             <LichessInput onSelect={handleAddGame} />
           )}
 
+          {gameOrigin === GameOrigin.Image && (
+            <ImageInput onSelect={handleAddGame} />
+          )}
+
           <Snackbar open={!!parsingError}>
             <Alert
               onClose={() => setParsingError("")}
@@ -183,4 +188,5 @@ const gameOriginLabel: Record<GameOrigin, string> = {
   [GameOrigin.ChessCom]: "Chess.com",
   [GameOrigin.Lichess]: "Lichess.org",
   [GameOrigin.Pgn]: "PGN",
+  [GameOrigin.Image]: "Image Upload",
 };
