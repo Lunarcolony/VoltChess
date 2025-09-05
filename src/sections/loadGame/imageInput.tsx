@@ -1,6 +1,7 @@
 import { FormControl, Button, Box, Typography, Grid2 as Grid, Alert } from "@mui/material";
 import { Icon } from "@iconify/react";
 import React, { useState, useRef } from "react";
+import PositionSetup from "./positionSetup";
 
 interface Props {
   onSelect: (pgn: string, boardOrientation?: boolean) => void;
@@ -8,7 +9,7 @@ interface Props {
 
 export default function ImageInput({ onSelect }: Props) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [showPositionSetup, setShowPositionSetup] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -28,42 +29,20 @@ export default function ImageInput({ onSelect }: Props) {
     // Create URL for preview
     const imageUrl = URL.createObjectURL(file);
     setSelectedImage(imageUrl);
-
-    // Read file for processing
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const imageData = e.target?.result as string;
-      processImage(imageData);
-    };
-    reader.readAsDataURL(file);
   };
 
-  const processImage = async (_imageData: string) => {
-    setIsProcessing(true);
-    setError(null);
-
-    try {
-      // For now, create a demo position from the starting position
-      // In a real implementation, this would use computer vision to detect the chess position
-      const demoPgn = `[Event "Image Upload Demo"]
-[Site "VoltChess"]
-[Date "2024.01.01"]
-[Round "-"]
-[White "Player"]
-[Black "Player"]
-[Result "*"]
-
-1. e4 e5 2. Nf3 Nc6 *`;
-
-      // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      onSelect(demoPgn, true);
-    } catch (err) {
-      setError('Failed to process image. Please try a different image or make sure the chess board is clearly visible.');
-    } finally {
-      setIsProcessing(false);
+  const handleSetupPosition = () => {
+    if (selectedImage) {
+      setShowPositionSetup(true);
     }
+  };
+
+  const handlePositionSet = (pgn: string) => {
+    onSelect(pgn, true);
+  };
+
+  const handleBackToUpload = () => {
+    setShowPositionSetup(false);
   };
 
   const handleUploadClick = () => {
@@ -73,11 +52,21 @@ export default function ImageInput({ onSelect }: Props) {
   const resetImage = () => {
     setSelectedImage(null);
     setError(null);
-    setIsProcessing(false);
+    setShowPositionSetup(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
+
+  if (showPositionSetup && selectedImage) {
+    return (
+      <PositionSetup
+        imageUrl={selectedImage}
+        onPositionSet={handlePositionSet}
+        onBack={handleBackToUpload}
+      />
+    );
+  }
 
   return (
     <FormControl fullWidth>
@@ -137,30 +126,21 @@ export default function ImageInput({ onSelect }: Props) {
                   border: '1px solid #ccc',
                 }}
               />
-              <Box sx={{ mt: 2 }}>
-                {isProcessing ? (
-                  <Typography variant="body2" color="primary">
-                    <Icon icon="eos-icons:loading" width={20} height={20} style={{ marginRight: 8 }} />
-                    Processing image... This may take a moment.
-                  </Typography>
-                ) : (
-                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                    <Button
-                      variant="outlined"
-                      onClick={resetImage}
-                      startIcon={<Icon icon="material-symbols:refresh" />}
-                    >
-                      Try Different Image
-                    </Button>
-                    <Button
-                      variant="contained"
-                      onClick={() => processImage(selectedImage)}
-                      startIcon={<Icon icon="material-symbols:smart-toy" />}
-                    >
-                      Analyze Position
-                    </Button>
-                  </Box>
-                )}
+              <Box sx={{ mt: 2, display: 'flex', gap: 1, justifyContent: 'center' }}>
+                <Button
+                  variant="outlined"
+                  onClick={resetImage}
+                  startIcon={<Icon icon="material-symbols:refresh" />}
+                >
+                  Try Different Image
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={handleSetupPosition}
+                  startIcon={<Icon icon="material-symbols:edit-square" />}
+                >
+                  Set Up Position
+                </Button>
               </Box>
             </Box>
           </Grid>
@@ -176,7 +156,7 @@ export default function ImageInput({ onSelect }: Props) {
 
         <Grid size={12}>
           <Typography variant="body2" align="center" color="textSecondary" sx={{ mt: 2 }}>
-            💡 Tips: Ensure good lighting, clear piece visibility, and minimal background clutter for best results
+            💡 Tips: After uploading, you'll set up the position manually to ensure accuracy
           </Typography>
         </Grid>
       </Grid>
