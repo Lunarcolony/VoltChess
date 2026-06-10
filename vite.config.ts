@@ -11,7 +11,8 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  base: "./", // Use relative paths for static deployment
+  // Vercel serves from domain root; "./" for other static hosts
+  base: process.env.VERCEL ? "/" : "./",
   server: {
     port: 3000,
     headers: {
