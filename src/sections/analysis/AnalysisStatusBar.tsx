@@ -38,8 +38,8 @@ export default function AnalysisStatusBar() {
   const reviewDisabled = !gameEval || isAnalyzing || engineLoading;
 
   return (
-    <Box sx={{ mb: 2 }}>
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
+    <Box sx={{ mt: 1.5 }}>
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, mb: 1.5 }}>
         <Chip
           size="small"
           icon={<Icon icon="mdi:upload" width={14} />}

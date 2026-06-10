@@ -18,41 +18,32 @@ export default function EvaluationGraphSection({
   return (
     <Box
       sx={{
-        mb: 2,
+        mb: 1.5,
+        width: "100%",
         ...(sticky && {
           position: "sticky",
           top: 0,
           zIndex: 2,
           bgcolor: palette.surfaceRaised,
-          pt: 0.5,
-          pb: 1,
         }),
       }}
     >
-      <Typography
-        variant="body2"
-        fontWeight={600}
-        color="text.secondary"
-        sx={{ mb: 1, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: "0.7rem" }}
-      >
-        Evaluation chart
-      </Typography>
-
       {gameEval ? (
         <GraphTab
           {...graphProps}
           sx={{
-            minHeight: { xs: 64, sm: 80 },
-            height: { xs: 72, sm: 88 },
-            maxHeight: 100,
+            minHeight: { xs: 80, sm: 100 },
+            height: { xs: 88, sm: 108 },
+            maxHeight: { xs: 110, sm: 130 },
+            width: "100%",
             ...graphProps.sx,
           }}
         />
       ) : (
         <Box
           sx={{
-            height: { xs: 72, sm: 88 },
-            borderRadius: 1,
+            height: { xs: 88, sm: 108 },
+            borderRadius: 1.5,
             border: `1px dashed ${palette.border}`,
             bgcolor: palette.surface,
             display: "flex",
@@ -62,7 +53,7 @@ export default function EvaluationGraphSection({
           }}
         >
           <Typography variant="body2" color="text.secondary" align="center">
-            The evaluation chart will appear here once analysis finishes.
+            Evaluation chart appears after analysis finishes.
           </Typography>
         </Box>
       )}

@@ -19,7 +19,7 @@ export default function MovesClassificationsRecap() {
       rowGap={0.7}
       sx={{ scrollbarWidth: "thin", overflowY: "auto" }}
       height="100%"
-      maxHeight={{ xs: "16rem", sm: "20rem" }}
+      maxHeight={{ xs: "14rem", sm: "none" }}
       size={12}
     >
       <Grid

@@ -34,6 +34,8 @@ export interface Props {
   showBestMoveArrow?: boolean;
   showPlayerMoveIconAtom?: PrimitiveAtom<boolean>;
   showEvaluationBar?: boolean;
+  /** Hide built-in player rows (layout renders its own full-width bars) */
+  hidePlayerHeaders?: boolean;
 }
 
 export default function Board({
@@ -48,6 +50,7 @@ export default function Board({
   showBestMoveArrow = false,
   showPlayerMoveIconAtom,
   showEvaluationBar = false,
+  hidePlayerHeaders = false,
 }: Props) {
   const boardRef = useRef<HTMLDivElement>(null);
   const game = useAtomValue(gameAtom);
@@ -282,13 +285,64 @@ export default function Board({
     return commonBoardStyle;
   }, [boardHue]);
 
+  const chessboardEl = (
+    <Chessboard
+      id={`${boardId}-${canPlay}`}
+      boardWidth={boardSize}
+      position={gameFen}
+      onPieceDrop={onPieceDrop}
+      boardOrientation={boardOrientation === Color.White ? "white" : "black"}
+      customBoardStyle={customBoardStyle}
+      customArrows={customArrows}
+      isDraggablePiece={isPiecePlayable}
+      customSquare={SquareRenderer}
+      onSquareClick={handleSquareLeftClick}
+      onSquareRightClick={handleSquareRightClick}
+      onPieceDragBegin={handlePieceDragBegin}
+      onPieceDragEnd={handlePieceDragEnd}
+      onPromotionPieceSelect={onPromotionPieceSelect}
+      showPromotionDialog={showPromotionDialog}
+      promotionToSquare={moveClickTo}
+      animationDuration={200}
+      customPieces={customPieces}
+    />
+  );
+
+  if (hidePlayerHeaders) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexWrap: "nowrap",
+          width: "fit-content",
+          maxWidth: "100%",
+          flexShrink: 0,
+          gap: 1.5,
+        }}
+      >
+        {showEvaluationBar && (
+          <EvaluationBar
+            height={boardSize || 400}
+            boardOrientation={boardOrientation}
+            currentPositionAtom={currentPositionAtom}
+          />
+        )}
+        <Box ref={boardRef} sx={{ width: boardSize, flexShrink: 0 }}>
+          {chessboardEl}
+        </Box>
+      </Box>
+    );
+  }
+
   return (
     <Grid
       container
       justifyContent="center"
       alignItems="center"
       wrap="nowrap"
-      width={boardSize}
+      sx={{ width: "fit-content", maxWidth: "100%", flexShrink: 0 }}
     >
       {showEvaluationBar && (
         <EvaluationBar
@@ -300,11 +354,16 @@ export default function Board({
 
       <Grid
         container
-        rowGap={1.5}
+        rowGap={0.75}
         justifyContent="center"
         alignItems="center"
-        paddingLeft={showEvaluationBar ? 2 : 0}
-        size="grow"
+        paddingLeft={showEvaluationBar ? 1.5 : 0}
+        sx={{
+          width: boardSize ?? "100%",
+          maxWidth: "100%",
+          flexShrink: 0,
+          minWidth: 0,
+        }}
       >
         <PlayerHeader
           color={boardOrientation === Color.White ? Color.Black : Color.White}
@@ -318,28 +377,9 @@ export default function Board({
           alignItems="center"
           ref={boardRef}
           size={12}
+          sx={{ width: boardSize ?? "100%", maxWidth: "100%" }}
         >
-          <Chessboard
-            id={`${boardId}-${canPlay}`}
-            position={gameFen}
-            onPieceDrop={onPieceDrop}
-            boardOrientation={
-              boardOrientation === Color.White ? "white" : "black"
-            }
-            customBoardStyle={customBoardStyle}
-            customArrows={customArrows}
-            isDraggablePiece={isPiecePlayable}
-            customSquare={SquareRenderer}
-            onSquareClick={handleSquareLeftClick}
-            onSquareRightClick={handleSquareRightClick}
-            onPieceDragBegin={handlePieceDragBegin}
-            onPieceDragEnd={handlePieceDragEnd}
-            onPromotionPieceSelect={onPromotionPieceSelect}
-            showPromotionDialog={showPromotionDialog}
-            promotionToSquare={moveClickTo}
-            animationDuration={200}
-            customPieces={customPieces}
-          />
+          {chessboardEl}
         </Grid>
 
         <PlayerHeader

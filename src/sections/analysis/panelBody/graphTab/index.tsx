@@ -88,16 +88,16 @@ export default function GraphTab(props: GridProps) {
       container
       justifyContent="center"
       alignItems="center"
-      minHeight={72}
-      height={80}
-      maxHeight={96}
+      minHeight={{ xs: 72, sm: 88 }}
+      height={{ xs: 80, sm: 100 }}
+      maxHeight={{ xs: 100, sm: 120 }}
       {...props}
       sx={props.hidden ? { display: "none" } : props.sx}
       size={12}
     >
       <Box
         height="100%"
-        width={{ xs: "100%", lg: "90%" }}
+        width="100%"
         sx={{
           backgroundColor: "#141414",
           borderRadius: "8px",
@@ -121,8 +121,16 @@ export default function GraphTab(props: GridProps) {
             }}
             style={{ cursor: "pointer" }}
           >
-            <XAxis dataKey="moveNb" hide stroke="red" />
-            <YAxis domain={[0, 20]} hide />
+            <XAxis dataKey="moveNb" hide />
+            <YAxis
+              domain={[0, 20]}
+              ticks={[0, 10, 20]}
+              tickFormatter={(v) => (v === 20 ? "+20" : v === 0 ? "-20" : "0")}
+              width={28}
+              tick={{ fill: "#737373", fontSize: 10 }}
+              axisLine={false}
+              tickLine={false}
+            />
             <Tooltip
               content={<CustomTooltip />}
               isAnimationActive={false}

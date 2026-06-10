@@ -1,11 +1,12 @@
 import { Color } from "@/types/enums";
 import { Player } from "@/types/game";
-import { Avatar, Grid2 as Grid, Stack, Typography } from "@mui/material";
+import { Avatar, Box, Stack, Typography } from "@mui/material";
 import CapturedPieces from "./capturedPieces";
 import { PrimitiveAtom, useAtomValue } from "jotai";
 import { Chess } from "chess.js";
 import { useMemo } from "react";
 import { getPaddedNumber } from "@/lib/helpers";
+import { palette } from "@/theme/voltchessTheme";
 
 export interface Props {
   player: Player;
@@ -15,8 +16,8 @@ export interface Props {
 
 export default function PlayerHeader({ color, player, gameAtom }: Props) {
   const game = useAtomValue(gameAtom);
-
   const gameFen = game.fen();
+  const isWhite = color === Color.White;
 
   const clock = useMemo(() => {
     const turn = game.turn();
@@ -24,68 +25,102 @@ export default function PlayerHeader({ color, player, gameAtom }: Props) {
     if (turn === color) {
       const history = game.history({ verbose: true });
       const previousFen = history.at(-1)?.before;
-
       const comment = game
         .getComments()
         .find(({ fen }) => fen === previousFen)?.comment;
-
       return getClock(comment);
     }
 
-    const comment = game.getComment();
-    return getClock(comment);
+    return getClock(game.getComment());
   }, [game, color]);
 
   return (
-    <Grid
-      container
-      justifyContent="space-between"
-      alignItems="center"
-      size={12}
+    <Box
+      sx={{
+        width: "100%",
+        minWidth: 0,
+        overflow: "hidden",
+        minHeight: 44,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 1,
+        px: 1.25,
+        py: 0.5,
+        bgcolor: palette.surfaceRaised,
+        border: `1px solid ${palette.border}`,
+        borderRadius: 1,
+      }}
     >
-      <Stack direction="row">
+      <Stack
+        direction="row"
+        alignItems="center"
+        sx={{ minWidth: 0, flex: 1, overflow: "hidden" }}
+      >
         <Avatar
           src={player.avatarUrl}
           alt={player.name}
           variant="circular"
           sx={{
-            width: 40,
-            height: 40,
-            backgroundColor: color === Color.White ? "white" : "black",
-            color: color === Color.White ? "black" : "white",
-            border: "1px solid black",
+            width: 30,
+            height: 30,
+            flexShrink: 0,
+            bgcolor: isWhite ? "#e8e8e8" : "#1a1a1a",
+            color: isWhite ? "#0a0a0a" : palette.text,
+            border: `1px solid ${palette.border}`,
+            fontSize: "0.8rem",
           }}
         >
-          {player.name[0].toUpperCase()}
+          {player.name[0]?.toUpperCase()}
         </Avatar>
 
-        <Stack marginLeft={1}>
-          <Stack direction="row">
-            <Typography fontSize="0.9rem">{player.name}</Typography>
-
-            {player.rating && (
-              <Typography marginLeft={0.5} fontSize="0.9rem" fontWeight="200">
+        <Stack ml={1} sx={{ minWidth: 0, overflow: "hidden" }}>
+          <Stack
+            direction="row"
+            alignItems="baseline"
+            gap={0.5}
+            flexWrap="nowrap"
+            sx={{ minWidth: 0, overflow: "hidden" }}
+          >
+            <Typography
+              fontSize="0.85rem"
+              fontWeight={600}
+              noWrap
+              sx={{ color: palette.text, minWidth: 0 }}
+            >
+              {player.name}
+            </Typography>
+            {player.rating != null && (
+              <Typography
+                fontSize="0.75rem"
+                color="text.secondary"
+                noWrap
+                sx={{ flexShrink: 0 }}
+              >
                 ({player.rating})
               </Typography>
             )}
           </Stack>
-
           <CapturedPieces fen={gameFen} color={color} />
         </Stack>
       </Stack>
 
       {clock && (
         <Typography
-          align="center"
           sx={{
-            backgroundColor: color === Color.White ? "white" : "black",
-            color: color === Color.White ? "black" : "white",
+            flexShrink: 0,
+            bgcolor: isWhite ? "#e8e8e8" : "#0a0a0a",
+            color: isWhite ? "#0a0a0a" : palette.text,
+            border: `1px solid ${palette.border}`,
+            borderRadius: 1,
+            px: 1,
+            py: 0.5,
+            minWidth: "4.5rem",
+            textAlign: "center",
+            fontSize: "0.8rem",
+            fontWeight: 600,
+            fontVariantNumeric: "tabular-nums",
           }}
-          borderRadius="5px"
-          padding={0.8}
-          border="1px solid #424242"
-          width="5rem"
-          textAlign="right"
         >
           {clock.hours ? `${clock.hours}:` : ""}
           {getPaddedNumber(clock.minutes)}:{getPaddedNumber(clock.seconds)}
@@ -94,7 +129,7 @@ export default function PlayerHeader({ color, player, gameAtom }: Props) {
             : `.${clock.tenths}`}
         </Typography>
       )}
-    </Grid>
+    </Box>
   );
 }
 

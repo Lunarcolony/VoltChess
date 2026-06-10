@@ -62,22 +62,16 @@ export default function MoveItem({
       justifyContent="center"
       alignItems="center"
       gap={1}
-      width="5rem"
+      width={{ xs: "4.5rem", sm: "5rem" }}
       wrap="nowrap"
       onClick={handleClick}
       paddingY={0.5}
-      sx={(theme) => ({
+      sx={{
         cursor: isCurrentMove ? undefined : "pointer",
-        backgroundColor:
-          isCurrentMove && theme.palette.mode === "dark"
-            ? "#4f4f4f"
-            : undefined,
-        border:
-          isCurrentMove && theme.palette.mode === "light"
-            ? "1px solid #424242"
-            : undefined,
+        backgroundColor: isCurrentMove ? "rgba(232, 185, 35, 0.15)" : undefined,
+        border: isCurrentMove ? "1px solid rgba(232, 185, 35, 0.4)" : undefined,
         borderRadius: 1,
-      })}
+      }}
       id={`move-${moveIdx}`}
       ref={itemRef}
     >

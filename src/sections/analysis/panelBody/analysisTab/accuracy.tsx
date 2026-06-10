@@ -29,9 +29,9 @@ export default function AnalysisTab(props: GridProps) {
       justifyContent={{ xs: "center", lg: gameEval ? "center" : "center" }}
       alignItems="center"
       flexWrap={{ lg: gameEval ? "nowrap" : undefined }}
-      gap={2}
-      marginY={{ lg: gameEval ? 1 : undefined }}
-      paddingX={{ xs: 0, lg: "calc(4% - 2rem)" }}
+      gap={1.5}
+      marginY={{ lg: gameEval ? 0.5 : undefined }}
+      paddingX={0}
       {...props}
       sx={props.hidden ? { display: "none" } : props.sx}
     >

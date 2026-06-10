@@ -1,137 +1,56 @@
-import PanelHeader from "@/sections/analysis/panelHeader";
-import PanelToolBar from "@/sections/analysis/panelToolbar";
-import AnalysisTab from "@/sections/analysis/panelBody/analysisTab/engine";
-import ClassificationTab from "@/sections/analysis/panelBody/classificationTab/moves";
-import {
-  boardAtom,
-  gameAtom,
-  gameEvalAtom,
-} from "@/sections/analysis/states";
-import {
-  Box,
-  Divider,
-  Tab,
-  Tabs,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
-import { useAtomValue } from "jotai";
-import { useEffect, useState, useMemo } from "react";
-import { Icon } from "@iconify/react";
-import { PageTitle } from "@/components/pageTitle";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AnalysisPageLayout from "@/sections/analysis/AnalysisPageLayout";
-import EvaluationProgress from "@/sections/analysis/EvaluationProgress";
-import EvaluationGraphSection from "@/sections/analysis/EvaluationGraphSection";
-import { palette } from "@/theme/voltchessTheme";
+import AnalysisPanelTabs from "@/sections/analysis/AnalysisPanelTabs";
+import AnalysisBottomNav from "@/sections/analysis/panel/AnalysisBottomNav";
+import ReportTabPanel from "@/sections/analysis/panel/ReportTabPanel";
+import AnalysisTabPanel from "@/sections/analysis/panel/AnalysisTabPanel";
+import SettingsTabPanel from "@/sections/analysis/panel/SettingsTabPanel";
+import AnalyzeButton from "@/sections/analysis/panelHeader/analyzeButton";
+import { gameEvalAtom } from "@/sections/analysis/states";
+import { PageTitle } from "@/components/pageTitle";
 import { useAnalysisSession } from "@/hooks/useAnalysisSession";
+import { useAtomValue } from "jotai";
+import { useMemo } from "react";
 
 function ReanalysisPage() {
   useAnalysisSession();
-  const theme = useTheme();
-  const [tab, setTab] = useState(0);
-  const isMdOrGreater = useMediaQuery(theme.breakpoints.up("md"));
-
   const gameEval = useAtomValue(gameEvalAtom);
-  const game = useAtomValue(gameAtom);
-  const board = useAtomValue(boardAtom);
-
-  const showMovesTab = game.history().length > 0 || board.history().length > 0;
-
-  useEffect(() => {
-    if (tab === 1 && !showMovesTab) setTab(0);
-  }, [showMovesTab, gameEval, tab]);
 
   const tabs = useMemo(
     () => [
-      { label: "Engine", icon: "mdi:magnify", show: true },
-      { label: "Moves", icon: "mdi:format-list-bulleted", show: showMovesTab },
+      {
+        id: "report" as const,
+        label: "Report",
+        icon: "mdi:clipboard-text",
+        content: <ReportTabPanel showReviewButton={false} />,
+      },
+      {
+        id: "engine" as const,
+        label: "Analysis",
+        icon: "mdi:magnify",
+        show: !!gameEval,
+        scrollable: false,
+        content: <AnalysisTabPanel />,
+      },
+      {
+        id: "settings" as const,
+        label: "Settings",
+        icon: "mdi:cog-outline",
+        content: <SettingsTabPanel />,
+      },
     ],
-    [showMovesTab]
+    [gameEval]
   );
 
   return (
     <>
       <PageTitle title="Game Review — VoltChess" />
 
-      <Typography variant="h2" sx={{ mb: { xs: 1.5, sm: 2 } }}>
-        Game Review
-      </Typography>
+      <AnalyzeButton />
 
-      <AnalysisPageLayout
-        panelPinned={
-          <>
-            <EvaluationProgress />
-            <EvaluationGraphSection sticky={false} />
-          </>
-        }
-        panelFooter={isMdOrGreater ? <PanelToolBar /> : undefined}
-      >
-        {!isMdOrGreater && (
-          <Box sx={{ mb: 2 }}>
-            <PanelToolBar />
-            <Divider sx={{ my: 2, borderColor: palette.borderSubtle }} />
-          </Box>
-        )}
-
-        <PanelHeader />
-
-        {!isMdOrGreater && (
-          <Tabs
-            value={tab}
-            onChange={(_, v) => setTab(v)}
-            variant="fullWidth"
-            sx={{
-              mb: 2,
-              minHeight: 40,
-              borderBottom: `1px solid ${palette.border}`,
-              "& .MuiTab-root": {
-                minHeight: 40,
-                py: 1,
-                fontSize: "0.8rem",
-                color: palette.textMuted,
-                "&.Mui-selected": { color: palette.accent },
-              },
-            }}
-          >
-            {tabs.map(
-              (t, idx) =>
-                t.show && (
-                  <Tab
-                    key={t.label}
-                    label={t.label}
-                    icon={<Icon icon={t.icon} width={16} />}
-                    iconPosition="start"
-                    id={`tab${idx}`}
-                  />
-                )
-            )}
-          </Tabs>
-        )}
-
-        <AnalysisTab
-          role="tabpanel"
-          hidden={tab !== 0 && !isMdOrGreater}
-          id="tabContent0"
-        />
-
-        {isMdOrGreater && (
-          <Divider sx={{ my: 2, borderColor: palette.borderSubtle }} />
-        )}
-
-        <ClassificationTab
-          role="tabpanel"
-          hidden={tab !== 1 && !isMdOrGreater}
-          id="tabContent1"
-        />
+      <AnalysisPageLayout useTabs panelFooter={<AnalysisBottomNav />}>
+        <AnalysisPanelTabs defaultTab="report" tabs={tabs} />
       </AnalysisPageLayout>
-
-      {!isMdOrGreater && (
-        <Box sx={{ mt: 2, maxWidth: 520, mx: "auto", width: "100%" }}>
-          <PanelToolBar />
-        </Box>
-      )}
     </>
   );
 }

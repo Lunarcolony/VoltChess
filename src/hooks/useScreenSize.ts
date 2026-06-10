@@ -2,8 +2,12 @@ import { useEffect, useState } from "react";
 import { SIDEBAR_WIDTH } from "@/sections/layout/Sidebar";
 
 const MOBILE_HEADER = 52;
-const MAIN_PADDING_X = 16;
-const MAIN_PADDING_Y = 20;
+/** Fixed right panel width on desktop (Chessigma-style) */
+export const ANALYSIS_PANEL_WIDTH = 400;
+/** Rigid player bar height (top + bottom of board column) */
+export const PLAYER_BAR_HEIGHT = 52;
+/** Eval bar width + gap next to the board */
+const EVAL_BAR_TOTAL = 52;
 
 /** md breakpoint — matches MUI and layout side-by-side */
 const MD_BREAKPOINT = 900;
@@ -34,19 +38,24 @@ export const getAnalysisBoardSize = (
   screenWidth: number,
   screenHeight: number
 ): number => {
-  const isMobile = screenWidth < MD_BREAKPOINT;
   const isSideBySide = screenWidth >= MD_BREAKPOINT;
 
-  const sidebar = isMobile ? 0 : SIDEBAR_WIDTH;
-  const paddingX = isMobile ? MAIN_PADDING_X * 2 : MAIN_PADDING_X * 2 + 16;
-  const panelWidth = isSideBySide ? 520 : 0;
-  const gap = isSideBySide ? 24 : 0;
-  const topOffset = isMobile ? MOBILE_HEADER + MAIN_PADDING_Y + 36 : MAIN_PADDING_Y + 36;
+  if (isSideBySide) {
+    // Full-bleed layout: sidebar | middle column | fixed panel
+    const middleWidth = screenWidth - SIDEBAR_WIDTH - ANALYSIS_PANEL_WIDTH;
+    const maxByWidth = middleWidth - EVAL_BAR_TOTAL - 32;
 
-  const maxWidth = screenWidth - sidebar - paddingX - panelWidth - gap;
-  const maxHeight = screenHeight - topOffset - MAIN_PADDING_Y;
+    // Vertical: two rigid player bars + board area padding
+    const maxByHeight = screenHeight - PLAYER_BAR_HEIGHT * 2 - 24;
 
-  return Math.max(240, Math.min(maxWidth, maxHeight, isMobile ? 420 : 600));
+    return Math.max(280, Math.floor(Math.min(maxByWidth, maxByHeight)));
+  }
+
+  const maxByWidth = screenWidth - EVAL_BAR_TOTAL - 16;
+  const maxByHeight =
+    screenHeight - MOBILE_HEADER - PLAYER_BAR_HEIGHT * 2 - 24;
+
+  return Math.max(240, Math.floor(Math.min(maxByWidth, maxByHeight)));
 };
 
 export const getPlayBoardSize = (
@@ -57,13 +66,13 @@ export const getPlayBoardSize = (
   const isSideBySide = screenWidth >= MD_BREAKPOINT;
 
   const sidebar = isMobile ? 0 : SIDEBAR_WIDTH;
-  const paddingX = isMobile ? MAIN_PADDING_X * 2 : MAIN_PADDING_X * 2 + 16;
+  const paddingX = isMobile ? 24 : 40;
   const sidePanel = isSideBySide ? 400 : 0;
   const gap = isSideBySide ? 32 : 0;
-  const topOffset = isMobile ? MOBILE_HEADER + MAIN_PADDING_Y + 48 : MAIN_PADDING_Y + 48;
+  const topOffset = isMobile ? MOBILE_HEADER + 60 : 60;
 
   const maxWidth = screenWidth - sidebar - paddingX - sidePanel - gap;
-  const maxHeight = screenHeight - topOffset - MAIN_PADDING_Y;
+  const maxHeight = screenHeight - topOffset - PLAYER_BAR_HEIGHT * 2 - 24;
 
   return Math.max(240, Math.min(maxWidth, maxHeight, isMobile ? 400 : 560));
 };

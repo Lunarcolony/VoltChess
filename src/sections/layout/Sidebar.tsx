@@ -19,8 +19,6 @@ import { palette } from "@/theme/voltchessTheme";
 const NAV_ITEMS = [
   { label: "Home", icon: "mdi:home-outline", href: "/" },
   { label: "Play", icon: "mdi:chess-pawn", href: "/play" },
-  { label: "Puzzles", icon: "mdi:puzzle-outline", href: "/puzzles" },
-  { label: "Openings", icon: "mdi:book-open-outline", href: "/openings" },
   { label: "Analysis", icon: "mdi:magnify", href: "/reanalysis" },
   { label: "Database", icon: "mdi:database-outline", href: "/database" },
 ] as const;
