@@ -1,11 +1,10 @@
 import { Box, Button, Chip, Typography } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { useAtomValue } from "jotai";
-import { evaluationProgressAtom, gameEvalAtom, gameAtom } from "./states";
-import { useEngine } from "@/hooks/useEngine";
-import { engineNameAtom } from "./states";
+import { evaluationProgressAtom, gameAtom } from "./states";
 import { useRouter } from "@/hooks/useRouter";
 import { palette } from "@/theme/voltchessTheme";
+import { useAnalyzeGame } from "@/hooks/useAnalyzeGame";
 
 type Step = "load" | "analyze" | "review";
 
@@ -22,22 +21,18 @@ function getActiveStep(
 export default function AnalysisStatusBar() {
   const router = useRouter();
   const game = useAtomValue(gameAtom);
-  const gameEval = useAtomValue(gameEvalAtom);
   const progress = useAtomValue(evaluationProgressAtom);
-  const engineName = useAtomValue(engineNameAtom);
-  const engine = useEngine(engineName);
+  const { gameEval, reanalyzeGame, engineReady } = useAnalyzeGame();
 
   const hasMoves = game.history().length > 0;
   const isAnalyzing = progress > 0;
   const step = getActiveStep(hasMoves, isAnalyzing, !!gameEval);
-  const engineLoading = !engine?.getIsReady() && hasMoves && !gameEval;
+  const engineLoading = !engineReady && hasMoves && !gameEval;
+  const needsReanalysis = hasMoves && !gameEval && !isAnalyzing;
 
   const handleGameReview = () => {
     if (isAnalyzing || engineLoading) return;
-    if (gameEval) {
-      router.push("/reanalysis");
-      return;
-    }
+    if (gameEval) router.push("/reanalysis");
   };
 
   const reviewDisabled = !gameEval || isAnalyzing || engineLoading;
@@ -76,8 +71,22 @@ export default function AnalysisStatusBar() {
 
       {!hasMoves && (
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          Load a game from the home page to start analysis.
+          Load a game to start analysis.
         </Typography>
+      )}
+
+      {needsReanalysis && (
+        <Button
+          variant="outlined"
+          color="primary"
+          fullWidth
+          size="medium"
+          disabled={!engineReady}
+          onClick={() => reanalyzeGame()}
+          sx={{ mb: 1.5, py: 1 }}
+        >
+          {engineReady ? "Re-analyze this game" : "Loading engine…"}
+        </Button>
       )}
 
       <Button
@@ -99,7 +108,7 @@ export default function AnalysisStatusBar() {
               : "Game Review"}
       </Button>
 
-      {reviewDisabled && hasMoves && (
+      {reviewDisabled && hasMoves && !needsReanalysis && (
         <Typography
           variant="caption"
           color="text.secondary"
@@ -124,7 +133,7 @@ export default function AnalysisStatusBar() {
             fontWeight: 600,
           }}
         >
-          Analysis complete — click above to open move-by-move review.
+          Analysis complete — open move-by-move review.
         </Typography>
       )}
     </Box>

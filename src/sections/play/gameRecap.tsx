@@ -1,17 +1,30 @@
-import { useAtomValue } from "jotai";
-import { gameAtom, isGameInProgressAtom, playerColorAtom } from "./states";
+import { useAtomValue, useSetAtom } from "jotai";
+import { gameAtom as playGameAtom, isGameInProgressAtom, playerColorAtom } from "./states";
 import { Button, Grid2 as Grid, Typography } from "@mui/material";
 import { Color } from "@/types/enums";
 import { setGameHeaders } from "@/lib/chess";
 import { useGameDatabase } from "@/hooks/useGameDatabase";
 import { useRouter } from "@/hooks/useRouter";
+import { useChessActions } from "@/hooks/useChessActions";
+import {
+  boardAtom as analysisBoardAtom,
+  boardOrientationAtom,
+  gameAtom as analysisGameAtom,
+  gameEvalAtom,
+} from "@/sections/analysis/states";
+import { saveAnalysisSession } from "@/hooks/useAnalysisSession";
 
 export default function GameRecap() {
-  const game = useAtomValue(gameAtom);
+  const game = useAtomValue(playGameAtom);
   const playerColor = useAtomValue(playerColorAtom);
   const isGameInProgress = useAtomValue(isGameInProgressAtom);
   const { addGame } = useGameDatabase();
   const router = useRouter();
+  const { setPgn: setAnalysisPgn } = useChessActions(analysisGameAtom);
+  const { resetToStartingPosition: resetAnalysisBoard } =
+    useChessActions(analysisBoardAtom);
+  const setEval = useSetAtom(gameEvalAtom);
+  const setBoardOrientation = useSetAtom(boardOrientationAtom);
 
   if (isGameInProgress || !game.history().length) return null;
 
@@ -19,7 +32,7 @@ export default function GameRecap() {
     if (game.isCheckmate()) {
       const winnerColor = game.turn() === "w" ? Color.Black : Color.White;
       const winnerLabel = winnerColor === playerColor ? "You" : "Stockfish";
-      return `${winnerLabel} won by checkmate !`;
+      return `${winnerLabel} won by checkmate`;
     }
     if (game.isInsufficientMaterial()) return "Draw by insufficient material";
     if (game.isStalemate()) return "Draw by stalemate";
@@ -33,25 +46,27 @@ export default function GameRecap() {
     const gameToAnalysis = setGameHeaders(game, {
       resigned: !game.isGameOver() ? playerColor : undefined,
     });
-    const gameId = await addGame(gameToAnalysis);
+    const pgn = gameToAnalysis.pgn();
+    const orientation = playerColor === Color.White;
 
-    router.push(`/?gameId=${gameId}`);
+    resetAnalysisBoard(pgn);
+    setAnalysisPgn(pgn);
+    setEval(undefined);
+    setBoardOrientation(orientation);
+    saveAnalysisSession(pgn, undefined, orientation);
+
+    await addGame(gameToAnalysis);
+    router.push("/analysis");
   };
 
   return (
-    <Grid
-      container
-      justifyContent="center"
-      alignItems="center"
-      gap={2}
-      size={12}
-    >
+    <Grid container justifyContent="center" alignItems="center" gap={2} size={12}>
       <Grid container justifyContent="center" size={12}>
-        <Typography>{getResultLabel()}</Typography>
+        <Typography align="center">{getResultLabel()}</Typography>
       </Grid>
 
-      <Button variant="outlined" onClick={handleOpenGameAnalysis}>
-        Open game analysis
+      <Button variant="contained" color="primary" onClick={handleOpenGameAnalysis}>
+        Analyze this game
       </Button>
     </Grid>
   );

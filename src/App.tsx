@@ -3,7 +3,7 @@ import { Suspense, lazy } from "react";
 import Layout from "@/sections/layout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { LoadingSpinner } from "@/components/Loading";
-import VercelAnalytics from "@/components/VercelAnalytics";
+import RouteAnalytics from "@/components/RouteAnalytics";
 
 // Lazy load pages for better performance
 const Home = lazy(() => import("@/pages/index"));
@@ -21,7 +21,7 @@ const Thanks = lazy(() => import("@/pages/thanks"));
 function App() {
   return (
     <ErrorBoundary>
-      <VercelAnalytics />
+      <RouteAnalytics />
       <Layout>
         <Suspense
           fallback={

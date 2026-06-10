@@ -25,8 +25,10 @@ import AnalysisPageLayout from "@/sections/analysis/AnalysisPageLayout";
 import EvaluationProgress from "@/sections/analysis/EvaluationProgress";
 import EvaluationGraphSection from "@/sections/analysis/EvaluationGraphSection";
 import { palette } from "@/theme/voltchessTheme";
+import { useAnalysisSession } from "@/hooks/useAnalysisSession";
 
 function ReanalysisPage() {
+  useAnalysisSession();
   const theme = useTheme();
   const [tab, setTab] = useState(0);
   const isMdOrGreater = useMediaQuery(theme.breakpoints.up("md"));

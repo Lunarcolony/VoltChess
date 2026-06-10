@@ -1,11 +1,32 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import { viteSingleFile } from "vite-plugin-singlefile";
 import path from "path";
 
+const VERCEL_ANALYTICS_SNIPPET = `<!-- Vercel Web Analytics -->
+    <script>
+      window.va =
+        window.va ||
+        function () {
+          (window.vaq = window.vaq || []).push(arguments);
+        };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>`;
+
+/** Ensures Vercel Web Analytics scripts are present in every production build. */
+function vercelAnalyticsPlugin(): Plugin {
+  return {
+    name: "vercel-analytics-inject",
+    transformIndexHtml(html) {
+      if (html.includes("_vercel/insights/script.js")) return html;
+      return html.replace("</body>", `    ${VERCEL_ANALYTICS_SNIPPET}\n  </body>`);
+    },
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), viteSingleFile()],
+  plugins: [react(), vercelAnalyticsPlugin(), viteSingleFile()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

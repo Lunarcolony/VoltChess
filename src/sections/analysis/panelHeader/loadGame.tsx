@@ -1,29 +1,26 @@
+import { Stack, Button } from "@mui/material";
 import LoadGameButton from "../../loadGame/loadGameButton";
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { useChessActions } from "@/hooks/useChessActions";
 import {
   boardAtom,
-  boardOrientationAtom,
-  evaluationProgressAtom,
   gameAtom,
   gameEvalAtom,
 } from "../states";
-import { useGameDatabase } from "@/hooks/useGameDatabase";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Chess } from "chess.js";
 import { useRouter } from "@/hooks/useRouter";
-import { decodeBase64 } from "@/lib/helpers";
-import { Game } from "@/types/game";
+import { useAnalyzeGame } from "@/hooks/useAnalyzeGame";
+import { clearAnalysisSession } from "@/hooks/useAnalysisSession";
 
 export default function LoadGame() {
   const router = useRouter();
   const game = useAtomValue(gameAtom);
   const { setPgn: setGamePgn } = useChessActions(gameAtom);
   const { resetToStartingPosition: resetBoard } = useChessActions(boardAtom);
-  const { gameFromUrl } = useGameDatabase();
   const setEval = useSetAtom(gameEvalAtom);
-  const setBoardOrientation = useSetAtom(boardOrientationAtom);
-  const evaluationProgress = useAtomValue(evaluationProgressAtom);
+  const { reanalyzeGame, gameEval, evaluationProgress, engineReady } =
+    useAnalyzeGame();
 
   const resetAndSetGamePgn = useCallback(
     (pgn: string) => {
@@ -34,65 +31,34 @@ export default function LoadGame() {
     [resetBoard, setGamePgn, setEval]
   );
 
-  const { pgn: pgnParam, orientation: orientationParam } = router.query;
-
-  useEffect(() => {
-    const loadGameFromIdParam = (gameUrl: Game) => {
-      const gamefromDbChess = new Chess();
-      gamefromDbChess.loadPgn(gameUrl.pgn);
-      if (game.history().join() === gamefromDbChess.history().join()) return;
-
-      resetAndSetGamePgn(gameUrl.pgn);
-      setEval(gameUrl.eval);
-      setBoardOrientation(
-        gameUrl.black.name === "You" && gameUrl.site === "voltchess.me"
-          ? false
-          : true
-      );
-    };
-
-    const loadGameFromPgnParam = (encodedPgn: string) => {
-      const decodedPgn = decodeBase64(encodedPgn);
-      if (!decodedPgn) return;
-
-      const gameFromPgnParam = new Chess();
-      gameFromPgnParam.loadPgn(decodedPgn || "");
-      if (game.history().join() === gameFromPgnParam.history().join()) return;
-
-      resetAndSetGamePgn(decodedPgn);
-      setBoardOrientation(orientationParam !== "black");
-    };
-
-    if (gameFromUrl) {
-      loadGameFromIdParam(gameFromUrl);
-    } else if (typeof pgnParam === "string") {
-      loadGameFromPgnParam(pgnParam);
-    }
-  }, [
-    gameFromUrl,
-    pgnParam,
-    orientationParam,
-    game,
-    resetAndSetGamePgn,
-    setEval,
-    setBoardOrientation,
-  ]);
-
   const isGameLoaded =
-    gameFromUrl !== undefined ||
     (!!game.getHeaders().White && game.getHeaders().White !== "?") ||
     game.history().length > 0;
 
-  if (evaluationProgress) return null;
+  const needsReanalysis = isGameLoaded && !gameEval && !evaluationProgress;
 
   return (
-    <LoadGameButton
-      label={isGameLoaded ? "Load a new game" : "Load game"}
-      size="small"
-      setGame={async (game) => {
-        await router.push("/analysis");
-        resetAndSetGamePgn(game.pgn());
-      }}
-    />
+    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 1 }}>
+      <LoadGameButton
+        label={isGameLoaded ? "Load new game" : "Load game"}
+        size="small"
+        setGame={async (loadedGame: Chess) => {
+          clearAnalysisSession();
+          await router.push("/analysis");
+          resetAndSetGamePgn(loadedGame.pgn());
+        }}
+      />
+
+      {needsReanalysis && (
+        <Button
+          variant="outlined"
+          size="small"
+          disabled={!engineReady || evaluationProgress > 0}
+          onClick={() => reanalyzeGame()}
+        >
+          {engineReady ? "Re-analyze game" : "Loading engine…"}
+        </Button>
+      )}
+    </Stack>
   );
 }
