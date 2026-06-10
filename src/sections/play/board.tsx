@@ -9,7 +9,7 @@ import {
 } from "./states";
 import { useChessActions } from "@/hooks/useChessActions";
 import { useEffect, useMemo } from "react";
-import { useScreenSize } from "@/hooks/useScreenSize";
+import { getPlayBoardSize, useScreenSize } from "@/hooks/useScreenSize";
 import { useEngine } from "@/hooks/useEngine";
 import { uciMoveParams } from "@/lib/chess";
 import Board from "@/components/board";
@@ -55,17 +55,10 @@ export default function BoardContainer() {
     };
   }, [gameFen, isGameInProgress]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const boardSize = useMemo(() => {
-    const width = screenSize.width;
-    const height = screenSize.height;
-
-    // 900 is the md layout breakpoint
-    if (window?.innerWidth < 900) {
-      return Math.min(width, height - 150);
-    }
-
-    return Math.min(width - 300, height * 0.83);
-  }, [screenSize]);
+  const boardSize = useMemo(
+    () => getPlayBoardSize(screenSize.width, screenSize.height),
+    [screenSize]
+  );
 
   useGameData(gameAtom, gameDataAtom);
 

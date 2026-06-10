@@ -19,23 +19,38 @@ export default function MovesClassificationsRecap() {
       rowGap={0.7}
       sx={{ scrollbarWidth: "thin", overflowY: "auto" }}
       height="100%"
-      maxHeight="22rem"
-      size={6}
+      maxHeight={{ xs: "16rem", sm: "20rem" }}
+      size={12}
     >
       <Grid
         container
         alignItems="center"
-        justifyContent="space-evenly"
+        justifyContent="space-between"
         wrap="nowrap"
         size={12}
+        sx={{ px: 1 }}
       >
-        <Typography width="12rem" align="center" noWrap fontSize="0.9rem">
+        <Typography
+          flex={1}
+          align="center"
+          noWrap
+          fontSize="0.85rem"
+          fontWeight={600}
+        >
           {white.name}
         </Typography>
 
-        <Typography width="7rem" />
+        <Typography flex={0.6} align="center" fontSize="0.75rem" color="text.secondary">
+          Moves
+        </Typography>
 
-        <Typography width="12rem" align="center" noWrap fontSize="0.9rem">
+        <Typography
+          flex={1}
+          align="center"
+          noWrap
+          fontSize="0.85rem"
+          fontWeight={600}
+        >
           {black.name}
         </Typography>
       </Grid>

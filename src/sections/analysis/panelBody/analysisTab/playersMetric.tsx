@@ -1,4 +1,5 @@
 import { Stack, Typography } from "@mui/material";
+import { palette } from "@/theme/voltchessTheme";
 
 interface Props {
   title: string;
@@ -16,39 +17,46 @@ export default function PlayersMetric({
       justifyContent="center"
       alignItems="center"
       flexDirection="row"
-      columnGap={{ xs: "8vw", md: 10 }}
+      columnGap={{ xs: 3, md: 6 }}
+      width="100%"
     >
-      <ValueBlock value={whiteValue} color="white" />
-
-      <Typography align="center" fontSize="0.8em" noWrap>
+      <ValueBlock value={whiteValue} side="white" />
+      <Typography
+        align="center"
+        variant="body2"
+        color="text.secondary"
+        sx={{ minWidth: 72 }}
+      >
         {title}
       </Typography>
-
-      <ValueBlock value={blackValue} color="black" />
+      <ValueBlock value={blackValue} side="black" />
     </Stack>
   );
 }
 
 const ValueBlock = ({
   value,
-  color,
+  side,
 }: {
   value: string | number;
-  color: "white" | "black";
+  side: "white" | "black";
 }) => {
+  const isWhite = side === "white";
+
   return (
     <Typography
       align="center"
       sx={{
-        backgroundColor: color,
-        color: color === "white" ? "black" : "white",
+        minWidth: 56,
+        bgcolor: isWhite ? "#e8e8e8" : palette.surface,
+        color: isWhite ? "#0a0a0a" : palette.text,
+        border: `1px solid ${palette.border}`,
+        borderRadius: 1,
+        py: 0.75,
+        px: 1.25,
+        fontWeight: 600,
+        fontSize: "0.875rem",
       }}
-      borderRadius="5px"
-      lineHeight="1em"
-      fontSize="0.9em"
-      padding={0.8}
-      fontWeight="500"
-      border="1px solid #424242"
       noWrap
     >
       {value}

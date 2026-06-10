@@ -11,14 +11,15 @@ import {
 import { Icon } from "@iconify/react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { GameItem } from "./gameItem";
 
 interface Props {
   onSelect: (pgn: string, boardOrientation?: boolean) => void;
+  presetUsername?: string;
 }
 
-export default function ChessComInput({ onSelect }: Props) {
+export default function ChessComInput({ onSelect, presetUsername }: Props) {
   const [rawStoredValue, setStoredValues] = useLocalStorage<string>(
     "chesscom-username",
     ""
@@ -37,7 +38,15 @@ export default function ChessComInput({ onSelect }: Props) {
     return [];
   }, [rawStoredValue]);
 
+  useEffect(() => {
+    if (presetUsername) {
+      setChessComUsername(presetUsername);
+      setHasEdited(true);
+    }
+  }, [presetUsername]);
+
   if (
+    !presetUsername &&
     !hasEdited &&
     storedValues.length &&
     chessComUsername.trim().toLowerCase() !=

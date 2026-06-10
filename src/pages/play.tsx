@@ -4,48 +4,59 @@ import GameInProgress from "@/sections/play/gameInProgress";
 import GameRecap from "@/sections/play/gameRecap";
 import GameSettingsButton from "@/sections/play/gameSettings/gameSettingsButton";
 import { isGameInProgressAtom } from "@/sections/play/states";
-import { Grid2 as Grid } from "@mui/material";
+import { Box } from "@mui/material";
 import { useAtomValue } from "jotai";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import PageContainer from "@/components/PageContainer";
+import { cardSx } from "@/theme/voltchessTheme";
 
 function Play() {
   const isGameInProgress = useAtomValue(isGameInProgressAtom);
 
   return (
-    <Grid container gap={4} justifyContent="space-evenly" alignItems="start">
-      <PageTitle title="VoltChess Play with Ai" />
+    <>
+      <PageTitle title="Play vs Engine — VoltChess" />
 
-      <Board />
-
-      <Grid
-        container
-        marginTop={{ xs: 0, md: "2.5em" }}
-        justifyContent="center"
-        alignItems="center"
-        borderRadius={2}
-        border={1}
-        borderColor={"secondary.main"}
-        size={{
-          xs: 12,
-          md: "grow",
-        }}
-        sx={{
-          backgroundColor: "secondary.main",
-          borderColor: "primary.main",
-          borderWidth: 2,
-          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
-        }}
-        padding={3}
-        rowGap={3}
-        style={{
-          maxWidth: "400px",
-        }}
+      <PageContainer
+        title="Play vs Engine"
+        subtitle="Challenge Stockfish at a rating that matches your level."
       >
-        <GameInProgress />
-        {!isGameInProgress && <GameSettingsButton />}
-        <GameRecap />
-      </Grid>
-    </Grid>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            gap: 3,
+            alignItems: { xs: "center", md: "flex-start" },
+          }}
+        >
+          <Box
+            sx={{
+              flexShrink: 0,
+              display: "flex",
+              justifyContent: "center",
+              width: { xs: "100%", md: "auto" },
+            }}
+          >
+            <Board />
+          </Box>
+
+          <Box
+            sx={{
+              ...cardSx,
+              width: "100%",
+              maxWidth: 400,
+              display: "flex",
+              flexDirection: "column",
+              gap: 2.5,
+            }}
+          >
+            <GameInProgress />
+            {!isGameInProgress && <GameSettingsButton />}
+            <GameRecap />
+          </Box>
+        </Box>
+      </PageContainer>
+    </>
   );
 }
 
