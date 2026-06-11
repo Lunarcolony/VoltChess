@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { SIDEBAR_WIDTH } from "@/sections/layout/Sidebar";
 
 const MOBILE_HEADER = 52;
+/** Move nav row shown below the board on mobile analysis pages */
+export const MOBILE_MOVE_NAV_HEIGHT = 52;
 /** Fixed right panel width on desktop (Chessigma-style) */
 export const ANALYSIS_PANEL_WIDTH = 400;
 /** Rigid player bar height (top + bottom of board column) */
@@ -53,7 +55,11 @@ export const getAnalysisBoardSize = (
 
   const maxByWidth = screenWidth - EVAL_BAR_TOTAL - 16;
   const maxByHeight =
-    screenHeight - MOBILE_HEADER - PLAYER_BAR_HEIGHT * 2 - 24;
+    screenHeight -
+    MOBILE_HEADER -
+    PLAYER_BAR_HEIGHT * 2 -
+    MOBILE_MOVE_NAV_HEIGHT -
+    24;
 
   return Math.max(240, Math.floor(Math.min(maxByWidth, maxByHeight)));
 };

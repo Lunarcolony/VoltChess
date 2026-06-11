@@ -105,6 +105,22 @@ export default function AnalysisPageLayout({
         </Box>
 
         <PlayerBar position="bottom" />
+
+        {/* Mobile: keep move controls next to the board, not at the end of the report */}
+        {panelFooter && (
+          <Box
+            sx={{
+              display: { xs: "block", md: "none" },
+              flexShrink: 0,
+              px: { xs: 1, sm: 1.25 },
+              py: 1,
+              bgcolor: palette.surface,
+              borderTop: `1px solid ${palette.border}`,
+            }}
+          >
+            {panelFooter}
+          </Box>
+        )}
       </Box>
 
       {/* Right panel: fixed width, full height */}
@@ -171,6 +187,7 @@ export default function AnalysisPageLayout({
         {panelFooter && (
           <Box
             sx={{
+              display: { xs: "none", md: "block" },
               pt: 1,
               mt: "auto",
               flexShrink: 0,
