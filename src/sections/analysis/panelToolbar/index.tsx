@@ -65,21 +65,6 @@ export default function PanelToolBar() {
       <NextMoveButton />
 
       <GoToLastPositionButton />
-
-      <Tooltip title="Copy pgn">
-        <Grid>
-          <IconButton
-            disabled={game.history().length === 0}
-            onClick={() => {
-              navigator.clipboard?.writeText?.(game.pgn());
-            }}
-            sx={{ paddingX: 1.2, paddingY: 0.5 }}
-          >
-            <Icon icon="ri:clipboard-line" />
-          </IconButton>
-        </Grid>
-      </Tooltip>
-
       <SaveButton />
     </Grid>
   );

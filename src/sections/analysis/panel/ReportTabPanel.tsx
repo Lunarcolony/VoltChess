@@ -8,16 +8,22 @@ import ClassificationGoodBad from "./ClassificationGoodBad";
 import CriticalAnalysis from "./CriticalAnalysis";
 import AnalysisEmptyState from "../AnalysisEmptyState";
 import { useAtomValue } from "jotai";
-import { evaluationProgressAtom, gameAtom, gameEvalAtom } from "../states";
-import { useRouter } from "@/hooks/useRouter";
+import {
+  evaluationProgressAtom,
+  gameAtom,
+  gameEvalAtom,
+} from "../states";
 import { useAnalyzeGame } from "@/hooks/useAnalyzeGame";
 
 interface Props {
   showReviewButton?: boolean;
+  onOpenAnalysis?: () => void;
 }
 
-export default function ReportTabPanel({ showReviewButton = true }: Props) {
-  const router = useRouter();
+export default function ReportTabPanel({
+  showReviewButton = true,
+  onOpenAnalysis,
+}: Props) {
   const game = useAtomValue(gameAtom);
   const gameEval = useAtomValue(gameEvalAtom);
   const progress = useAtomValue(evaluationProgressAtom);
@@ -34,15 +40,21 @@ export default function ReportTabPanel({ showReviewButton = true }: Props) {
       {!gameEval && !isAnalyzing && <AnalysisEmptyState />}
 
       {gameEval && (
-        <>
+        <Box data-tour-id="accuracy">
           <AccuracyOverview />
           <EloOverview />
-        </>
+        </Box>
       )}
 
-      <EvaluationGraphSection sticky={false} />
+      <Box data-tour-id="eval-graph">
+        <EvaluationGraphSection sticky={false} />
+      </Box>
 
-      {gameEval && <ClassificationGoodBad />}
+      {gameEval && (
+        <Box data-tour-id="classification">
+          <ClassificationGoodBad />
+        </Box>
+      )}
 
       {gameEval && <CriticalAnalysis />}
 
@@ -63,7 +75,7 @@ export default function ReportTabPanel({ showReviewButton = true }: Props) {
           variant="contained"
           fullWidth
           disabled={!gameEval || isAnalyzing}
-          onClick={() => gameEval && router.push("/reanalysis")}
+          onClick={() => gameEval && onOpenAnalysis?.()}
           endIcon={<Icon icon="mdi:arrow-right" width={18} />}
           sx={{ py: 1.1, mb: 1 }}
         >

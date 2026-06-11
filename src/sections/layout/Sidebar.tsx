@@ -18,7 +18,6 @@ import { palette } from "@/theme/voltchessTheme";
 
 const NAV_ITEMS = [
   { label: "Home", icon: "mdi:home-outline", href: "/" },
-  { label: "Play", icon: "mdi:chess-pawn", href: "/play" },
   { label: "Analysis", icon: "mdi:magnify", href: "/reanalysis" },
   { label: "Database", icon: "mdi:database-outline", href: "/database" },
 ] as const;
@@ -53,6 +52,8 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           VoltChess
         </Typography>
       </Box>
+
+ 
 
       <List sx={{ flex: 1, px: 1.5, py: 1 }}>
         {NAV_ITEMS.map(({ label, icon, href }) => {

@@ -10,6 +10,7 @@ export interface AnalysisTabDef {
   label: string;
   icon: string;
   show?: boolean;
+  tourId?: string;
   /** When false the tab fills the panel height and manages its own scrolling */
   scrollable?: boolean;
   content: ReactNode;
@@ -18,13 +19,29 @@ export interface AnalysisTabDef {
 interface Props {
   tabs: AnalysisTabDef[];
   defaultTab?: AnalysisTabId;
+  activeTab?: AnalysisTabId;
+  onActiveTabChange?: (tab: AnalysisTabId) => void;
 }
 
-export default function AnalysisPanelTabs({ tabs, defaultTab }: Props) {
+export default function AnalysisPanelTabs({
+  tabs,
+  defaultTab,
+  activeTab: controlledActiveTab,
+  onActiveTabChange,
+}: Props) {
   const visible = tabs.filter((t) => t.show !== false);
-  const [activeTab, setActiveTab] = useState<AnalysisTabId>(
+  const [internalActiveTab, setInternalActiveTab] = useState<AnalysisTabId>(
     defaultTab ?? visible[0]?.id ?? "report"
   );
+
+  const activeTab = controlledActiveTab ?? internalActiveTab;
+
+  const setActiveTab = (value: AnalysisTabId) => {
+    if (controlledActiveTab === undefined) {
+      setInternalActiveTab(value);
+    }
+    onActiveTabChange?.(value);
+  };
 
   return (
     <Box
@@ -65,6 +82,7 @@ export default function AnalysisPanelTabs({ tabs, defaultTab }: Props) {
             label={tab.label}
             icon={<Icon icon={tab.icon} width={16} />}
             iconPosition="start"
+            {...(tab.tourId ? { "data-tour-id": tab.tourId } : {})}
           />
         ))}
       </Tabs>

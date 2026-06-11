@@ -1,6 +1,6 @@
-﻿import Head from "@/components/Head";
+import Head from "@/components/Head";
 import { useRouter } from "@/hooks/useRouter";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Chess } from "chess.js";
 import { Box, Grid2 as Grid, Typography } from "@mui/material";
@@ -17,12 +17,21 @@ import {
 import type { Game } from "@/types/game";
 import HomeGameLoader from "@/sections/home/HomeGameLoader";
 import FeatureCard from "@/sections/home/FeatureCard";
+import WelcomeModal from "@/sections/onboarding/WelcomeModal";
+import { isOnboardingComplete } from "@/sections/onboarding/onboardingStorage";
 import { palette } from "@/theme/voltchessTheme";
 
 function Home() {
   const router = useRouter();
   const game = useAtomValue(gameAtom);
   const evaluationProgress = useAtomValue(evaluationProgressAtom);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingReady, setOnboardingReady] = useState(false);
+
+  useEffect(() => {
+    setOnboardingReady(true);
+    setShowOnboarding(!isOnboardingComplete());
+  }, []);
 
   const { setPgn: setGamePgn } = useChessActions(gameAtom);
   const { resetToStartingPosition: resetBoard } = useChessActions(boardAtom);
@@ -40,12 +49,20 @@ function Home() {
   );
 
   const startAnalysis = useCallback(
-    async (loadedGame: Chess, boardOrientation = true) => {
+    async (loadedGame: Chess, boardOrientation = true, withTour = false) => {
       setBoardOrientation(boardOrientation);
-      await router.push("/analysis");
+      await router.push(withTour ? "/analysis?tour=1" : "/analysis");
       resetAndSetGamePgn(loadedGame.pgn());
     },
     [router, resetAndSetGamePgn, setBoardOrientation]
+  );
+
+  const handleOnboardingGameLoaded = useCallback(
+    (loadedGame: Chess, boardOrientation = true) => {
+      setShowOnboarding(false);
+      void startAnalysis(loadedGame, boardOrientation, true);
+    },
+    [startAnalysis]
   );
 
   const { pgn: pgnParam, orientation: orientationParam } = router.query;
@@ -107,11 +124,23 @@ function Home() {
           variant="h1"
           sx={{ mb: 0.5, color: palette.text }}
         >
-          Welcome back
+          {onboardingReady && showOnboarding ? "Welcome to VoltChess" : "Welcome back"}
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 3.5 }}>
           Load a game and get instant engine analysis.
         </Typography>
+
+        {onboardingReady && (
+          <WelcomeModal
+            open={showOnboarding}
+            onClose={() => setShowOnboarding(false)}
+            onGameLoaded={handleOnboardingGameLoaded}
+          />
+        )}
+
+        <Box sx={{ mb: 3 }}>
+          <HomeGameLoader onGameLoaded={startAnalysis} />
+        </Box>
 
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid size={{ xs: 12, sm: 6 }}>
@@ -133,8 +162,6 @@ function Home() {
             />
           </Grid>
         </Grid>
-
-        <HomeGameLoader onGameLoaded={startAnalysis} />
       </Box>
     </>
   );

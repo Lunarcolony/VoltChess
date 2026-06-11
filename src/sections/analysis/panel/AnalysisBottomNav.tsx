@@ -72,7 +72,10 @@ export default function AnalysisBottomNav() {
   }, [goBack, handleGoForward, goToStart, goToEnd]);
 
   return (
-    <Box sx={{ display: "flex", gap: 0.75, alignItems: "center", width: "100%" }}>
+    <Box
+      data-tour-id="bottom-nav"
+      sx={{ display: "flex", gap: 0.75, alignItems: "center", width: "100%" }}
+    >
       <Tooltip title="Start">
         <IconButton onClick={goToStart} disabled={!canGoBack} sx={navBtnSx}>
           <Icon icon="mdi:chevron-double-left" width={22} />
@@ -95,24 +98,6 @@ export default function AnalysisBottomNav() {
       <Tooltip title="End">
         <IconButton onClick={goToEnd} disabled={!canGoEnd} sx={navBtnSx}>
           <Icon icon="mdi:chevron-double-right" width={22} />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title="Copy PGN">
-        <IconButton
-          disabled={gameHistory.length === 0}
-          onClick={() => navigator.clipboard?.writeText?.(game.pgn())}
-          sx={{
-            flexShrink: 0,
-            width: 40,
-            height: { xs: 40, sm: 44 },
-            borderRadius: 1.5,
-            bgcolor: palette.surface,
-            border: `1px solid ${palette.border}`,
-            color: palette.textMuted,
-            "&:hover": { bgcolor: palette.surfaceRaised },
-          }}
-        >
-          <Icon icon="mdi:dots-vertical" width={18} />
         </IconButton>
       </Tooltip>
     </Box>

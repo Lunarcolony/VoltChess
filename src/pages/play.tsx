@@ -21,6 +21,20 @@ function Play() {
         title="Play vs Engine"
         subtitle="Challenge Stockfish at a rating that matches your level."
       >
+        <Box sx={{ mb: 2 }}>
+          <Box
+            sx={{
+              bgcolor: "rgba(232,185,35,0.04)",
+              border: `1px solid rgba(232,185,35,0.08)`,
+              color: "rgba(232,185,35,1)",
+              px: 2,
+              py: 1,
+              borderRadius: 1,
+            }}
+          >
+            Play feature is under development — coming soon.
+          </Box>
+        </Box>
         <Box
           sx={{
             display: "flex",
