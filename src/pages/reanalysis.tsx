@@ -22,7 +22,7 @@ function ReanalysisPage() {
         id: "report" as const,
         label: "Report",
         icon: "mdi:clipboard-text",
-        content: <ReportTabPanel showReviewButton={false} />,
+        content: <ReportTabPanel />,
       },
       {
         id: "engine" as const,

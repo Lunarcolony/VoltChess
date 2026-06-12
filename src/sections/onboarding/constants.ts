@@ -49,12 +49,20 @@ export const ANALYSIS_TOUR_STEPS = [
     placement: "top" as const,
   },
   {
-    id: "analysis-tab",
-    target: "analysis-tab",
-    title: "Analysis tab",
+    id: "eval-lead",
+    target: "eval-lead",
+    title: "Eval Lead",
     content:
-      "Open the Analysis tab for engine lines, best moves, and deep position evaluation.",
-    placement: "bottom" as const,
+      "See who held the evaluation advantage throughout the game. Shares always add to 100% — a quick read on who was winning the position battle.",
+    placement: "top" as const,
+  },
+  {
+    id: "position-dominance",
+    target: "position-dominance",
+    title: "Position Dominance",
+    content:
+      "Deeper quality breakdown: control share, average win chance, phase performance, and your worst eval drop — tap a row to jump there.",
+    placement: "top" as const,
   },
   {
     id: "bottom-nav",

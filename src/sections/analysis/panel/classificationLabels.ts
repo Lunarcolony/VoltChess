@@ -10,6 +10,15 @@ export const GOOD_CLASSIFICATIONS = [
   MoveClassification.Forced,
 ] as const;
 
+/** Good moves shown on the Report tab (excludes Book/Forced for a cleaner summary) */
+export const REPORT_GOOD_CLASSIFICATIONS = GOOD_CLASSIFICATIONS.filter(
+  (c) =>
+    c !== MoveClassification.Opening && c !== MoveClassification.Forced
+) as readonly Exclude<
+  (typeof GOOD_CLASSIFICATIONS)[number],
+  MoveClassification.Opening | MoveClassification.Forced
+>[];
+
 export const BAD_CLASSIFICATIONS = [
   MoveClassification.Inaccuracy,
   MoveClassification.Mistake,

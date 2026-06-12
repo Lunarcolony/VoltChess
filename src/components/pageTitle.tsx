@@ -1,4 +1,5 @@
 import Head from "@/components/Head";
+import { DEFAULT_SEO } from "@/data/seo";
 
 export const PageTitle = ({
   title,
@@ -7,24 +8,17 @@ export const PageTitle = ({
   title: string;
   description?: string;
 }) => {
-  const defaultDescription =
-    "Free chess analysis with AI feedback powered by Stockfish. Upload PGN files, get instant game analysis, find blunders and improve your chess.";
+  const metaDescription = description || DEFAULT_SEO.description;
 
   return (
     <Head>
       <title>{title}</title>
-      <meta name="description" content={description || defaultDescription} />
+      <meta name="description" content={metaDescription} />
       <meta property="og:title" content={title} />
-      <meta
-        property="og:description"
-        content={description || defaultDescription}
-      />
+      <meta property="og:description" content={metaDescription} />
       <meta property="og:type" content="website" />
       <meta name="twitter:title" content={title} />
-      <meta
-        name="twitter:description"
-        content={description || defaultDescription}
-      />
+      <meta name="twitter:description" content={metaDescription} />
     </Head>
   );
 };

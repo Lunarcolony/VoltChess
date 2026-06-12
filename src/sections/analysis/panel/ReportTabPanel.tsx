@@ -1,5 +1,7 @@
 import { Box, Button } from "@mui/material";
-import { Icon } from "@iconify/react";
+import { useCallback } from "react";
+import { useAtomValue, useSetAtom } from "jotai";
+import { Chess } from "chess.js";
 import EvaluationProgress from "../EvaluationProgress";
 import EvaluationGraphSection from "../EvaluationGraphSection";
 import PlayerStatsPanel from "./PlayerStatsPanel";
@@ -8,27 +10,36 @@ import EvalLeadPanel from "./EvalLeadPanel";
 import CriticalAnalysis from "./CriticalAnalysis";
 import ReportSection from "./ReportSection";
 import AnalysisEmptyState from "../AnalysisEmptyState";
-import { useAtomValue } from "jotai";
+import LoadGameButton from "@/sections/loadGame/loadGameButton";
+import { useChessActions } from "@/hooks/useChessActions";
+import { useRouter } from "@/hooks/useRouter";
+import { prepareNewAnalysisSession } from "@/hooks/useAnalysisSession";
 import {
+  boardAtom,
   evaluationProgressAtom,
   gameAtom,
   gameEvalAtom,
 } from "../states";
 import { useAnalyzeGame } from "@/hooks/useAnalyzeGame";
 
-interface Props {
-  showReviewButton?: boolean;
-  onOpenAnalysis?: () => void;
-}
-
-export default function ReportTabPanel({
-  showReviewButton = true,
-  onOpenAnalysis,
-}: Props) {
+export default function ReportTabPanel() {
+  const router = useRouter();
   const game = useAtomValue(gameAtom);
   const gameEval = useAtomValue(gameEvalAtom);
   const progress = useAtomValue(evaluationProgressAtom);
   const { reanalyzeGame, engineReady } = useAnalyzeGame();
+  const { setPgn: setGamePgn } = useChessActions(gameAtom);
+  const { resetToStartingPosition: resetBoard } = useChessActions(boardAtom);
+  const setEval = useSetAtom(gameEvalAtom);
+
+  const resetAndSetGamePgn = useCallback(
+    (pgn: string) => {
+      resetBoard(pgn);
+      setEval(undefined);
+      setGamePgn(pgn);
+    },
+    [resetBoard, setGamePgn, setEval]
+  );
 
   const hasMoves = game.history().length > 0;
   const isAnalyzing = progress > 0;
@@ -83,18 +94,22 @@ export default function ReportTabPanel({
         </Button>
       )}
 
-      {showReviewButton && (
-        <Button
-          variant="contained"
-          fullWidth
-          disabled={!gameEval || isAnalyzing}
-          onClick={() => gameEval && onOpenAnalysis?.()}
-          endIcon={<Icon icon="mdi:arrow-right" width={18} />}
-          sx={{ py: 1.1, mb: 1 }}
-        >
-          {isAnalyzing ? "Analyzing…" : "Open Game Review"}
-        </Button>
-      )}
+      <LoadGameButton
+        label={isAnalyzing ? "Analyzing…" : "Load new game"}
+        setGame={async (loadedGame: Chess) => {
+          const pgn = loadedGame.pgn();
+          resetAndSetGamePgn(pgn);
+          prepareNewAnalysisSession(pgn);
+          await router.push("/analysis");
+        }}
+        sx={{
+          width: "100%",
+          py: 1.1,
+          mb: 1,
+          pointerEvents: isAnalyzing ? "none" : undefined,
+          opacity: isAnalyzing ? 0.6 : 1,
+        }}
+      />
     </Box>
   );
 }

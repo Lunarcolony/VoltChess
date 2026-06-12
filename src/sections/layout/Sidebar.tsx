@@ -21,6 +21,7 @@ import { Link as MuiLink } from "@mui/material";
 const NAV_ITEMS = [
   { label: "Home", icon: "mdi:home-outline", href: "/" },
   { label: "Analysis", icon: "mdi:magnify", href: "/reanalysis" },
+  { label: "Guides", icon: "mdi:book-open-page-variant-outline", href: "/blog" },
   { label: "Database", icon: "mdi:database-outline", href: "/database" },
 ] as const;
 
@@ -45,7 +46,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         <Box
           component="img"
           src="/favicon-32x32.png"
-          alt=""
+          alt="VoltChess"
           sx={{ width: 28, height: 28 }}
         />
         <Typography
@@ -106,12 +107,8 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           borderTop: `1px solid ${palette.borderSubtle}`,
         }}
       >
-        <Typography
-          fontSize="0.65rem"
-          lineHeight={1.45}
-          color="text.secondary"
-        >
-          Powered by{" "}
+        <Typography fontSize="0.65rem" lineHeight={1.45} color="text.secondary">
+          Free chess game review · Powered by{" "}
           <MuiLink
             href="https://github.com/GuillaumeSD/Chesskit"
             target="_blank"
@@ -121,7 +118,6 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           >
             Chesskit
           </MuiLink>
-          . Thank you to the Chesskit team.
         </Typography>
       </Box>
     </Box>
@@ -160,7 +156,7 @@ export default function Sidebar() {
             <Icon icon="mdi:menu" width={22} />
           </IconButton>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: 0.5 }}>
-            <Box component="img" src="/favicon-32x32.png" alt="" sx={{ width: 24, height: 24 }} />
+            <Box component="img" src="/favicon-32x32.png" alt="VoltChess" sx={{ width: 24, height: 24 }} />
             <Typography fontWeight={700} fontSize="0.95rem">
               VoltChess
             </Typography>

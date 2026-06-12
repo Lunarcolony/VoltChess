@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Grid2 as Grid } from "@mui/material";
 import { Typography, Card, CardContent, Box, Container } from "@mui/material";
 import { motion } from "framer-motion";
@@ -95,8 +95,8 @@ const Thanks: React.FC = () => {
                   real-time analysis.
                 </Typography>
                 <Typography variant="body1" paragraph>
-                  • <strong>Chesskit</strong>: UI + engine integration
-                  inspiration.
+                  • <strong>VoltChess</strong>: Free chess game review and
+                  Stockfish analysis in your browser.
                 </Typography>
               </CardContent>
             </MotionCard>

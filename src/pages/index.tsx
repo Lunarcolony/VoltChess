@@ -21,6 +21,9 @@ import FeatureCard from "@/sections/home/FeatureCard";
 import WelcomeModal from "@/sections/onboarding/WelcomeModal";
 import { isOnboardingComplete } from "@/sections/onboarding/onboardingStorage";
 import { usePalette } from "@/hooks/usePalette";
+import { DEFAULT_SEO } from "@/data/seo";
+import { BLOG_POSTS } from "@/data/blogPosts";
+import NavLink from "@/components/NavLink";
 
 function Home() {
   const palette = usePalette();
@@ -123,22 +126,22 @@ function Home() {
   return (
     <>
       <Head>
-        <title>VoltChess — Chess Analysis</title>
-        <meta
-          name="description"
-          content="Analyze chess games with Stockfish. Import from Chess.com, Lichess, or PGN."
-        />
+        <title>{DEFAULT_SEO.title}</title>
+        <meta name="description" content={DEFAULT_SEO.description} />
+        <meta name="keywords" content={DEFAULT_SEO.keywords} />
       </Head>
 
       <Box sx={{ maxWidth: 960, mx: "auto" }}>
         <Typography
           variant="h1"
-          sx={{ mb: 0.5, color: palette.text }}
+          sx={{ mb: 0.5, color: palette.text, fontSize: { xs: "1.75rem", sm: "2.125rem" } }}
         >
-          {onboardingReady && showOnboarding ? "Welcome to VoltChess" : "Welcome back"}
+          {onboardingReady && showOnboarding
+            ? "Free Chess Game Review"
+            : "Welcome back"}
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 3.5 }}>
-          Load a game and get instant engine analysis.
+          {DEFAULT_SEO.description}
         </Typography>
 
         {onboardingReady && (
@@ -173,6 +176,47 @@ function Home() {
             />
           </Grid>
         </Grid>
+
+        <Box
+          sx={{
+            p: 2.5,
+            borderRadius: 2,
+            bgcolor: palette.surface,
+            border: `1px solid ${palette.border}`,
+          }}
+        >
+          <Typography variant="h2" sx={{ fontSize: "1.1rem", fontWeight: 700, mb: 1 }}>
+            Chess game review & analysis guides
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Learn how to review games free, import from Chess.com and Lichess, and
+            use Stockfish to find blunders.
+          </Typography>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            {BLOG_POSTS.slice(0, 5).map((post) => (
+              <NavLink key={post.slug} href={`/blog/${post.slug}`}>
+                <Typography
+                  fontSize="0.85rem"
+                  sx={{
+                    color: palette.textMuted,
+                    "&:hover": { color: palette.accent },
+                  }}
+                >
+                  {post.title}
+                </Typography>
+              </NavLink>
+            ))}
+            <NavLink href="/blog">
+              <Typography
+                fontSize="0.85rem"
+                fontWeight={600}
+                sx={{ color: palette.accent, mt: 0.5 }}
+              >
+                View all guides →
+              </Typography>
+            </NavLink>
+          </Box>
+        </Box>
       </Box>
     </>
   );

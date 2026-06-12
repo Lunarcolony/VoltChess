@@ -9,7 +9,7 @@ import { markOnboardingComplete } from "./onboardingStorage";
 import SpotlightTour, { type TourStep } from "./SpotlightTour";
 
 interface Props {
-  onTabChange?: (tab: "report" | "engine") => void;
+  onTabChange?: (tab: "report") => void;
 }
 
 export default function AnalysisTour({ onTabChange }: Props) {
@@ -46,13 +46,13 @@ export default function AnalysisTour({ onTabChange }: Props) {
 
   const handleStepChange = useCallback(
     (step: TourStep) => {
-      if (step.id === "analysis-tab") {
-        onTabChange?.("engine");
-      } else if (
+      if (
         step.id === "report-tab" ||
         step.id === "eval-graph" ||
         step.id === "accuracy" ||
-        step.id === "classification"
+        step.id === "classification" ||
+        step.id === "eval-lead" ||
+        step.id === "position-dominance"
       ) {
         onTabChange?.("report");
       }

@@ -150,7 +150,7 @@ function GameDatabase() {
       gap={4}
       marginTop={6}
     >
-      <PageTitle title="Chesskit Game Database" />
+      <PageTitle title="VoltChess Game Database — Save & Review Your Games" />
 
       <Grid container justifyContent="center" alignItems="center" size={12}>
         <LoadGameButton />

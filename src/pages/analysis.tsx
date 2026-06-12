@@ -19,7 +19,7 @@ function AnalysisPage() {
   const gameEval = useAtomValue(gameEvalAtom);
   const [activeTab, setActiveTab] = useState<AnalysisTabId>("report");
 
-  const handleTourTabChange = useCallback((tab: "report" | "engine") => {
+  const handleTourTabChange = useCallback((tab: "report") => {
     setActiveTab(tab);
   }, []);
 
@@ -42,9 +42,7 @@ function AnalysisPage() {
               label: "Report",
               tourId: "report-tab",
               icon: "mdi:clipboard-text",
-              content: (
-                <ReportTabPanel onOpenAnalysis={() => setActiveTab("engine")} />
-              ),
+              content: <ReportTabPanel />,
             },
             {
               id: "engine",

@@ -36,6 +36,20 @@ interface Props {
 
 const PADDING = 8;
 const TOOLTIP_GAP = 14;
+const MOBILE_BREAKPOINT = 900;
+const SCROLL_SETTLE_MS = 450;
+
+function isMobileViewport(): boolean {
+  return window.innerWidth < MOBILE_BREAKPOINT;
+}
+
+function scrollTourTargetIntoView(targetId: string): Promise<void> {
+  const el = document.querySelector(`[data-tour-id="${targetId}"]`);
+  if (!el) return Promise.resolve();
+
+  el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+  return new Promise((resolve) => setTimeout(resolve, SCROLL_SETTLE_MS));
+}
 
 function getTargetRect(targetId: string): Rect | null {
   const el = document.querySelector(`[data-tour-id="${targetId}"]`);
@@ -129,23 +143,37 @@ export default function SpotlightTour({
   useLayoutEffect(() => {
     if (!active || !step) return;
 
-    updateRects();
+    let cancelled = false;
 
-    const onResize = () => updateRects();
+    const measure = () => {
+      if (!cancelled) updateRects();
+    };
+
+    const run = async () => {
+      if (step.target && isMobileViewport()) {
+        await scrollTourTargetIntoView(step.target);
+      }
+      measure();
+    };
+
+    void run();
+
+    const onResize = () => measure();
     window.addEventListener("resize", onResize);
     window.addEventListener("scroll", onResize, true);
 
     let interval: ReturnType<typeof setInterval> | undefined;
     if (step.target && waitForTarget) {
-      interval = setInterval(updateRects, 250);
+      interval = setInterval(measure, 250);
     }
 
     return () => {
+      cancelled = true;
       window.removeEventListener("resize", onResize);
       window.removeEventListener("scroll", onResize, true);
       if (interval) clearInterval(interval);
     };
-  }, [active, step, updateRects, waitForTarget]);
+  }, [active, step, stepIndex, updateRects, waitForTarget]);
 
   useEffect(() => {
     if (!active || !step?.target || !waitForTarget) return;

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 interface SchemaOrgProps {
-  data: Record<string, any>;
+  data: Record<string, unknown>;
 }
 
 export const SchemaOrg: React.FC<SchemaOrgProps> = ({ data }) => {
@@ -28,7 +28,7 @@ export const chessSoftwareSchema = {
   applicationCategory: "GameApplication",
   applicationSubCategory: "Chess Analysis Software",
   description:
-    "Free chess analysis with AI feedback powered by Stockfish. Upload PGN files, get instant game analysis, find blunders and improve your chess rating.",
+    "Free chess game review and analysis powered by Stockfish. Upload PGN files, import Chess.com and Lichess games, find blunders, and improve your chess.",
   url: "https://voltchess.me/",
   screenshot: "https://voltchess.me/social-networks-1200x630.png",
   operatingSystem: "Any",
@@ -44,48 +44,39 @@ export const chessSoftwareSchema = {
     name: "VoltChess",
   },
   keywords: [
-    "chess analyzer",
+    "chess game review",
     "chess analysis",
     "stockfish",
-    "AI chess",
     "PGN analyzer",
-    "chess.com alternative",
+    "chess.com game review free",
     "free chess analysis",
     "chess blunder finder",
-    "chess game review",
+    "lichess game review",
   ],
   featureList: [
-    "Free chess game analysis",
-    "AI-powered feedback",
-    "Stockfish engine integration",
+    "Free chess game review",
+    "Stockfish engine analysis",
+    "Chess.com and Lichess import",
     "PGN file support",
     "Blunder detection",
     "Move accuracy analysis",
     "No registration required",
-    "Real-time analysis",
-    "Interactive charts",
-    "Position evaluation",
+    "Evaluation graph",
+    "Interactive move navigation",
   ],
-  aggregateRating: {
-    "@type": "AggregateRating",
-    ratingValue: "4.8",
-    ratingCount: "150",
-    bestRating: "5",
-    worstRating: "1",
-  },
 };
 
 export const chessAnalysisServiceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",
-  name: "Chess Game Analysis",
+  name: "Chess Game Review & Analysis",
   description:
-    "Professional chess game analysis with AI feedback. Analyze your games for free using advanced Stockfish engine.",
+    "Free professional chess game review and analysis using the Stockfish engine. Analyze Chess.com, Lichess, and PGN games.",
   provider: {
     "@type": "Organization",
     name: "VoltChess",
   },
-  serviceType: "Chess Analysis",
+  serviceType: "Chess Game Analysis",
   areaServed: "Worldwide",
   hasOfferCatalog: {
     "@type": "OfferCatalog",
@@ -95,8 +86,8 @@ export const chessAnalysisServiceSchema = {
         "@type": "Offer",
         itemOffered: {
           "@type": "Service",
-          name: "PGN Analysis",
-          description: "Upload and analyze chess games in PGN format",
+          name: "PGN Game Review",
+          description: "Upload and review chess games in PGN format",
         },
         price: "0",
         priceCurrency: "USD",
@@ -105,8 +96,8 @@ export const chessAnalysisServiceSchema = {
         "@type": "Offer",
         itemOffered: {
           "@type": "Service",
-          name: "Real-time Analysis",
-          description: "Get instant position evaluation and move suggestions",
+          name: "Chess.com Game Import",
+          description: "Import and review Chess.com games for free",
         },
         price: "0",
         priceCurrency: "USD",

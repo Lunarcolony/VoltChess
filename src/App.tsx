@@ -17,6 +17,8 @@ const Reanalysis = lazy(() => import("@/pages/reanalysis"));
 const Register = lazy(() => import("@/pages/register"));
 const TermsAndConditions = lazy(() => import("@/pages/terms-and-conditions"));
 const Thanks = lazy(() => import("@/pages/thanks"));
+const BlogIndex = lazy(() => import("@/pages/blog/index"));
+const BlogPost = lazy(() => import("@/pages/blog/post"));
 
 function App() {
   return (
@@ -43,6 +45,8 @@ function App() {
               element={<TermsAndConditions />}
             />
             <Route path="/thanks" element={<Thanks />} />
+            <Route path="/blog" element={<BlogIndex />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
           </Routes>
         </Suspense>
       </Layout>

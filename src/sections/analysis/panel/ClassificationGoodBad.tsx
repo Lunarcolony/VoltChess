@@ -7,7 +7,7 @@ import { useChessActions } from "@/hooks/useChessActions";
 import {
   BAD_CLASSIFICATIONS,
   CLASSIFICATION_DISPLAY_LABELS,
-  GOOD_CLASSIFICATIONS,
+  REPORT_GOOD_CLASSIFICATIONS,
 } from "./classificationLabels";
 import { REPORT_COLORS } from "./reportColors";
 
@@ -132,7 +132,6 @@ function ClassificationColumn({
         {classifications.map((classification) => {
           const whiteNb = countFor(gameEval.positions, classification, true);
           const blackNb = countFor(gameEval.positions, classification, false);
-          if (!whiteNb && !blackNb) return null;
 
           return (
             <Box
@@ -215,7 +214,7 @@ export default function ClassificationGoodBad() {
       <ClassificationColumn
         title="Good"
         dotColor={REPORT_COLORS.good}
-        classifications={GOOD_CLASSIFICATIONS}
+        classifications={REPORT_GOOD_CLASSIFICATIONS}
       />
       <ClassificationColumn
         title="Bad"
