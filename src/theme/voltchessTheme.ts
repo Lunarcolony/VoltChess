@@ -1,42 +1,34 @@
 import { createTheme, alpha } from "@mui/material/styles";
+import { COLOR_THEMES, DEFAULT_COLOR_THEME } from "./themes";
+import type { ColorPalette } from "./themes";
 
-export const palette = {
-  bg: "#0a0a0a",
-  surface: "#141414",
-  surfaceRaised: "#1a1a1a",
-  border: "#2a2a2a",
-  borderSubtle: "#1f1f1f",
-  text: "#e8e8e8",
-  textMuted: "#737373",
-  accent: "#e8b923",
-  accentHover: "#f5c842",
-  accentDark: "#c9a01e",
-} as const;
+/** @deprecated Use usePalette() or getPalette() */
+export const palette = COLOR_THEMES[DEFAULT_COLOR_THEME];
 
-export const createVoltChessTheme = () =>
+export const createAppTheme = (colorPalette: ColorPalette) =>
   createTheme({
     palette: {
       mode: "dark",
       primary: {
-        main: palette.accent,
-        light: palette.accentHover,
-        dark: palette.accentDark,
-        contrastText: "#0a0a0a",
+        main: colorPalette.accent,
+        light: colorPalette.accentHover,
+        dark: colorPalette.accentDark,
+        contrastText: colorPalette.onAccent,
       },
       secondary: {
-        main: palette.surfaceRaised,
-        light: palette.surface,
-        dark: palette.bg,
+        main: colorPalette.surfaceRaised,
+        light: colorPalette.surface,
+        dark: colorPalette.bg,
       },
       background: {
-        default: palette.bg,
-        paper: palette.surfaceRaised,
+        default: colorPalette.bg,
+        paper: colorPalette.surfaceRaised,
       },
       text: {
-        primary: palette.text,
-        secondary: palette.textMuted,
+        primary: colorPalette.text,
+        secondary: colorPalette.textMuted,
       },
-      divider: palette.border,
+      divider: colorPalette.border,
     },
     typography: {
       fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
@@ -53,8 +45,8 @@ export const createVoltChessTheme = () =>
       MuiCssBaseline: {
         styleOverrides: {
           body: {
-            backgroundColor: palette.bg,
-            scrollbarColor: `${palette.border} ${palette.bg}`,
+            backgroundColor: colorPalette.bg,
+            scrollbarColor: `${colorPalette.border} ${colorPalette.bg}`,
           },
         },
       },
@@ -68,8 +60,8 @@ export const createVoltChessTheme = () =>
             "&:hover": { boxShadow: "none" },
           },
           containedPrimary: {
-            color: palette.bg,
-            "&:hover": { backgroundColor: palette.accentHover },
+            color: colorPalette.onAccent,
+            "&:hover": { backgroundColor: colorPalette.accentHover },
           },
         },
       },
@@ -77,7 +69,7 @@ export const createVoltChessTheme = () =>
         styleOverrides: {
           root: {
             backgroundImage: "none",
-            border: `1px solid ${palette.border}`,
+            border: `1px solid ${colorPalette.border}`,
           },
         },
       },
@@ -85,10 +77,10 @@ export const createVoltChessTheme = () =>
         styleOverrides: {
           root: {
             "& .MuiOutlinedInput-root": {
-              backgroundColor: palette.surface,
-              "& fieldset": { borderColor: palette.border },
-              "&:hover fieldset": { borderColor: palette.textMuted },
-              "&.Mui-focused fieldset": { borderColor: palette.accent },
+              backgroundColor: colorPalette.surface,
+              "& fieldset": { borderColor: colorPalette.border },
+              "&:hover fieldset": { borderColor: colorPalette.textMuted },
+              "&.Mui-focused fieldset": { borderColor: colorPalette.accent },
             },
           },
         },
@@ -101,13 +93,22 @@ export const createVoltChessTheme = () =>
     },
   });
 
-export const cardSx = {
-  bgcolor: palette.surfaceRaised,
-  border: `1px solid ${palette.border}`,
-  borderRadius: 2,
-  p: 3,
-  transition: "border-color 0.15s ease",
-  "&:hover": {
-    borderColor: alpha(palette.accent, 0.35),
-  },
-} as const;
+/** @deprecated Use createAppTheme */
+export const createVoltChessTheme = () =>
+  createAppTheme(COLOR_THEMES[DEFAULT_COLOR_THEME]);
+
+export function getCardSx(colorPalette: ColorPalette) {
+  return {
+    bgcolor: colorPalette.surfaceRaised,
+    border: `1px solid ${colorPalette.border}`,
+    borderRadius: 2,
+    p: 3,
+    transition: "border-color 0.15s ease",
+    "&:hover": {
+      borderColor: alpha(colorPalette.accent, 0.35),
+    },
+  } as const;
+}
+
+/** @deprecated Use useCardSx() */
+export const cardSx = getCardSx(COLOR_THEMES[DEFAULT_COLOR_THEME]);

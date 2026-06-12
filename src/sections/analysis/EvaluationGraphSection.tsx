@@ -2,17 +2,20 @@ import { Box, Typography } from "@mui/material";
 import { useAtomValue } from "jotai";
 import { gameEvalAtom } from "./states";
 import GraphTab from "./panelBody/graphTab";
-import { palette } from "@/theme/voltchessTheme";
-import type { Grid2Props as GridProps } from "@mui/material";
+import { usePalette } from "@/hooks/usePalette";
+import type { Grid2Props as GridProps, SxProps, Theme } from "@mui/material";
 
 interface Props extends GridProps {
   sticky?: boolean;
+  containerSx?: SxProps<Theme>;
 }
 
 export default function EvaluationGraphSection({
   sticky = true,
+  containerSx,
   ...graphProps
 }: Props) {
+  const palette = usePalette();
   const gameEval = useAtomValue(gameEvalAtom);
 
   return (
@@ -26,6 +29,7 @@ export default function EvaluationGraphSection({
           zIndex: 2,
           bgcolor: palette.surfaceRaised,
         }),
+        ...containerSx,
       }}
     >
       {gameEval ? (

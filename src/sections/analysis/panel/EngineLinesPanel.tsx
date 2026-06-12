@@ -9,7 +9,7 @@ import {
 import { getLineEvalLabel, moveLineUciToSan } from "@/lib/chess";
 import { useChessActions } from "@/hooks/useChessActions";
 import { LineEval } from "@/types/eval";
-import { palette } from "@/theme/voltchessTheme";
+import { usePalette } from "@/hooks/usePalette";
 import PrettyMoveSan from "@/components/prettyMoveSan";
 
 function EngineLineRow({
@@ -19,6 +19,7 @@ function EngineLineRow({
   line: LineEval;
   isBest: boolean;
 }) {
+  const palette = usePalette();
   const board = useAtomValue(boardAtom);
   const { addMoves } = useChessActions(boardAtom);
   const showSkeleton = line.depth < 6;
@@ -71,8 +72,8 @@ function EngineLineRow({
                   borderRadius: 0.75,
                   fontSize: "0.75rem",
                   fontWeight: 600,
-                  bgcolor: isBlackCp ? "#0a0a0a" : "#e8e8e8",
-                  color: isBlackCp ? palette.text : "#0a0a0a",
+                  bgcolor: isBlackCp ? palette.playerDarkBg : palette.playerLightBg,
+                  color: isBlackCp ? palette.playerDarkText : palette.playerLightText,
                   border: `1px solid ${palette.border}`,
                 }}
               >
@@ -122,6 +123,7 @@ function EngineLineRow({
 }
 
 export default function EngineLinesPanel() {
+  const palette = usePalette();
   const board = useAtomValue(boardAtom);
   const position = useAtomValue(currentPositionAtom);
   const linesNumber = useAtomValue(engineMultiPvAtom);

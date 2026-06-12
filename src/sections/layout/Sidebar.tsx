@@ -14,7 +14,9 @@ import {
 import { useState } from "react";
 import NavLink from "@/components/NavLink";
 import { useRouter } from "@/hooks/useRouter";
-import { palette } from "@/theme/voltchessTheme";
+import { usePalette } from "@/hooks/usePalette";
+import { alpha } from "@mui/material/styles";
+import { Link as MuiLink } from "@mui/material";
 
 const NAV_ITEMS = [
   { label: "Home", icon: "mdi:home-outline", href: "/" },
@@ -25,6 +27,7 @@ const NAV_ITEMS = [
 const SIDEBAR_WIDTH = 220;
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+  const palette = usePalette();
   const router = useRouter();
 
   return (
@@ -71,10 +74,10 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                   mb: 0.5,
                   py: 1,
                   color: isActive ? palette.accent : palette.textMuted,
-                  bgcolor: isActive ? "rgba(232, 185, 35, 0.08)" : "transparent",
+                  bgcolor: isActive ? alpha(palette.accent, 0.1) : "transparent",
                   "&:hover": {
                     bgcolor: isActive
-                      ? "rgba(232, 185, 35, 0.12)"
+                      ? alpha(palette.accent, 0.14)
                       : palette.surfaceRaised,
                   },
                 }}
@@ -94,11 +97,39 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           );
         })}
       </List>
+
+      <Box
+        sx={{
+          mt: "auto",
+          px: 2,
+          py: 1.75,
+          borderTop: `1px solid ${palette.borderSubtle}`,
+        }}
+      >
+        <Typography
+          fontSize="0.65rem"
+          lineHeight={1.45}
+          color="text.secondary"
+        >
+          Powered by{" "}
+          <MuiLink
+            href="https://github.com/GuillaumeSD/Chesskit"
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="hover"
+            sx={{ color: palette.textMuted, fontSize: "inherit" }}
+          >
+            Chesskit
+          </MuiLink>
+          . Thank you to the Chesskit team.
+        </Typography>
+      </Box>
     </Box>
   );
 }
 
 export default function Sidebar() {
+  const palette = usePalette();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [mobileOpen, setMobileOpen] = useState(false);

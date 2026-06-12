@@ -17,7 +17,8 @@ import { boardOrientationAtom } from "@/sections/analysis/states";
 import ChessComInput from "@/sections/loadGame/chessComInput";
 import LichessInput from "@/sections/loadGame/lichessInput";
 import GamePgnInput from "@/sections/loadGame/gamePgnInput";
-import { cardSx, palette } from "@/theme/voltchessTheme";
+import { useCardSx, usePalette } from "@/hooks/usePalette";
+import { alpha } from "@mui/material/styles";
 
 interface Props {
   onGameLoaded: (game: Chess, boardOrientation?: boolean) => void;
@@ -32,6 +33,8 @@ const TABS = [
 const QUICK_USERS = ["MagnusCarlsen", "GothamChess", "Hikaru"];
 
 export default function HomeGameLoader({ onGameLoaded }: Props) {
+  const palette = usePalette();
+  const cardSx = useCardSx();
   const [tab, setTab] = useState<GameOrigin>(GameOrigin.ChessCom);
   const [pgn, setPgn] = useState("");
   const [chessComUser, setChessComUser] = useState("");
@@ -72,7 +75,7 @@ export default function HomeGameLoader({ onGameLoaded }: Props) {
             mx: 0.25,
             "&.Mui-selected": {
               color: palette.accent,
-              bgcolor: "rgba(232, 185, 35, 0.06)",
+              bgcolor: alpha(palette.accent, 0.06),
             },
           },
         }}
@@ -135,7 +138,7 @@ export default function HomeGameLoader({ onGameLoaded }: Props) {
                     fontSize: "0.8rem",
                     "&:hover": {
                       borderColor: palette.accent,
-                      bgcolor: "rgba(232, 185, 35, 0.06)",
+                      bgcolor: alpha(palette.accent, 0.06),
                     },
                   }}
                 >

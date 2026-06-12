@@ -25,8 +25,10 @@ import { CLASSIFICATION_COLORS } from "@/constants";
 import CustomDot from "./dot";
 import { MoveClassification } from "@/types/enums";
 import { useChessActions } from "@/hooks/useChessActions";
+import { usePalette } from "@/hooks/usePalette";
 
 export default function GraphTab(props: GridProps) {
+  const palette = usePalette();
   const gameEval = useAtomValue(gameEvalAtom);
   const currentPosition = useAtomValue(currentPositionAtom);
   const { goToMove } = useChessActions(boardAtom);
@@ -99,9 +101,9 @@ export default function GraphTab(props: GridProps) {
         height="100%"
         width="100%"
         sx={{
-          backgroundColor: "#141414",
+          backgroundColor: palette.surface,
           borderRadius: "8px",
-          border: "1px solid #2a2a2a",
+          border: `1px solid ${palette.border}`,
           overflow: "hidden",
         }}
       >
@@ -127,7 +129,7 @@ export default function GraphTab(props: GridProps) {
               ticks={[0, 10, 20]}
               tickFormatter={(v) => (v === 20 ? "+20" : v === 0 ? "-20" : "0")}
               width={28}
-              tick={{ fill: "#737373", fontSize: 10 }}
+              tick={{ fill: palette.textMuted, fontSize: 10 }}
               axisLine={false}
               tickLine={false}
             />
@@ -144,7 +146,7 @@ export default function GraphTab(props: GridProps) {
               type="monotone"
               dataKey="value"
               stroke="none"
-              fill="#ffffff"
+              fill={palette.chartAreaFill}
               fillOpacity={1}
               dot={renderDot}
               activeDot={<CustomDot />}

@@ -1,9 +1,7 @@
 import { EngineName, MoveClassification } from "./types/enums";
+import { ENGINE_DEFAULTS } from "./constants/engineDefaults";
 export const ACCESS_TOKEN = "access";
 export const REFRESH_TOKEN = "refresh";
-export const MAIN_THEME_COLOR = "#E8B923";
-export const LINEAR_PROGRESS_BAR_COLOR = "#E8B923";
-
 // Authentication Configuration
 // Set this to false to disable authentication and allow users to access all pages without logging in
 // Set this to true to enable authentication and require users to log in for protected routes
@@ -25,7 +23,7 @@ export const CLASSIFICATION_COLORS: Record<MoveClassification, string> = {
   [MoveClassification.Blunder]: "#df5353",
 };
 
-export const DEFAULT_ENGINE: EngineName = EngineName.Stockfish17Lite;
+export const DEFAULT_ENGINE: EngineName = ENGINE_DEFAULTS.engine;
 export const STRONGEST_ENGINE: EngineName = EngineName.Stockfish17;
 
 export const ENGINE_LABELS: Record<

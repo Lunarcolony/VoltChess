@@ -13,7 +13,7 @@ import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import { PageTitle } from "@/components/pageTitle";
 import PageContainer from "@/components/PageContainer";
-import { cardSx, palette } from "@/theme/voltchessTheme";
+import { useCardSx, usePalette } from "@/hooks/usePalette";
 import { uciMoveParams } from "@/lib/chess";
 
 interface PuzzleData {
@@ -67,6 +67,8 @@ function moveToUci(chess: Chess, from: string, to: string, promotion?: string) {
 }
 
 function Puzzles() {
+  const palette = usePalette();
+  const cardSx = useCardSx();
   const [currentPuzzleIndex, setCurrentPuzzleIndex] = useState(0);
   const [game, setGame] = useState(new Chess());
   const [gamePosition, setGamePosition] = useState("");

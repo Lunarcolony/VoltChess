@@ -2,7 +2,7 @@ import { Box, Typography } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { useAtomValue } from "jotai";
 import { gameEvalAtom } from "../states";
-import { palette } from "@/theme/voltchessTheme";
+import { usePalette } from "@/hooks/usePalette";
 import { MoveClassification } from "@/types/enums";
 import {
   BAD_CLASSIFICATIONS,
@@ -23,6 +23,7 @@ function countMoves(
 }
 
 function GoodBadBar({ good, bad }: { good: number; bad: number }) {
+  const palette = usePalette();
   const total = good + bad || 1;
   const goodPct = (good / total) * 100;
 
@@ -70,6 +71,7 @@ function PlayerScoreCard({
   good: number;
   bad: number;
 }) {
+  const palette = usePalette();
   const isWhite = side === "white";
 
   return (
@@ -90,8 +92,8 @@ function PlayerScoreCard({
           px: 1,
           borderRadius: 1.5,
           textAlign: "center",
-          bgcolor: isWhite ? "#e8e8e8" : palette.surface,
-          color: isWhite ? "#0a0a0a" : palette.text,
+          bgcolor: isWhite ? palette.playerLightBg : palette.surface,
+          color: isWhite ? palette.playerLightText : palette.text,
           border: `1px solid ${palette.border}`,
         }}
       >
@@ -113,6 +115,7 @@ function PlayerScoreCard({
 }
 
 export default function AccuracyOverview() {
+  const palette = usePalette();
   const gameEval = useAtomValue(gameEvalAtom);
   if (!gameEval) return null;
 
@@ -128,7 +131,7 @@ export default function AccuracyOverview() {
         display: "flex",
         alignItems: "flex-start",
         gap: { xs: 1, sm: 1.5 },
-        mb: 2,
+        mb: 0,
         width: "100%",
       }}
     >

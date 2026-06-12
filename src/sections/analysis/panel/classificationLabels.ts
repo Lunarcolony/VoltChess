@@ -16,16 +16,17 @@ export const BAD_CLASSIFICATIONS = [
   MoveClassification.Blunder,
 ] as const;
 
+/** VoltChess move-quality names shown in the UI */
 export const CLASSIFICATION_DISPLAY_LABELS: Record<MoveClassification, string> =
   {
-    [MoveClassification.Splendid]: "Sigma",
-    [MoveClassification.Perfect]: "Awesome",
+    [MoveClassification.Splendid]: "Surge",
+    [MoveClassification.Perfect]: "Clean",
     [MoveClassification.Best]: "Best",
     [MoveClassification.Excellent]: "Nice",
     [MoveClassification.Okay]: "Ok",
-    [MoveClassification.Opening]: "Theoretical",
+    [MoveClassification.Opening]: "Book",
     [MoveClassification.Forced]: "Forced",
-    [MoveClassification.Inaccuracy]: "Strange",
-    [MoveClassification.Mistake]: "Bad",
-    [MoveClassification.Blunder]: "Clown",
+    [MoveClassification.Inaccuracy]: "Drift",
+    [MoveClassification.Mistake]: "Slip",
+    [MoveClassification.Blunder]: "Shock",
   };

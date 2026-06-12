@@ -11,7 +11,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { Chess } from "chess.js";
 import { useRouter } from "@/hooks/useRouter";
 import { useAnalyzeGame } from "@/hooks/useAnalyzeGame";
-import { clearAnalysisSession } from "@/hooks/useAnalysisSession";
+import { prepareNewAnalysisSession } from "@/hooks/useAnalysisSession";
 
 export default function LoadGame() {
   const router = useRouter();
@@ -43,9 +43,10 @@ export default function LoadGame() {
         label={isGameLoaded ? "Load new game" : "Load game"}
         size="small"
         setGame={async (loadedGame: Chess) => {
-          clearAnalysisSession();
+          const pgn = loadedGame.pgn();
+          resetAndSetGamePgn(pgn);
+          prepareNewAnalysisSession(pgn);
           await router.push("/analysis");
-          resetAndSetGamePgn(loadedGame.pgn());
         }}
       />
 

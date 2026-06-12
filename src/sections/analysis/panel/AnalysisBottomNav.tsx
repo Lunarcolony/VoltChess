@@ -4,23 +4,11 @@ import { useAtomValue } from "jotai";
 import { boardAtom, gameAtom } from "../states";
 import { useChessActions } from "@/hooks/useChessActions";
 import { useCallback, useEffect } from "react";
-import { palette } from "@/theme/voltchessTheme";
-
-const navBtnSx = {
-  flex: 1,
-  minWidth: 0,
-  height: { xs: 40, sm: 44 },
-  borderRadius: 1.5,
-  bgcolor: palette.accent,
-  color: "#0a0a0a",
-  "&:hover": { bgcolor: palette.accentHover },
-  "&.Mui-disabled": {
-    bgcolor: "rgba(232, 185, 35, 0.35)",
-    color: "rgba(10, 10, 10, 0.45)",
-  },
-};
+import { usePalette } from "@/hooks/usePalette";
+import { accentIconButtonSx } from "@/theme/buttonStyles";
 
 export default function AnalysisBottomNav() {
+  const palette = usePalette();
   const board = useAtomValue(boardAtom);
   const game = useAtomValue(gameAtom);
   const { resetToStartingPosition, undoMove, setPgn, playMove } =
@@ -70,6 +58,14 @@ export default function AnalysisBottomNav() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [goBack, handleGoForward, goToStart, goToEnd]);
+
+  const navBtnSx = {
+    flex: 1,
+    minWidth: 0,
+    height: { xs: 40, sm: 44 },
+    borderRadius: 1.5,
+    ...accentIconButtonSx(palette),
+  };
 
   return (
     <Box

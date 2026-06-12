@@ -14,14 +14,16 @@ import {
   gameEvalAtom,
   evaluationProgressAtom,
 } from "@/sections/analysis/states";
+import { prepareNewAnalysisSession } from "@/hooks/useAnalysisSession";
 import type { Game } from "@/types/game";
 import HomeGameLoader from "@/sections/home/HomeGameLoader";
 import FeatureCard from "@/sections/home/FeatureCard";
 import WelcomeModal from "@/sections/onboarding/WelcomeModal";
 import { isOnboardingComplete } from "@/sections/onboarding/onboardingStorage";
-import { palette } from "@/theme/voltchessTheme";
+import { usePalette } from "@/hooks/usePalette";
 
 function Home() {
+  const palette = usePalette();
   const router = useRouter();
   const game = useAtomValue(gameAtom);
   const evaluationProgress = useAtomValue(evaluationProgressAtom);
@@ -38,6 +40,7 @@ function Home() {
   const { gameFromUrl } = useGameDatabase();
   const setEval = useSetAtom(gameEvalAtom);
   const setBoardOrientation = useSetAtom(boardOrientationAtom);
+  const setEvaluationProgress = useSetAtom(evaluationProgressAtom);
 
   const resetAndSetGamePgn = useCallback(
     (pgn: string) => {
@@ -50,11 +53,19 @@ function Home() {
 
   const startAnalysis = useCallback(
     async (loadedGame: Chess, boardOrientation = true, withTour = false) => {
+      const pgn = loadedGame.pgn();
       setBoardOrientation(boardOrientation);
+      resetAndSetGamePgn(pgn);
+      setEvaluationProgress(0);
+      prepareNewAnalysisSession(pgn, boardOrientation);
       await router.push(withTour ? "/analysis?tour=1" : "/analysis");
-      resetAndSetGamePgn(loadedGame.pgn());
     },
-    [router, resetAndSetGamePgn, setBoardOrientation]
+    [
+      router,
+      resetAndSetGamePgn,
+      setBoardOrientation,
+      setEvaluationProgress,
+    ]
   );
 
   const handleOnboardingGameLoaded = useCallback(

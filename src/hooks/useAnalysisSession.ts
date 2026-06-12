@@ -46,6 +46,14 @@ export function clearAnalysisSession() {
   sessionStorage.removeItem(SESSION_KEY);
 }
 
+/** Write a fresh game to session before navigating to /analysis */
+export function prepareNewAnalysisSession(
+  pgn: string,
+  boardOrientation = true
+) {
+  saveAnalysisSession(pgn, undefined, boardOrientation);
+}
+
 /** Restore analysis state from sessionStorage and URL query params. */
 export function useAnalysisSession() {
   const router = useRouter();

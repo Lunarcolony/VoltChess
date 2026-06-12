@@ -2,9 +2,10 @@ import { Box, Typography } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { useAtomValue } from "jotai";
 import { evaluationProgressAtom, gameEvalAtom, gameAtom } from "./states";
-import { palette } from "@/theme/voltchessTheme";
+import { usePalette } from "@/hooks/usePalette";
 
 export default function AnalysisEmptyState() {
+  const palette = usePalette();
   const gameEval = useAtomValue(gameEvalAtom);
   const progress = useAtomValue(evaluationProgressAtom);
   const game = useAtomValue(gameAtom);

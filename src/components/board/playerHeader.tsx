@@ -6,7 +6,7 @@ import { PrimitiveAtom, useAtomValue } from "jotai";
 import { Chess } from "chess.js";
 import { useMemo } from "react";
 import { getPaddedNumber } from "@/lib/helpers";
-import { palette } from "@/theme/voltchessTheme";
+import { usePalette } from "@/hooks/usePalette";
 
 export interface Props {
   player: Player;
@@ -15,6 +15,7 @@ export interface Props {
 }
 
 export default function PlayerHeader({ color, player, gameAtom }: Props) {
+  const palette = usePalette();
   const game = useAtomValue(gameAtom);
   const gameFen = game.fen();
   const isWhite = color === Color.White;
@@ -65,8 +66,8 @@ export default function PlayerHeader({ color, player, gameAtom }: Props) {
             width: 30,
             height: 30,
             flexShrink: 0,
-            bgcolor: isWhite ? "#e8e8e8" : "#1a1a1a",
-            color: isWhite ? "#0a0a0a" : palette.text,
+            bgcolor: isWhite ? palette.playerLightBg : palette.playerDarkBg,
+            color: isWhite ? palette.playerLightText : palette.playerDarkText,
             border: `1px solid ${palette.border}`,
             fontSize: "0.8rem",
           }}
@@ -109,8 +110,8 @@ export default function PlayerHeader({ color, player, gameAtom }: Props) {
         <Typography
           sx={{
             flexShrink: 0,
-            bgcolor: isWhite ? "#e8e8e8" : "#0a0a0a",
-            color: isWhite ? "#0a0a0a" : palette.text,
+            bgcolor: isWhite ? palette.playerLightBg : palette.playerDarkBg,
+            color: isWhite ? palette.playerLightText : palette.playerDarkText,
             border: `1px solid ${palette.border}`,
             borderRadius: 1,
             px: 1,

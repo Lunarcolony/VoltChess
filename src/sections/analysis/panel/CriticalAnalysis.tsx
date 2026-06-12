@@ -1,101 +1,197 @@
-import { Avatar, Box, Typography } from "@mui/material";
+import { Avatar, Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { useMemo } from "react";
 import { useAtomValue } from "jotai";
-import {
-  boardAtom,
-  boardOrientationAtom,
-  gameAtom,
-  gameEvalAtom,
-} from "../states";
-import { Color, MoveClassification } from "@/types/enums";
-import { palette } from "@/theme/voltchessTheme";
+import { boardAtom, gameAtom, gameEvalAtom } from "../states";
 import { usePlayersData } from "@/hooks/usePlayersData";
 import { useChessActions } from "@/hooks/useChessActions";
+import {
+  computePositionDominance,
+  type PhaseId,
+  type PlayerDominanceProfile,
+} from "@/lib/positionDominance";
+import { Icon } from "@iconify/react";
+import ReportSection from "./ReportSection";
+import { REPORT_COLORS, PHASE_COLORS } from "./reportColors";
 
-const CRITICAL = [MoveClassification.Mistake, MoveClassification.Blunder];
+const PHASE_LABELS: Record<PhaseId, string> = {
+  opening: "Opening",
+  middlegame: "Middle",
+  endgame: "Endgame",
+};
 
-function countCritical(
-  positions: { moveClassification?: MoveClassification }[],
-  isWhite: boolean,
-  classification: MoveClassification
-) {
-  return positions.filter(
-    (p, idx) =>
-      p.moveClassification === classification &&
-      (isWhite ? idx % 2 !== 0 : idx % 2 === 0)
-  ).length;
-}
+const INFO_TOOLTIP = (
+  <Box sx={{ maxWidth: 260, p: 0.5 }}>
+    <Typography fontSize="0.75rem" fontWeight={600} sx={{ mb: 0.5 }}>
+      Position Dominance
+    </Typography>
+    <Typography fontSize="0.72rem" lineHeight={1.45}>
+      Quality of positions each player created on their own moves. Shares always
+      add to 100%. Phase bars show who owned each game phase. Tap a row to jump
+      to that player&apos;s worst eval drop.
+    </Typography>
+  </Box>
+);
 
-function CountBadge({
-  classification,
-  count,
+function PhaseShareBar({
+  phase,
+  whiteShare,
+  blackShare,
 }: {
-  classification: MoveClassification;
-  count: number;
+  phase: PhaseId;
+  whiteShare: number;
+  blackShare: number;
 }) {
+  const labelColor = PHASE_COLORS[phase];
+
   return (
-    <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.4 }}>
-      <Box
-        component="img"
-        src={`/icons/${classification}.png`}
-        alt={classification}
-        sx={{ width: 16, height: 16 }}
-      />
-      <Typography component="span" fontSize="0.8rem" fontWeight={700}>
-        {count}
+    <Box sx={{ flex: 1, minWidth: 0 }}>
+      <Typography
+        fontSize="0.68rem"
+        fontWeight={600}
+        textAlign="center"
+        sx={{ mb: 0.35, color: labelColor }}
+      >
+        {PHASE_LABELS[phase]}
       </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          height: 5,
+          borderRadius: 2,
+          overflow: "hidden",
+          bgcolor: REPORT_COLORS.track,
+        }}
+      >
+        <Box
+          sx={{
+            width: `${whiteShare}%`,
+            bgcolor: REPORT_COLORS.whitePlayer,
+            minWidth: whiteShare > 0 ? 2 : 0,
+          }}
+        />
+        <Box
+          sx={{
+            width: `${blackShare}%`,
+            bgcolor: REPORT_COLORS.blackPlayer,
+            minWidth: blackShare > 0 ? 2 : 0,
+          }}
+        />
+      </Box>
     </Box>
   );
 }
 
-function PlayerCriticalChip({
+function MetricStat({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: string;
+  color?: string;
+}) {
+  return (
+    <Typography fontSize="0.72rem" component="span">
+      <Box component="span" sx={{ color: REPORT_COLORS.textMuted }}>
+        {label}{" "}
+      </Box>
+      <Box
+        component="span"
+        sx={{ color: color ?? REPORT_COLORS.text, fontWeight: 600 }}
+      >
+        {value}
+      </Box>
+    </Typography>
+  );
+}
+
+function PlayerDominanceRow({
   name,
-  mistakes,
-  blunders,
-  onClick,
+  profile,
+  side,
+  onJumpToWorst,
 }: {
   name: string;
-  mistakes: number;
-  blunders: number;
-  onClick: () => void;
+  profile: PlayerDominanceProfile;
+  side: "white" | "black";
+  onJumpToWorst: () => void;
 }) {
-  const hasCritical = mistakes + blunders > 0;
+  const isWhite = side === "white";
+  const playerColor = isWhite
+    ? REPORT_COLORS.whitePlayer
+    : REPORT_COLORS.blackPlayer;
+  const canJump = profile.worstLeakMoveIdx !== null && profile.worstLeakPct >= 5;
 
   return (
     <Box
-      onClick={hasCritical ? onClick : undefined}
+      onClick={canJump ? onJumpToWorst : undefined}
       sx={{
-        flex: 1,
-        minWidth: 0,
-        display: "flex",
-        alignItems: "center",
-        gap: 1,
+        width: "100%",
         px: 1.25,
-        py: 0.85,
+        py: 1,
         borderRadius: 1.5,
-        bgcolor: palette.surfaceRaised,
-        border: `1px solid ${palette.border}`,
-        cursor: hasCritical ? "pointer" : "default",
-        "&:hover": hasCritical ? { borderColor: palette.accent } : undefined,
+        bgcolor: REPORT_COLORS.rowBg,
+        border: `1px solid ${REPORT_COLORS.rowBorder}`,
+        cursor: canJump ? "pointer" : "default",
+        transition: "border-color 0.15s ease",
+        "&:hover": canJump ? { borderColor: playerColor } : undefined,
       }}
     >
-      <Avatar
-        sx={{
-          width: 26,
-          height: 26,
-          fontSize: "0.75rem",
-          bgcolor: palette.surface,
-          color: palette.text,
-          border: `1px solid ${palette.border}`,
-        }}
-      >
-        {name[0]?.toUpperCase()}
-      </Avatar>
-      <Typography fontSize="0.8rem" fontWeight={600} noWrap sx={{ flex: 1 }}>
-        {name}
-      </Typography>
-      <Box sx={{ display: "flex", gap: 0.75, flexShrink: 0 }}>
-        <CountBadge classification={MoveClassification.Mistake} count={mistakes} />
-        <CountBadge classification={MoveClassification.Blunder} count={blunders} />
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.85 }}>
+        <Avatar
+          sx={{
+            width: 26,
+            height: 26,
+            fontSize: "0.75rem",
+            bgcolor: playerColor,
+            color: REPORT_COLORS.whiteAvatarText,
+            border: `1px solid ${isWhite ? REPORT_COLORS.whitePlayerDark : REPORT_COLORS.blackPlayerDark}`,
+          }}
+        >
+          {name[0]?.toUpperCase()}
+        </Avatar>
+        <Typography
+          fontSize="0.82rem"
+          fontWeight={600}
+          noWrap
+          sx={{ flex: 1, color: REPORT_COLORS.text }}
+        >
+          {name}
+        </Typography>
+        <Typography
+          fontSize="1.1rem"
+          fontWeight={800}
+          sx={{ color: playerColor }}
+        >
+          {profile.dominanceShare.toFixed(0)}%
+        </Typography>
+      </Box>
+
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.25 }}>
+        <MetricStat
+          label="Control"
+          value={`${profile.controlShare.toFixed(0)}%`}
+          color={REPORT_COLORS.control}
+        />
+        <MetricStat
+          label="Avg win"
+          value={`${profile.avgWinPct.toFixed(0)}%`}
+          color={REPORT_COLORS.peak}
+        />
+        <MetricStat
+          label="Swing"
+          value={`${profile.avgMoveSwing >= 0 ? "+" : ""}${profile.avgMoveSwing.toFixed(1)}`}
+          color={
+            profile.avgMoveSwing >= 0 ? REPORT_COLORS.good : REPORT_COLORS.bad
+          }
+        />
+        {profile.worstLeakPct >= 5 && (
+          <MetricStat
+            label="Worst"
+            value={`−${profile.worstLeakPct.toFixed(0)}%`}
+            color={REPORT_COLORS.worst}
+          />
+        )}
       </Box>
     </Box>
   );
@@ -104,101 +200,69 @@ function PlayerCriticalChip({
 export default function CriticalAnalysis() {
   const gameEval = useAtomValue(gameEvalAtom);
   const game = useAtomValue(gameAtom);
-  const board = useAtomValue(boardAtom);
-  const orientation = useAtomValue(boardOrientationAtom);
   const { white, black } = usePlayersData(gameAtom);
   const { goToMove } = useChessActions(boardAtom);
 
-  if (!gameEval?.positions.length) return null;
+  const profiles = useMemo(() => {
+    if (!gameEval?.positions.length) return null;
+    return computePositionDominance(gameEval.positions);
+  }, [gameEval]);
 
-  const positions = gameEval.positions;
-  const whiteMistakes = countCritical(positions, true, MoveClassification.Mistake);
-  const whiteBlunders = countCritical(positions, true, MoveClassification.Blunder);
-  const blackMistakes = countCritical(positions, false, MoveClassification.Mistake);
-  const blackBlunders = countCritical(positions, false, MoveClassification.Blunder);
+  if (!profiles) return null;
 
-  // "You" = the side the board is oriented towards
-  const youMistakes = orientation ? whiteMistakes : blackMistakes;
-  const youBlunders = orientation ? whiteBlunders : blackBlunders;
-
-  const goToNextCritical = (color: Color) => {
-    const isWhite = color === Color.White;
-    const moveIdx = board.history().length;
-
-    const matches = (p: { moveClassification?: MoveClassification }, idx: number) =>
-      !!p.moveClassification &&
-      CRITICAL.includes(p.moveClassification) &&
-      (isWhite ? idx % 2 !== 0 : idx % 2 === 0);
-
-    const nextIdx = positions.findIndex((p, idx) => matches(p, idx) && idx > moveIdx);
-    if (nextIdx > 0) {
-      goToMove(nextIdx, game);
-      return;
-    }
-    const firstIdx = positions.findIndex(matches);
-    if (firstIdx > 0) goToMove(firstIdx, game);
+  const jumpToWorst = (profile: PlayerDominanceProfile) => {
+    if (profile.worstLeakMoveIdx === null) return;
+    goToMove(profile.worstLeakMoveIdx, game);
   };
 
   return (
-    <Box
-      sx={{
-        bgcolor: palette.surface,
-        border: `1px solid ${palette.border}`,
-        borderRadius: 1.5,
-        p: 1.5,
-        mb: 1.5,
-        width: "100%",
-      }}
+    <ReportSection
+      title="Position Dominance"
+      dotColor={REPORT_COLORS.endgame}
+      tourId="position-dominance"
+      headerExtra={
+        <Tooltip title={INFO_TOOLTIP} placement="left" arrow>
+          <IconButton
+            size="small"
+            aria-label="About Position Dominance"
+            sx={{
+              p: 0.35,
+              color: REPORT_COLORS.textMuted,
+              "&:hover": { color: REPORT_COLORS.text },
+            }}
+          >
+            <Icon icon="mdi:information-outline" width={18} />
+          </IconButton>
+        </Tooltip>
+      }
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 0.75 }}>
-        <Box
-          sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "#df5353" }}
-        />
-        <Typography
-          fontSize="0.72rem"
-          fontWeight={700}
-          sx={{ color: "#df5353", letterSpacing: "0.04em" }}
-        >
-          Critical Analysis
-        </Typography>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          {(["opening", "middlegame", "endgame"] as PhaseId[]).map((phase) => (
+            <PhaseShareBar
+              key={phase}
+              phase={phase}
+              whiteShare={profiles.white.phases[phase].phaseShare}
+              blackShare={profiles.black.phases[phase].phaseShare}
+            />
+          ))}
+        </Box>
+
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
+          <PlayerDominanceRow
+            name={white.name}
+            profile={profiles.white}
+            side="white"
+            onJumpToWorst={() => jumpToWorst(profiles.white)}
+          />
+          <PlayerDominanceRow
+            name={black.name}
+            profile={profiles.black}
+            side="black"
+            onJumpToWorst={() => jumpToWorst(profiles.black)}
+          />
+        </Box>
       </Box>
-
-      <Typography fontSize="1rem" fontWeight={700} sx={{ mb: 0.5 }}>
-        Learn from your mistakes.
-      </Typography>
-
-      <Typography
-        fontSize="0.82rem"
-        color="text.secondary"
-        sx={{ mb: 1.5, display: "flex", alignItems: "center", gap: 0.5, flexWrap: "wrap" }}
-      >
-        You made
-        <CountBadge classification={MoveClassification.Mistake} count={youMistakes} />
-        and
-        <CountBadge classification={MoveClassification.Blunder} count={youBlunders} />
-        critical errors. Master these positions to improve.
-      </Typography>
-
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: { xs: "column", sm: "row" },
-          gap: 1,
-        }}
-      >
-        <PlayerCriticalChip
-          name={white.name}
-          mistakes={whiteMistakes}
-          blunders={whiteBlunders}
-          onClick={() => goToNextCritical(Color.White)}
-        />
-        <PlayerCriticalChip
-          name={black.name}
-          mistakes={blackMistakes}
-          blunders={blackBlunders}
-          onClick={() => goToNextCritical(Color.Black)}
-        />
-      </Box>
-    </Box>
+    </ReportSection>
   );
 }

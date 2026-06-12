@@ -3,7 +3,7 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import { useAtomValue } from "jotai";
 import { useRouter } from "@/hooks/useRouter";
 import { gameEvalAtom } from "@/sections/analysis/states";
-import { palette } from "@/theme/voltchessTheme";
+import { usePalette } from "@/hooks/usePalette";
 import { ANALYSIS_TOUR_STEPS } from "./constants";
 import { markOnboardingComplete } from "./onboardingStorage";
 import SpotlightTour, { type TourStep } from "./SpotlightTour";
@@ -13,6 +13,7 @@ interface Props {
 }
 
 export default function AnalysisTour({ onTabChange }: Props) {
+  const palette = usePalette();
   const router = useRouter();
   const gameEval = useAtomValue(gameEvalAtom);
   const tourRequested = router.query.tour === "1";

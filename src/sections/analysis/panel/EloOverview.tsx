@@ -2,9 +2,10 @@ import { Box, Typography } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { useAtomValue } from "jotai";
 import { gameEvalAtom } from "../states";
-import { palette } from "@/theme/voltchessTheme";
+import { usePalette } from "@/hooks/usePalette";
 
 function EloCard({ value, side }: { value: number; side: "white" | "black" }) {
+  const palette = usePalette();
   const isWhite = side === "white";
   return (
     <Box
@@ -16,8 +17,8 @@ function EloCard({ value, side }: { value: number; side: "white" | "black" }) {
         px: 1,
         borderRadius: 1.5,
         textAlign: "center",
-        bgcolor: isWhite ? "#e8e8e8" : palette.surface,
-        color: isWhite ? "#0a0a0a" : palette.text,
+        bgcolor: isWhite ? palette.playerLightBg : palette.surface,
+        color: isWhite ? palette.playerLightText : palette.text,
         border: `1px solid ${palette.border}`,
       }}
     >
@@ -35,6 +36,7 @@ function EloCard({ value, side }: { value: number; side: "white" | "black" }) {
 }
 
 export default function EloOverview() {
+  const palette = usePalette();
   const gameEval = useAtomValue(gameEvalAtom);
   if (!gameEval?.estimatedElo) return null;
 
@@ -44,7 +46,7 @@ export default function EloOverview() {
         display: "flex",
         alignItems: "center",
         gap: { xs: 1, sm: 1.5 },
-        mb: 2,
+        mb: 0,
         width: "100%",
       }}
     >

@@ -7,6 +7,8 @@ import { useChessActions } from "@/hooks/useChessActions";
 import { useEffect, useRef } from "react";
 import { CLASSIFICATION_COLORS } from "@/constants";
 import PrettyMoveSan from "@/components/prettyMoveSan";
+import { usePalette } from "@/hooks/usePalette";
+import { alpha } from "@mui/material/styles";
 
 interface Props {
   san: string;
@@ -25,6 +27,7 @@ export default function MoveItem({
   const board = useAtomValue(boardAtom);
   const { goToMove } = useChessActions(boardAtom);
   const position = useAtomValue(currentPositionAtom);
+  const palette = usePalette();
   const color = getMoveColor(moveClassification);
 
   const isCurrentMove = position?.currentMoveIdx === moveIdx;
@@ -68,8 +71,12 @@ export default function MoveItem({
       paddingY={0.5}
       sx={{
         cursor: isCurrentMove ? undefined : "pointer",
-        backgroundColor: isCurrentMove ? "rgba(232, 185, 35, 0.15)" : undefined,
-        border: isCurrentMove ? "1px solid rgba(232, 185, 35, 0.4)" : undefined,
+        backgroundColor: isCurrentMove
+          ? alpha(palette.accent, 0.15)
+          : undefined,
+        border: isCurrentMove
+          ? `1px solid ${alpha(palette.accent, 0.4)}`
+          : undefined,
         borderRadius: 1,
       }}
       id={`move-${moveIdx}`}

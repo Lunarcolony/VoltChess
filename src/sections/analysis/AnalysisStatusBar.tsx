@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react";
 import { useAtomValue } from "jotai";
 import { evaluationProgressAtom, gameAtom } from "./states";
 import { useRouter } from "@/hooks/useRouter";
-import { palette } from "@/theme/voltchessTheme";
+import { usePalette } from "@/hooks/usePalette";
 import { useAnalyzeGame } from "@/hooks/useAnalyzeGame";
 
 type Step = "load" | "analyze" | "review";
@@ -19,6 +19,7 @@ function getActiveStep(
 }
 
 export default function AnalysisStatusBar() {
+  const palette = usePalette();
   const router = useRouter();
   const game = useAtomValue(gameAtom);
   const progress = useAtomValue(evaluationProgressAtom);

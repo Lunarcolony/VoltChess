@@ -1,4 +1,4 @@
-import { LINEAR_PROGRESS_BAR_COLOR } from "@/constants";
+import { usePalette } from "@/hooks/usePalette";
 import {
   Grid2 as Grid,
   LinearProgress,
@@ -10,6 +10,8 @@ import {
 const LinearProgressBar = (
   props: LinearProgressProps & { value: number; label: string }
 ) => {
+  const palette = usePalette();
+
   if (props.value === 0) return null;
 
   return (
@@ -38,7 +40,7 @@ const LinearProgressBar = (
             },
             [`& .${linearProgressClasses.bar}`]: {
               borderRadius: 5,
-              backgroundColor: LINEAR_PROGRESS_BAR_COLOR,
+              backgroundColor: palette.accent,
             },
           })}
         />

@@ -3,9 +3,11 @@ import { Icon } from "@iconify/react";
 import { useAtomValue } from "jotai";
 import { boardAtom, currentPositionAtom } from "../states";
 import { useChessActions } from "@/hooks/useChessActions";
-import { palette } from "@/theme/voltchessTheme";
+import { usePalette } from "@/hooks/usePalette";
+import { accentContainedButtonSx } from "@/theme/buttonStyles";
 
 export default function FollowBestLineButton() {
+  const palette = usePalette();
   const position = useAtomValue(currentPositionAtom);
   const board = useAtomValue(boardAtom);
   const { addMoves } = useChessActions(boardAtom);
@@ -28,16 +30,8 @@ export default function FollowBestLineButton() {
         mb: 1.5,
         py: 1,
         borderRadius: 1.5,
-        bgcolor: palette.accent,
-        color: "#0a0a0a",
-        fontWeight: 700,
         fontSize: "0.85rem",
-        textTransform: "none",
-        "&:hover": { bgcolor: palette.accentHover },
-        "&.Mui-disabled": {
-          bgcolor: "rgba(232, 185, 35, 0.25)",
-          color: "rgba(10, 10, 10, 0.4)",
-        },
+        ...accentContainedButtonSx(palette),
       }}
     >
       Follow Best Line

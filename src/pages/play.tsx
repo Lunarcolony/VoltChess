@@ -8,9 +8,10 @@ import { Box } from "@mui/material";
 import { useAtomValue } from "jotai";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PageContainer from "@/components/PageContainer";
-import { cardSx } from "@/theme/voltchessTheme";
+import { useCardSx } from "@/hooks/usePalette";
 
 function Play() {
+  const cardSx = useCardSx();
   const isGameInProgress = useAtomValue(isGameInProgressAtom);
 
   return (

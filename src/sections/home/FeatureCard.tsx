@@ -1,7 +1,8 @@
 import { Box, Button, Typography } from "@mui/material";
 import { Icon } from "@iconify/react";
 import NavLink from "@/components/NavLink";
-import { cardSx, palette } from "@/theme/voltchessTheme";
+import { useCardSx, usePalette } from "@/hooks/usePalette";
+import { alpha } from "@mui/material/styles";
 
 interface Props {
   title: string;
@@ -18,6 +19,9 @@ export default function FeatureCard({
   href,
   actionLabel,
 }: Props) {
+  const palette = usePalette();
+  const cardSx = useCardSx();
+
   return (
     <Box sx={{ ...cardSx, display: "flex", flexDirection: "column", height: "100%" }}>
       <Box
@@ -28,7 +32,7 @@ export default function FeatureCard({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          bgcolor: "rgba(232, 185, 35, 0.1)",
+          bgcolor: alpha(palette.accent, 0.1),
           color: palette.accent,
           mb: 2,
         }}

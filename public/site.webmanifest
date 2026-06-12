@@ -1,6 +1,6 @@
 {
-  "name": "Chesskit",
-  "short_name": "Chesskit",
+  "name": "VoltChess",
+  "short_name": "VoltChess",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -13,7 +13,7 @@
       "type": "image/png"
     }
   ],
-  "theme_color": "#5d9948",
-  "background_color": "#ffffff",
+  "theme_color": "#0a0a0a",
+  "background_color": "#0a0a0a",
   "display": "standalone"
 }

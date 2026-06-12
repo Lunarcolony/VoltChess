@@ -7,9 +7,11 @@ import {
   engineNameAtom,
 } from "./states";
 import { useEngine } from "@/hooks/useEngine";
-import { palette } from "@/theme/voltchessTheme";
+import { usePalette } from "@/hooks/usePalette";
+import { alpha } from "@mui/material/styles";
 
 export default function EvaluationProgress() {
+  const palette = usePalette();
   const progress = useAtomValue(evaluationProgressAtom);
   const gameEval = useAtomValue(gameEvalAtom);
   const game = useAtomValue(gameAtom);
@@ -42,8 +44,8 @@ export default function EvaluationProgress() {
         width: "100%",
         p: 2,
         borderRadius: 1.5,
-        bgcolor: "rgba(232, 185, 35, 0.08)",
-        border: `1px solid rgba(232, 185, 35, 0.25)`,
+        bgcolor: alpha(palette.accent, 0.08),
+        border: `1px solid ${alpha(palette.accent, 0.25)}`,
         mb: 2,
       }}
     >

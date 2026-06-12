@@ -2,10 +2,11 @@ import { Box, Button } from "@mui/material";
 import { Icon } from "@iconify/react";
 import EvaluationProgress from "../EvaluationProgress";
 import EvaluationGraphSection from "../EvaluationGraphSection";
-import AccuracyOverview from "./AccuracyOverview";
-import EloOverview from "./EloOverview";
+import PlayerStatsPanel from "./PlayerStatsPanel";
 import ClassificationGoodBad from "./ClassificationGoodBad";
+import EvalLeadPanel from "./EvalLeadPanel";
 import CriticalAnalysis from "./CriticalAnalysis";
+import ReportSection from "./ReportSection";
 import AnalysisEmptyState from "../AnalysisEmptyState";
 import { useAtomValue } from "jotai";
 import {
@@ -40,23 +41,35 @@ export default function ReportTabPanel({
       {!gameEval && !isAnalyzing && <AnalysisEmptyState />}
 
       {gameEval && (
-        <Box data-tour-id="accuracy">
-          <AccuracyOverview />
-          <EloOverview />
-        </Box>
+        <>
+          <ReportSection title="Evaluation graph" tourId="eval-graph" noPadding>
+            <EvaluationGraphSection
+              sticky={false}
+              containerSx={{ mb: 0, p: 1.25 }}
+            />
+          </ReportSection>
+
+          <ReportSection title="Accuracy & ELO" tourId="accuracy">
+            <PlayerStatsPanel />
+          </ReportSection>
+
+          <Box data-tour-id="classification" sx={{ mb: 1.5 }}>
+            <ClassificationGoodBad />
+          </Box>
+
+          <EvalLeadPanel />
+          <CriticalAnalysis />
+        </>
       )}
 
-      <Box data-tour-id="eval-graph">
-        <EvaluationGraphSection sticky={false} />
-      </Box>
-
-      {gameEval && (
-        <Box data-tour-id="classification">
-          <ClassificationGoodBad />
-        </Box>
+      {!gameEval && !isAnalyzing && (
+        <ReportSection title="Evaluation graph" tourId="eval-graph" noPadding>
+          <EvaluationGraphSection
+            sticky={false}
+            containerSx={{ mb: 0, p: 1.25 }}
+          />
+        </ReportSection>
       )}
-
-      {gameEval && <CriticalAnalysis />}
 
       {needsReanalysis && (
         <Button

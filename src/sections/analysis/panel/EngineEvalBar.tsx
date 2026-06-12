@@ -7,13 +7,14 @@ import {
   engineNameAtom,
   showBestMoveArrowAtom,
 } from "../states";
-import { palette } from "@/theme/voltchessTheme";
+import { usePalette } from "@/hooks/usePalette";
 import { ENGINE_LABELS } from "@/constants";
 import { getLineEvalLabel } from "@/lib/chess";
 import { useState } from "react";
 import EngineSettingsDialog from "@/sections/engineSettings/engineSettingsDialog";
 
 export default function EngineEvalBar() {
+  const palette = usePalette();
   const position = useAtomValue(currentPositionAtom);
   const engineName = useAtomValue(engineNameAtom);
   const engineDepth = useAtomValue(engineDepthAtom);

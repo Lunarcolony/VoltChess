@@ -1,5 +1,4 @@
-import { DEFAULT_ENGINE } from "@/constants";
-import { getRecommendedWorkersNb } from "@/lib/engine/worker";
+import { ENGINE_DEFAULTS } from "@/constants/engineDefaults";
 import { EngineName } from "@/types/enums";
 import { CurrentPosition, GameEval, SavedEvals } from "@/types/eval";
 import { Chess } from "chess.js";
@@ -15,12 +14,21 @@ export const boardOrientationAtom = atom(true);
 export const showBestMoveArrowAtom = atom(true);
 export const showPlayerMoveIconAtom = atom(true);
 
-export const engineNameAtom = atom<EngineName>(DEFAULT_ENGINE);
-export const engineDepthAtom = atom(14);
-export const engineMultiPvAtom = atom(3);
-export const engineWorkersNbAtom = atomWithStorage(
+export const engineNameAtom = atomWithStorage<EngineName>(
+  "engine-name",
+  ENGINE_DEFAULTS.engine
+);
+export const engineDepthAtom = atomWithStorage<number>(
+  "engine-depth",
+  ENGINE_DEFAULTS.depth
+);
+export const engineMultiPvAtom = atomWithStorage<number>(
+  "engine-multi-pv",
+  ENGINE_DEFAULTS.multiPv
+);
+export const engineWorkersNbAtom = atomWithStorage<number>(
   "engineWorkersNb",
-  getRecommendedWorkersNb()
+  ENGINE_DEFAULTS.workers
 );
 export const evaluationProgressAtom = atom(0);
 

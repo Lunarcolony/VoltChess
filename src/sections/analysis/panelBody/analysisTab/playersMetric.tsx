@@ -1,5 +1,5 @@
 import { Stack, Typography } from "@mui/material";
-import { palette } from "@/theme/voltchessTheme";
+import { usePalette } from "@/hooks/usePalette";
 
 interface Props {
   title: string;
@@ -41,6 +41,7 @@ const ValueBlock = ({
   value: string | number;
   side: "white" | "black";
 }) => {
+  const palette = usePalette();
   const isWhite = side === "white";
 
   return (
@@ -48,8 +49,8 @@ const ValueBlock = ({
       align="center"
       sx={{
         minWidth: 56,
-        bgcolor: isWhite ? "#e8e8e8" : palette.surface,
-        color: isWhite ? "#0a0a0a" : palette.text,
+        bgcolor: isWhite ? palette.playerLightBg : palette.surface,
+        color: isWhite ? palette.playerLightText : palette.text,
         border: `1px solid ${palette.border}`,
         borderRadius: 1,
         py: 0.75,

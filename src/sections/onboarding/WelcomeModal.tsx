@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { Chess } from "chess.js";
-import { palette } from "@/theme/voltchessTheme";
+import { usePalette } from "@/hooks/usePalette";
 import { GameOrigin } from "@/types/enums";
 import type { OnboardingPlatform } from "./constants";
 import { loadFirstGameForUser } from "./loadOnboardingGame";
@@ -37,6 +37,7 @@ const PLATFORM_TABS = [
 ] as const;
 
 function PlatformBadge({ platform }: { platform: OnboardingPlatform }) {
+  const palette = usePalette();
   const isChessCom = platform === "chesscom";
 
   return (
@@ -62,6 +63,7 @@ function PlatformBadge({ platform }: { platform: OnboardingPlatform }) {
 }
 
 export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
+  const palette = usePalette();
   const storedUser = useMemo(() => (open ? getStoredUsername() : null), [open]);
   const [step, setStep] = useState<ModalStep>("welcome");
   const [tab, setTab] = useState<GameOrigin>(GameOrigin.ChessCom);

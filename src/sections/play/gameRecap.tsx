@@ -12,7 +12,7 @@ import {
   gameAtom as analysisGameAtom,
   gameEvalAtom,
 } from "@/sections/analysis/states";
-import { saveAnalysisSession } from "@/hooks/useAnalysisSession";
+import { prepareNewAnalysisSession } from "@/hooks/useAnalysisSession";
 
 export default function GameRecap() {
   const game = useAtomValue(playGameAtom);
@@ -53,7 +53,7 @@ export default function GameRecap() {
     setAnalysisPgn(pgn);
     setEval(undefined);
     setBoardOrientation(orientation);
-    saveAnalysisSession(pgn, undefined, orientation);
+    prepareNewAnalysisSession(pgn, orientation);
 
     await addGame(gameToAnalysis);
     router.push("/analysis");

@@ -1,7 +1,7 @@
 import { Box, Paper } from "@mui/material";
 import { PropsWithChildren, ReactNode } from "react";
 import { useAtomValue } from "jotai";
-import { palette } from "@/theme/voltchessTheme";
+import { usePalette } from "@/hooks/usePalette";
 import { ANALYSIS_PANEL_WIDTH, PLAYER_BAR_HEIGHT } from "@/hooks/useScreenSize";
 import { Color } from "@/types/enums";
 import { usePlayersData } from "@/hooks/usePlayersData";
@@ -16,19 +16,9 @@ interface Props extends PropsWithChildren {
   useTabs?: boolean;
 }
 
-export const analysisPanelSx = {
-  bgcolor: palette.surfaceRaised,
-  border: `1px solid ${palette.border}`,
-  borderRadius: 0,
-  p: { xs: 1, sm: 1.25 },
-  display: "flex",
-  flexDirection: "column" as const,
-  minHeight: 0,
-  width: "100%",
-};
-
 /** Full-width rigid player bar (top/bottom of the board column) */
 function PlayerBar({ position }: { position: "top" | "bottom" }) {
+  const palette = usePalette();
   const orientation = useAtomValue(boardOrientationAtom);
   const { white, black } = usePlayersData(gameAtom);
 
@@ -65,6 +55,8 @@ export default function AnalysisPageLayout({
   useTabs = false,
   children,
 }: Props) {
+  const palette = usePalette();
+
   return (
     <Box
       sx={{

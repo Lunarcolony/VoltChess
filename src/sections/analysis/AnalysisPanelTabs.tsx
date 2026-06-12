@@ -1,7 +1,7 @@
 import { Box, Tab, Tabs } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { ReactNode, useState } from "react";
-import { palette } from "@/theme/voltchessTheme";
+import { usePalette } from "@/hooks/usePalette";
 
 export type AnalysisTabId = "report" | "engine" | "moves" | "game" | "settings";
 
@@ -29,6 +29,7 @@ export default function AnalysisPanelTabs({
   activeTab: controlledActiveTab,
   onActiveTabChange,
 }: Props) {
+  const palette = usePalette();
   const visible = tabs.filter((t) => t.show !== false);
   const [internalActiveTab, setInternalActiveTab] = useState<AnalysisTabId>(
     defaultTab ?? visible[0]?.id ?? "report"
@@ -80,7 +81,13 @@ export default function AnalysisPanelTabs({
             key={tab.id}
             value={tab.id}
             label={tab.label}
-            icon={<Icon icon={tab.icon} width={16} />}
+            icon={
+              <Icon
+                icon={tab.icon}
+                width={16}
+                style={{ color: "currentColor" }}
+              />
+            }
             iconPosition="start"
             {...(tab.tourId ? { "data-tour-id": tab.tourId } : {})}
           />

@@ -8,7 +8,7 @@ import {
   Portal,
 } from "@mui/material";
 import { Icon } from "@iconify/react";
-import { palette } from "@/theme/voltchessTheme";
+import { usePalette } from "@/hooks/usePalette";
 
 export interface TourStep {
   id: string;
@@ -100,6 +100,7 @@ export default function SpotlightTour({
   onStepChange,
   waitForTarget = true,
 }: Props) {
+  const palette = usePalette();
   const [stepIndex, setStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<Rect | null>(null);
   const [tooltipSize, setTooltipSize] = useState({ width: 320, height: 200 });

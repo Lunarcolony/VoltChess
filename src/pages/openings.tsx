@@ -16,7 +16,7 @@ import {
 import { Icon } from "@iconify/react";
 import { PageTitle } from "@/components/pageTitle";
 import PageContainer from "@/components/PageContainer";
-import { cardSx, palette } from "@/theme/voltchessTheme";
+import { useCardSx, usePalette } from "@/hooks/usePalette";
 
 interface OpeningData {
   name: string;
@@ -145,6 +145,8 @@ const openingsDatabase: OpeningData[] = [
 ];
 
 function OpeningsDatabase() {
+  const palette = usePalette();
+  const cardSx = useCardSx();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(
     null

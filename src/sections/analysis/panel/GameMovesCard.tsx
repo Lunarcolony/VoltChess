@@ -3,9 +3,10 @@ import { useAtomValue } from "jotai";
 import { gameAtom } from "../states";
 import { usePlayersData } from "@/hooks/usePlayersData";
 import MovesPanel from "../panelBody/classificationTab/movesPanel";
-import { palette } from "@/theme/voltchessTheme";
+import { usePalette } from "@/hooks/usePalette";
 
 export default function GameMovesCard() {
+  const palette = usePalette();
   const game = useAtomValue(gameAtom);
   const { white, black } = usePlayersData(gameAtom);
   const headers = game.getHeaders();

@@ -1,7 +1,7 @@
 import { Grid2 as Grid, IconButton, Tooltip } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { useAtomValue } from "jotai";
-import { boardAtom, gameAtom } from "../states";
+import { boardAtom } from "../states";
 import { useChessActions } from "@/hooks/useChessActions";
 import FlipBoardButton from "./flipBoardButton";
 import NextMoveButton from "./nextMoveButton";
@@ -15,7 +15,6 @@ export default function PanelToolBar() {
     useChessActions(boardAtom);
 
   const boardHistory = board.history();
-  const game = useAtomValue(gameAtom);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {

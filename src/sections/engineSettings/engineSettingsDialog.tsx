@@ -24,10 +24,10 @@ import {
   engineWorkersNbAtom,
 } from "../analysis/states";
 import { boardHueAtom } from "@/components/board/states";
-import { useAtomLocalStorage } from "@/hooks/useAtomLocalStorage";
 import { isEngineSupported } from "@/lib/engine/shared";
 import { Stockfish16_1 } from "@/lib/engine/stockfish16_1";
-import { DEFAULT_ENGINE, ENGINE_LABELS, STRONGEST_ENGINE } from "@/constants";
+import { ENGINE_LABELS, STRONGEST_ENGINE } from "@/constants";
+import { ENGINE_DEFAULTS } from "@/constants/engineDefaults";
 import { getRecommendedWorkersNb } from "@/lib/engine/worker";
 
 interface Props {
@@ -36,18 +36,9 @@ interface Props {
 }
 
 export default function EngineSettingsDialog({ open, onClose }: Props) {
-  const [depth, setDepth] = useAtomLocalStorage(
-    "engine-depth",
-    engineDepthAtom
-  );
-  const [multiPv, setMultiPv] = useAtomLocalStorage(
-    "engine-multi-pv",
-    engineMultiPvAtom
-  );
-  const [engineName, setEngineName] = useAtomLocalStorage(
-    "engine-name",
-    engineNameAtom
-  );
+  const [depth, setDepth] = useAtom(engineDepthAtom);
+  const [multiPv, setMultiPv] = useAtom(engineMultiPvAtom);
+  const [engineName, setEngineName] = useAtom(engineNameAtom);
   const [boardHue, setBoardHue] = useAtom(boardHueAtom);
   const [engineWorkersNb, setEngineWorkersNb] = useAtom(engineWorkersNbAtom);
 
@@ -67,12 +58,11 @@ export default function EngineSettingsDialog({ open, onClose }: Props) {
 
       <DialogContent>
         <Typography variant="body2" sx={{ mb: 3 }}>
-          {ENGINE_LABELS[DEFAULT_ENGINE].small} is the default engine if your
-          device supports its requirements. It offers the best balance between
-          speed and strength. {ENGINE_LABELS[STRONGEST_ENGINE].small} is the
-          strongest engine available, note that it requires a one-time download
-          of {ENGINE_LABELS[STRONGEST_ENGINE].sizeMb}MB and is much more compute
-          intensive.
+          {ENGINE_LABELS[ENGINE_DEFAULTS.engine].full} is the default — tuned
+          for fast analysis in your browser (depth {ENGINE_DEFAULTS.depth},
+          {ENGINE_DEFAULTS.multiPv} lines, {ENGINE_DEFAULTS.workers} thread).
+          {ENGINE_LABELS[STRONGEST_ENGINE].small} is stronger but downloads{" "}
+          {ENGINE_LABELS[STRONGEST_ENGINE].sizeMb}MB and uses much more CPU.
         </Typography>
 
         <Grid container spacing={3}>

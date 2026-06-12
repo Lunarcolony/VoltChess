@@ -1,11 +1,8 @@
-import { ThemeProvider } from "@mui/material";
 import { PropsWithChildren } from "react";
 import Sidebar, { SIDEBAR_WIDTH } from "./Sidebar";
-import { createVoltChessTheme } from "@/theme/voltchessTheme";
-import { CssBaseline, Box, useMediaQuery, useTheme } from "@mui/material";
+import AppThemeProvider from "./AppThemeProvider";
+import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { useRouter } from "@/hooks/useRouter";
-
-const theme = createVoltChessTheme();
 
 /** Routes that render edge-to-edge without page padding */
 const FULL_BLEED_ROUTES = ["/analysis", "/reanalysis"];
@@ -42,12 +39,11 @@ function MainContent({ children }: PropsWithChildren) {
 
 export default function Layout({ children }: PropsWithChildren) {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <AppThemeProvider>
       <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}>
         <Sidebar />
         <MainContent>{children}</MainContent>
       </Box>
-    </ThemeProvider>
+    </AppThemeProvider>
   );
 }
