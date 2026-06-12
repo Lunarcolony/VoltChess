@@ -30,7 +30,7 @@ export default function BlogArticle({ post }: Props) {
           publisher: {
             "@type": "Organization",
             name: "VoltChess",
-            logo: { "@type": "ImageObject", url: `${SITE_URL}/favicon-32x32.png` },
+            logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.svg` },
           },
           mainEntityOfPage: url,
           keywords: post.keywords,

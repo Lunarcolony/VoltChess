@@ -8,6 +8,7 @@ import NavMenu from "./NavMenu";
 import { Icon } from "@iconify/react";
 import { useRouter } from "@/hooks/useRouter";
 import NavLink from "@/components/NavLink";
+import VoltChessLogo from "@/components/VoltChessLogo";
 
 interface Props {
   darkMode: boolean;
@@ -39,12 +40,7 @@ export default function NavBar({
         enableColorOnDark
       >
         <Toolbar variant="dense">
-          <img
-            src="/favicon-32x32.png"
-            alt="VoltChess logo"
-            width={70}
-            height={70}
-          />
+          <VoltChessLogo size={40} sx={{ ml: -0.5 }} />
 
           <NavLink href="/">
             <Typography

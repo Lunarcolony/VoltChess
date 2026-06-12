@@ -30,7 +30,7 @@ export const chessSoftwareSchema = {
   description:
     "Free chess game review and analysis powered by Stockfish. Upload PGN files, import Chess.com and Lichess games, find blunders, and improve your chess.",
   url: "https://voltchess.me/",
-  screenshot: "https://voltchess.me/social-networks-1200x630.png",
+  screenshot: "https://voltchess.me/og-image.svg",
   operatingSystem: "Any",
   browserRequirements: "Requires JavaScript. Requires HTML5.",
   offers: {

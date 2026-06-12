@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import NavLink from "@/components/NavLink";
+import VoltChessLogo from "@/components/VoltChessLogo";
 import { useRouter } from "@/hooks/useRouter";
 import { usePalette } from "@/hooks/usePalette";
 import { alpha } from "@mui/material/styles";
@@ -43,12 +44,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       }}
     >
       <Box sx={{ px: 2.5, py: 2.5, display: "flex", alignItems: "center", gap: 1.5 }}>
-        <Box
-          component="img"
-          src="/favicon-32x32.png"
-          alt="VoltChess"
-          sx={{ width: 28, height: 28 }}
-        />
+        <VoltChessLogo size={28} />
         <Typography
           variant="h6"
           sx={{ fontWeight: 700, fontSize: "1.05rem", color: palette.text }}
@@ -156,7 +152,7 @@ export default function Sidebar() {
             <Icon icon="mdi:menu" width={22} />
           </IconButton>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: 0.5 }}>
-            <Box component="img" src="/favicon-32x32.png" alt="VoltChess" sx={{ width: 24, height: 24 }} />
+            <VoltChessLogo size={24} />
             <Typography fontWeight={700} fontSize="0.95rem">
               VoltChess
             </Typography>

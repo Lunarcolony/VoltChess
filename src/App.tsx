@@ -4,6 +4,7 @@ import Layout from "@/sections/layout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { LoadingSpinner } from "@/components/Loading";
 import RouteAnalytics from "@/components/RouteAnalytics";
+import { Analytics } from "@vercel/analytics/react";
 
 // Lazy load pages for better performance
 const Home = lazy(() => import("@/pages/index"));
@@ -23,6 +24,7 @@ const BlogPost = lazy(() => import("@/pages/blog/post"));
 function App() {
   return (
     <ErrorBoundary>
+      <Analytics />
       <RouteAnalytics />
       <Layout>
         <Suspense

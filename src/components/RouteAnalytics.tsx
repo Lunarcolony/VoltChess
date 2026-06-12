@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { track } from "@vercel/analytics";
 
-/** Tracks HashRouter page views for Vercel Analytics. */
+/** Tracks page views for Vercel Analytics. */
 export default function RouteAnalytics() {
   const location = useLocation();
 
