@@ -11,11 +11,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-insecure-change-me")
 DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() == "true"
 
-ALLOWED_HOSTS = [
-    h.strip()
-    for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-    if h.strip()
-]
+_raw_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
+ALLOWED_HOSTS = (
+    ["*"]
+    if _raw_hosts.strip() == "*"
+    else [h.strip() for h in _raw_hosts.split(",") if h.strip()]
+)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -106,9 +107,13 @@ CORS_ALLOWED_ORIGINS = [
     o.strip()
     for o in os.environ.get(
         "CORS_ALLOWED_ORIGINS",
-        "http://localhost:3000,http://127.0.0.1:3000,https://voltchess.me",
+        "http://localhost:3000,http://127.0.0.1:3000,https://voltchess.me,https://www.voltchess.me",
     ).split(",")
     if o.strip()
+]
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.vercel\.app$",
+    r"^https://.*\.trycloudflare\.com$",
 ]
 CORS_ALLOW_CREDENTIALS = True
 

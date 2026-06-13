@@ -1,7 +1,8 @@
-import { useEffect, useState, ReactNode } from "react";
+import { useEffect, ReactNode } from "react";
 import { useRouter } from "@/hooks/useRouter";
-import { jwtDecode } from "jwt-decode";
-import { ACCESS_TOKEN, ENABLE_AUTHENTICATION } from "../constants";
+import { LoadingSpinner } from "@/components/Loading";
+import { useAuth } from "@/contexts/AuthContext";
+import { ENABLE_AUTHENTICATION } from "@/constants";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -9,39 +10,27 @@ interface ProtectedRouteProps {
 
 function ProtectedRoute({ children }: ProtectedRouteProps) {
   const router = useRouter();
-  const [isAuthorized, setIsAuthorized] = useState<null | boolean>(null);
+  const { loading, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    // If authentication is disabled, allow access to all routes
-    if (!ENABLE_AUTHENTICATION) {
-      setIsAuthorized(true);
-      return;
-    }
-
-    const token =
-      typeof window !== "undefined" ? localStorage.getItem(ACCESS_TOKEN) : null;
-    if (!token) {
-      setIsAuthorized(false);
-      router.replace("/login");
-      return;
-    }
-    try {
-      const decoded = jwtDecode(token);
-      const now = Date.now() / 1000;
-      if (decoded.exp && decoded.exp < now) {
-        setIsAuthorized(false);
-        router.replace("/login");
-      } else {
-        setIsAuthorized(true);
-      }
-    } catch {
-      setIsAuthorized(false);
+    if (!ENABLE_AUTHENTICATION || loading) return;
+    if (!isAuthenticated) {
       router.replace("/login");
     }
-  }, [router]);
+  }, [loading, isAuthenticated, router]);
 
-  if (isAuthorized === null) return <div>Loading...</div>;
-  if (!isAuthorized) return null;
+  if (!ENABLE_AUTHENTICATION) {
+    return children;
+  }
+
+  if (loading) {
+    return <LoadingSpinner message="Checking session…" />;
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return children;
 }
 

@@ -1,101 +1,151 @@
-import { useState } from "react";
-import { useRouter } from "@/hooks/useRouter";
+import { FormEvent, useState } from "react";
+import { useLocation } from "react-router-dom";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { Icon } from "@iconify/react";
 import Link from "@/components/Link";
-import api from "../api";
-import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
+import GuestRoute from "@/components/GuestRoute";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "@/hooks/useRouter";
+import { usePalette } from "@/hooks/usePalette";
+import AuthLayout from "@/sections/auth/AuthLayout";
+import { getApiErrorMessage } from "@/lib/apiErrors";
 
-export default function Login() {
+function LoginForm() {
   const router = useRouter();
+  const location = useLocation();
+  const palette = usePalette();
+  const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
 
-    // Validation checks
     if (!username.trim()) {
       setError("Username is required");
-      setLoading(false);
       return;
     }
     if (!password.trim()) {
       setError("Password is required");
-      setLoading(false);
       return;
     }
 
+    setLoading(true);
     try {
-      const res = await api.post("/api/token/", { username, password });
-      localStorage.setItem(ACCESS_TOKEN, res.data.access);
-      localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
-      router.push("/");
-    } catch (err: any) {
-      setError("Invalid username or password");
+      await login(username.trim(), password);
+      const from =
+        (location.state as { from?: { pathname: string } })?.from?.pathname ??
+        "/";
+      router.push(from);
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: "auto", padding: 24 }}>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Username</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            style={{ width: "100%", marginBottom: 12, padding: 8 }}
-          />
-        </div>
-        <div>
-          <label>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: "100%", marginBottom: 12, padding: 8 }}
-          />
-        </div>
-        {error && <div style={{ color: "red", marginBottom: 12 }}>{error}</div>}
-        <button
+    <AuthLayout
+      title="Sign in"
+      subtitle="Access your academy account to sync games and view student progress."
+      banner={
+        <Alert severity="warning" icon={<Icon icon="mdi:information-outline" width={22} />}>
+          Sign-in is only required for <strong>chess academies</strong> and{" "}
+          <strong>enrolled learners</strong>. Casual game review does not need an account.
+        </Alert>
+      }
+    >
+      <Box component="form" onSubmit={handleSubmit} noValidate>
+        <TextField
+          label="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          fullWidth
+          autoComplete="username"
+          autoFocus
+          margin="normal"
+          size="small"
+        />
+        <TextField
+          label="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          fullWidth
+          autoComplete="current-password"
+          margin="normal"
+          size="small"
+        />
+
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        <Button
           type="submit"
+          fullWidth
+          variant="contained"
           disabled={loading}
-          style={{
-            width: "100%",
-            padding: 12,
-            backgroundColor: "#007bff",
-            color: "white",
-            border: "none",
-            borderRadius: 4,
-            cursor: loading ? "not-allowed" : "pointer",
+          startIcon={
+            loading ? (
+              <CircularProgress size={18} color="inherit" />
+            ) : (
+              <Icon icon="mdi:login" width={20} />
+            )
+          }
+          sx={{
+            mt: 2.5,
+            py: 1.2,
+            fontWeight: 600,
+            bgcolor: palette.accent,
+            color: palette.onAccent,
+            "&:hover": { bgcolor: palette.accentHover },
           }}
         >
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
+          {loading ? "Signing in…" : "Sign in"}
+        </Button>
 
-      {/* Navigation Links */}
-      <div style={{ marginTop: 16, textAlign: "center" }}>
-        <p>
-          Don't have an account?{" "}
-          <Link href="/register" style={{ color: "#007bff" }}>
-            Register here
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mt: 2.5, textAlign: "center" }}
+        >
+          Don&apos;t have an account?{" "}
+          <Link href="/register" style={{ color: palette.accent, fontWeight: 600 }}>
+            Create one
           </Link>
-        </p>
-        <p>
-          <Link href="/" style={{ color: "#007bff" }}>
-            ← Back to Home
+        </Typography>
+
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mt: 1.5, textAlign: "center" }}
+        >
+          <Link href="/" style={{ color: palette.textMuted }}>
+            ← Back to VoltChess
           </Link>
-        </p>
-      </div>
-    </div>
+        </Typography>
+      </Box>
+    </AuthLayout>
+  );
+}
+
+export default function Login() {
+  return (
+    <GuestRoute>
+      <LoginForm />
+    </GuestRoute>
   );
 }

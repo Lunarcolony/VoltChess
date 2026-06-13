@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand
 
 from academies.models import Academy, CoachStudentLink, Membership, MembershipRole
 from accounts.models import UserRole
+from assignments.models import Assignment, AssignmentStatus
 
 User = get_user_model()
 
@@ -50,6 +51,16 @@ class Command(BaseCommand):
             coach=coach,
             student=student,
             defaults={"academy": academy},
+        )
+
+        Assignment.objects.get_or_create(
+            coach=coach,
+            student=student,
+            instructions="Analyze your latest tournament game and upload it to VoltChess.",
+            defaults={
+                "status": AssignmentStatus.PENDING,
+                "pgn": "",
+            },
         )
 
         self.stdout.write(self.style.SUCCESS("Demo data ready:"))

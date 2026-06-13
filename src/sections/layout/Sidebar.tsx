@@ -11,26 +11,57 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import NavLink from "@/components/NavLink";
 import VoltChessLogo from "@/components/VoltChessLogo";
 import { useRouter } from "@/hooks/useRouter";
 import { usePalette } from "@/hooks/usePalette";
 import { alpha } from "@mui/material/styles";
 import { Link as MuiLink } from "@mui/material";
+import { SidebarAccount, MobileSignInButton } from "./SidebarAccount";
+import { UserRole } from "@/types/user";
+import { useAuth } from "@/contexts/AuthContext";
 
-const NAV_ITEMS = [
+type NavItem = { label: string; icon: string; href: string };
+
+const BASE_NAV: NavItem[] = [
   { label: "Home", icon: "mdi:home-outline", href: "/" },
   { label: "Analysis", icon: "mdi:magnify", href: "/reanalysis" },
   { label: "Guides", icon: "mdi:book-open-page-variant-outline", href: "/blog" },
   { label: "Database", icon: "mdi:database-outline", href: "/database" },
-] as const;
+];
+
+function navForRole(role: UserRole | undefined, isAuthenticated: boolean): NavItem[] {
+  if (!isAuthenticated || !role) return BASE_NAV;
+
+  const items = [...BASE_NAV];
+  if (role === UserRole.Coach || role === UserRole.Admin) {
+    items.splice(1, 0, {
+      label: "Coach",
+      icon: "mdi:account-group-outline",
+      href: "/coach",
+    });
+  }
+  if (role === UserRole.Student) {
+    items.splice(1, 0, {
+      label: "My Academy",
+      icon: "mdi:school-outline",
+      href: "/student",
+    });
+  }
+  return items;
+}
 
 const SIDEBAR_WIDTH = 220;
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const palette = usePalette();
   const router = useRouter();
+  const { user, isAuthenticated } = useAuth();
+  const navItems = useMemo(
+    () => navForRole(user?.role, isAuthenticated),
+    [user?.role, isAuthenticated]
+  );
 
   return (
     <Box
@@ -56,7 +87,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
  
 
       <List sx={{ flex: 1, px: 1.5, py: 1 }}>
-        {NAV_ITEMS.map(({ label, icon, href }) => {
+        {navItems.map(({ label, icon, href }) => {
           const isActive =
             href === "/"
               ? router.pathname === "/"
@@ -95,26 +126,29 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         })}
       </List>
 
-      <Box
-        sx={{
-          mt: "auto",
-          px: 2,
-          py: 1.75,
-          borderTop: `1px solid ${palette.borderSubtle}`,
-        }}
-      >
-        <Typography fontSize="0.65rem" lineHeight={1.45} color="text.secondary">
-          Free chess game review · Powered by{" "}
-          <MuiLink
-            href="https://github.com/GuillaumeSD/Chesskit"
-            target="_blank"
-            rel="noopener noreferrer"
-            underline="hover"
-            sx={{ color: palette.textMuted, fontSize: "inherit" }}
-          >
-            Chesskit
-          </MuiLink>
-        </Typography>
+      <Box sx={{ mt: "auto" }}>
+        <SidebarAccount onNavigate={onNavigate} />
+
+        <Box
+          sx={{
+            px: 2,
+            py: 1.5,
+            borderTop: `1px solid ${palette.borderSubtle}`,
+          }}
+        >
+          <Typography fontSize="0.65rem" lineHeight={1.45} color="text.secondary">
+            Free chess game review · Powered by{" "}
+            <MuiLink
+              href="https://github.com/GuillaumeSD/Chesskit"
+              target="_blank"
+              rel="noopener noreferrer"
+              underline="hover"
+              sx={{ color: palette.textMuted, fontSize: "inherit" }}
+            >
+              Chesskit
+            </MuiLink>
+          </Typography>
+        </Box>
       </Box>
     </Box>
   );
@@ -151,12 +185,13 @@ export default function Sidebar() {
           >
             <Icon icon="mdi:menu" width={22} />
           </IconButton>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: 0.5 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: 0.5, flex: 1 }}>
             <VoltChessLogo size={24} />
             <Typography fontWeight={700} fontSize="0.95rem">
               VoltChess
             </Typography>
           </Box>
+          <MobileSignInButton />
         </Box>
 
         <Drawer

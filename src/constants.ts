@@ -1,14 +1,19 @@
 import { EngineName, MoveClassification } from "./types/enums";
 import { ENGINE_DEFAULTS } from "./constants/engineDefaults";
+import { resolveApiBaseUrl } from "./config/apiUrl";
+
 export const ACCESS_TOKEN = "access";
 export const REFRESH_TOKEN = "refresh";
-// Authentication Configuration
-// Set this to false to disable authentication and allow users to access all pages without logging in
-// Set this to true to enable authentication and require users to log in for protected routes
-// Can be overridden by VITE_ENABLE_AUTHENTICATION environment variable
-export const ENABLE_AUTHENTICATION = import.meta.env.VITE_ENABLE_AUTHENTICATION
-  ? import.meta.env.VITE_ENABLE_AUTHENTICATION === "true"
-  : true;
+
+/** Initial default; use getApiBaseUrl() at request time for latest URL */
+export const API_URL = resolveApiBaseUrl();
+
+/**
+ * Academy authentication is enabled by default.
+ * Set VITE_ENABLE_AUTHENTICATION=false only for local dev without the Pi API.
+ */
+export const ENABLE_AUTHENTICATION =
+  import.meta.env.VITE_ENABLE_AUTHENTICATION !== "false";
 
 export const CLASSIFICATION_COLORS: Record<MoveClassification, string> = {
   [MoveClassification.Opening]: "#dbac86",

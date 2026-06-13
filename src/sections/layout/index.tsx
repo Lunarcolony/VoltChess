@@ -7,6 +7,9 @@ import { useRouter } from "@/hooks/useRouter";
 /** Routes that render edge-to-edge without page padding */
 const FULL_BLEED_ROUTES = ["/analysis", "/reanalysis"];
 
+/** Auth entry — no sidebar (Academy sign-in / register) */
+const AUTH_ROUTES = ["/login", "/register", "/sign-in"];
+
 function MainContent({ children }: PropsWithChildren) {
   const muiTheme = useTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("md"));
@@ -38,6 +41,15 @@ function MainContent({ children }: PropsWithChildren) {
 }
 
 export default function Layout({ children }: PropsWithChildren) {
+  const router = useRouter();
+  const isAuthRoute = AUTH_ROUTES.some((route) =>
+    router.pathname.startsWith(route)
+  );
+
+  if (isAuthRoute) {
+    return <AppThemeProvider>{children}</AppThemeProvider>;
+  }
+
   return (
     <AppThemeProvider>
       <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}>

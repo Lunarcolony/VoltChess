@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getApiBaseUrl } from "@/config/apiUrl";
 
 export default function Hello() {
   const [message, setMessage] = useState<string>("Loading...");
@@ -6,7 +7,7 @@ export default function Hello() {
   useEffect(() => {
     console.log("useEffect started");
 
-    fetch("http://127.0.0.1:8000/api/hello/")
+    fetch(`${getApiBaseUrl()}/api/hello/`)
       .then((res) => {
         console.log("response status:", res.status);
         if (!res.ok) {
