@@ -4,19 +4,19 @@ overview: "Evolve VoltChess from a local-first analyzer into an academy control 
 todos:
   - id: phase1-django-api
     content: "Scaffold Django+DRF+PostgreSQL on Pi: User roles, Academy, Membership, JWT auth matching existing frontend"
-    status: pending
+    status: completed
   - id: phase1-frontend-api
     content: Wire VITE_API_URL, JWT refresh, role-based routes and sidebar nav
-    status: pending
+    status: completed
   - id: phase2-game-sync
     content: API for Game/GameEval CRUD; hybrid useGameDatabase + post-analyze sync
-    status: pending
+    status: completed
   - id: phase3-coach-dashboard
     content: Coach dashboard, student detail, assignments UI + backend endpoints
-    status: pending
+    status: completed
   - id: phase4-reports-annotations
     content: Move annotations, per-student stats API, report export (PDF or client-generated)
-    status: pending
+    status: completed
 isProject: false
 ---
 

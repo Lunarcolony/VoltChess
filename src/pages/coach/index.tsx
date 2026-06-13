@@ -129,9 +129,16 @@ export default function CoachDashboard() {
         </Box>
 
         <Box sx={{ ...cardSx }}>
-          <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-            Recent assignments
-          </Typography>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+            <Typography variant="h6" fontWeight={600}>
+              Recent assignments
+            </Typography>
+            <NavLink href="/coach/assignments">
+              <Typography fontSize="0.85rem" sx={{ color: palette.accent, fontWeight: 600 }}>
+                Manage →
+              </Typography>
+            </NavLink>
+          </Box>
           {assignmentsLoading ? (
             <CircularProgress size={28} />
           ) : assignments.length === 0 ? (

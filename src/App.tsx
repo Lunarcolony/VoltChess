@@ -23,6 +23,7 @@ const Thanks = lazy(() => import("@/pages/thanks"));
 const BlogIndex = lazy(() => import("@/pages/blog/index"));
 const BlogPost = lazy(() => import("@/pages/blog/post"));
 const CoachDashboard = lazy(() => import("@/pages/coach/index"));
+const CoachAssignments = lazy(() => import("@/pages/coach/assignments"));
 const CoachStudentDetail = lazy(() => import("@/pages/coach/student-detail"));
 const StudentHome = lazy(() => import("@/pages/student/index"));
 
@@ -64,6 +65,14 @@ function App() {
                 element={
                   <RoleRoute allowed={[UserRole.Coach, UserRole.Admin]}>
                     <CoachDashboard />
+                  </RoleRoute>
+                }
+              />
+              <Route
+                path="/coach/assignments"
+                element={
+                  <RoleRoute allowed={[UserRole.Coach, UserRole.Admin]}>
+                    <CoachAssignments />
                   </RoleRoute>
                 }
               />

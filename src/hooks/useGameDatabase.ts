@@ -1,4 +1,6 @@
 import { formatGameToDatabase } from "@/lib/chess";
+import { fetchGame } from "@/lib/api/games";
+import { isServerGameId } from "@/lib/gameSync";
 import { GameEval } from "@/types/eval";
 import { Game } from "@/types/game";
 import { Chess } from "chess.js";
@@ -14,6 +16,14 @@ interface GameDatabaseSchema extends DBSchema {
   };
 }
 
+export type LoadedServerGame = {
+  serverId: string;
+  pgn: string;
+  eval?: GameEval;
+  white: Game["white"];
+  black: Game["black"];
+};
+
 const gamesAtom = atom<Game[]>([]);
 const fetchGamesAtom = atom<boolean>(false);
 
@@ -22,6 +32,9 @@ export const useGameDatabase = (shouldFetchGames?: boolean) => {
   const [games, setGames] = useAtom(gamesAtom);
   const [fetchGames, setFetchGames] = useAtom(fetchGamesAtom);
   const [gameFromUrl, setGameFromUrl] = useState<Game | undefined>(undefined);
+  const [serverGameFromUrl, setServerGameFromUrl] = useState<
+    LoadedServerGame | undefined
+  >(undefined);
 
   useEffect(() => {
     if (shouldFetchGames !== undefined) {
@@ -105,16 +118,43 @@ export const useGameDatabase = (shouldFetchGames?: boolean) => {
   const { gameId } = router.query;
 
   useEffect(() => {
-    switch (typeof gameId) {
-      case "string":
-        getGame(parseInt(gameId)).then((game) => {
-          setGameFromUrl(game);
-        });
-        break;
-      default:
-        setGameFromUrl(undefined);
+    if (typeof gameId !== "string") {
+      setGameFromUrl(undefined);
+      setServerGameFromUrl(undefined);
+      return;
     }
-  }, [gameId, setGameFromUrl, getGame]);
+
+    if (isServerGameId(gameId)) {
+      setGameFromUrl(undefined);
+      fetchGame(gameId)
+        .then((serverGame) => {
+          setServerGameFromUrl({
+            serverId: serverGame.id,
+            pgn: serverGame.pgn,
+            white: serverGame.white,
+            black: serverGame.black,
+            eval: serverGame.eval
+              ? {
+                  positions: serverGame.eval.positions,
+                  accuracy: serverGame.eval.accuracy,
+                  estimatedElo: serverGame.eval.estimated_elo,
+                  settings: serverGame.eval.settings,
+                }
+              : undefined,
+          });
+        })
+        .catch(() => setServerGameFromUrl(undefined));
+      return;
+    }
+
+    setServerGameFromUrl(undefined);
+    const localId = parseInt(gameId, 10);
+    if (Number.isNaN(localId)) {
+      setGameFromUrl(undefined);
+      return;
+    }
+    getGame(localId).then((game) => setGameFromUrl(game));
+  }, [gameId, getGame]);
 
   const isReady = db !== null;
 
@@ -126,5 +166,6 @@ export const useGameDatabase = (shouldFetchGames?: boolean) => {
     games,
     isReady,
     gameFromUrl,
+    serverGameFromUrl,
   };
 };

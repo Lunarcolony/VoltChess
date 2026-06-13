@@ -5,6 +5,7 @@ import { useEngine } from "@/hooks/useEngine";
 import { useGameDatabase } from "@/hooks/useGameDatabase";
 import { usePlayersData } from "@/hooks/usePlayersData";
 import { logAnalyticsEvent } from "@/lib/firebase";
+import { syncAnalysisResult } from "@/lib/gameSync";
 import { SavedEvals } from "@/types/eval";
 import {
   engineDepthAtom,
@@ -26,7 +27,7 @@ export function useAnalyzeGame() {
   );
   const engineDepth = useAtomValue(engineDepthAtom);
   const engineMultiPv = useAtomValue(engineMultiPvAtom);
-  const { setGameEval, gameFromUrl } = useGameDatabase();
+  const { setGameEval, gameFromUrl, serverGameFromUrl } = useGameDatabase();
   const [gameEval, setEval] = useAtom(gameEvalAtom);
   const game = useAtomValue(gameAtom);
   const setSavedEvals = useSetAtom(savedEvalsAtom);
@@ -74,6 +75,13 @@ export function useAnalyzeGame() {
           setGameEval(gameFromUrl.id, newGameEval);
         }
 
+        void syncAnalysisResult(
+          game,
+          newGameEval,
+          gameFromUrl?.id,
+          serverGameFromUrl?.serverId
+        ).catch((err) => console.warn("Server sync failed:", err));
+
         const gameSavedEvals: SavedEvals = params.fens.reduce((acc, fen, idx) => {
           acc[fen] = { ...newGameEval.positions[idx], engine: engineName };
           return acc;
@@ -109,6 +117,7 @@ export function useAnalyzeGame() {
       setEval,
       gameEval,
       gameFromUrl,
+      serverGameFromUrl,
       setGameEval,
       setSavedEvals,
       white?.rating,

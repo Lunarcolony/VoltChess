@@ -25,3 +25,16 @@ export async function createAssignment(data: {
   const res = await api.post<Assignment>("/api/assignments/", data);
   return res.data;
 }
+
+export async function updateAssignment(
+  id: string,
+  data: Partial<{
+    instructions: string;
+    status: Assignment["status"];
+    due_date: string;
+    pgn: string;
+  }>
+): Promise<Assignment> {
+  const res = await api.patch<Assignment>(`/api/assignments/${id}/`, data);
+  return res.data;
+}

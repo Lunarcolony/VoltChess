@@ -21,6 +21,7 @@ import {
   gameEvalAtom,
 } from "../states";
 import { useAnalyzeGame } from "@/hooks/useAnalyzeGame";
+import MoveAnnotations from "./MoveAnnotations";
 
 export default function ReportTabPanel() {
   const router = useRouter();
@@ -70,6 +71,10 @@ export default function ReportTabPanel() {
 
           <EvalLeadPanel />
           <CriticalAnalysis />
+
+          <ReportSection title="Coach notes">
+            <MoveAnnotations />
+          </ReportSection>
         </>
       )}
 

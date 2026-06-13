@@ -1,4 +1,3 @@
-import ProtectedRoute from "@/components/ProtectedRoute";
 import AnalysisPageLayout from "@/sections/analysis/AnalysisPageLayout";
 import AnalysisPanelTabs from "@/sections/analysis/AnalysisPanelTabs";
 import AnalysisBottomNav from "@/sections/analysis/panel/AnalysisBottomNav";
@@ -55,10 +54,4 @@ function ReanalysisPage() {
   );
 }
 
-export default function ProtectedReanalysis() {
-  return (
-    <ProtectedRoute>
-      <ReanalysisPage />
-    </ProtectedRoute>
-  );
-}
+export default ReanalysisPage;

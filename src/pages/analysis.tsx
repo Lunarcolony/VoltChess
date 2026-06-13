@@ -1,5 +1,4 @@
 import AnalyzeButton from "@/sections/analysis/panelHeader/analyzeButton";
-import ProtectedRoute from "@/components/ProtectedRoute";
 import AnalysisPageLayout from "@/sections/analysis/AnalysisPageLayout";
 import AnalysisPanelTabs from "@/sections/analysis/AnalysisPanelTabs";
 import AnalysisBottomNav from "@/sections/analysis/panel/AnalysisBottomNav";
@@ -66,10 +65,4 @@ function AnalysisPage() {
   );
 }
 
-export default function ProtectedAnalysis() {
-  return (
-    <ProtectedRoute>
-      <AnalysisPage />
-    </ProtectedRoute>
-  );
-}
+export default AnalysisPage;

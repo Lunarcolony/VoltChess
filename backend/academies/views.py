@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -28,6 +29,14 @@ class AcademyViewSet(viewsets.ModelViewSet):
         return Academy.objects.filter(
             memberships__user=self.request.user
         ).distinct()
+
+    def perform_create(self, serializer):
+        academy = serializer.save()
+        Membership.objects.get_or_create(
+            academy=academy,
+            user=self.request.user,
+            defaults={"role": MembershipRole.ADMIN},
+        )
 
     @action(detail=True, methods=["get", "post"])
     def members(self, request, pk=None):
@@ -78,9 +87,14 @@ class CoachStudentLinkViewSet(viewsets.ModelViewSet):
         )
 
     def perform_create(self, serializer):
+        user = self.request.user
+        if user.role not in (User.UserRole.COACH, User.UserRole.ADMIN):
+            raise PermissionDenied(
+                "Only coaches and admins can create coach–student links."
+            )
         student_id = self.request.data.get("student_id")
         student = get_object_or_404(User, pk=student_id)
-        serializer.save(coach=self.request.user, student=student)
+        serializer.save(coach=user, student=student)
 
 
 class StudentStatsView(APIView):

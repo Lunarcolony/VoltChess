@@ -45,3 +45,38 @@ export async function fetchAcademies() {
   const res = await api.get("/api/academies/");
   return res.data;
 }
+
+export type StudentReport = {
+  student: { id: string; username: string; email: string };
+  summary: StudentStats;
+  games: Array<{
+    game_id: string;
+    date?: string;
+    white: { name: string };
+    black: { name: string };
+    result?: string;
+    has_eval: boolean;
+    accuracy?: Record<string, number>;
+    classifications?: Record<string, { white: number; black: number }>;
+    move_count?: number;
+  }>;
+  assignments: Array<{
+    id: string;
+    status: string;
+    instructions: string;
+    due_date: string | null;
+    coach: string;
+  }>;
+  generated_at: string;
+};
+
+export async function fetchStudentReport(
+  studentId: string,
+  from?: string,
+  to?: string
+): Promise<StudentReport> {
+  const res = await api.get<StudentReport>(`/api/students/${studentId}/report/`, {
+    params: { from, to },
+  });
+  return res.data;
+}

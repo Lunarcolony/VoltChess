@@ -3,6 +3,10 @@
 node_modules
 /.vs
 
+# Local deploy scripts (voltchess.me workflow — keep off GitHub)
+sync-pi-tunnel-url.bat
+scripts/sync_pi_tunnel_url.py
+
 # build output
 dist/
 build/

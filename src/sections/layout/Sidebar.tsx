@@ -41,6 +41,11 @@ function navForRole(role: UserRole | undefined, isAuthenticated: boolean): NavIt
       icon: "mdi:account-group-outline",
       href: "/coach",
     });
+    items.splice(2, 0, {
+      label: "Assignments",
+      icon: "mdi:clipboard-text-outline",
+      href: "/coach/assignments",
+    });
   }
   if (role === UserRole.Student) {
     items.splice(1, 0, {

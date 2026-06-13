@@ -65,7 +65,7 @@ export function useAnalysisSession() {
   const setEval = useSetAtom(gameEvalAtom);
   const setBoardOrientation = useSetAtom(boardOrientationAtom);
   const setEvaluationProgress = useSetAtom(evaluationProgressAtom);
-  const { gameFromUrl } = useGameDatabase();
+  const { gameFromUrl, serverGameFromUrl } = useGameDatabase();
   const restoredRef = useRef(false);
 
   const applyGame = useCallback(
@@ -135,11 +135,25 @@ export function useAnalysisSession() {
 
     if (gameFromUrl) {
       loadGameFromIdParam(gameFromUrl);
+    } else if (serverGameFromUrl) {
+      const fromServer = new Chess();
+      fromServer.loadPgn(serverGameFromUrl.pgn);
+      if (game.history().join() === fromServer.history().join() && gameEval) return;
+
+      applyGame(
+        serverGameFromUrl.pgn,
+        serverGameFromUrl.eval,
+        !(
+          serverGameFromUrl.black.name === "You" &&
+          serverGameFromUrl.pgn.includes("voltchess.me")
+        )
+      );
     } else if (typeof pgnParam === "string") {
       loadGameFromPgnParam(pgnParam);
     }
   }, [
     gameFromUrl,
+    serverGameFromUrl,
     pgnParam,
     orientationParam,
     game,

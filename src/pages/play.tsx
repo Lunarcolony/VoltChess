@@ -6,7 +6,6 @@ import GameSettingsButton from "@/sections/play/gameSettings/gameSettingsButton"
 import { isGameInProgressAtom } from "@/sections/play/states";
 import { Box } from "@mui/material";
 import { useAtomValue } from "jotai";
-import ProtectedRoute from "@/components/ProtectedRoute";
 import PageContainer from "@/components/PageContainer";
 import { useCardSx } from "@/hooks/usePalette";
 
@@ -75,10 +74,4 @@ function Play() {
   );
 }
 
-export default function ProtectedPlay() {
-  return (
-    <ProtectedRoute>
-      <Play />
-    </ProtectedRoute>
-  );
-}
+export default Play;
