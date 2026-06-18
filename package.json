@@ -5,7 +5,7 @@
   "license": "AGPL-3.0-only",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build && node scripts/postbuild-spa.mjs",
     "build:github": "tsc && vite build --config vite.config.github.ts",
     "build:static": "tsc && vite build --config vite.config.ts",
     "start": "vite preview",

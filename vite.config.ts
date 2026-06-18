@@ -12,7 +12,8 @@ export default defineConfig({
     },
   },
   // Vercel serves from domain root; "./" for other static hosts
-  base: process.env.VERCEL ? "/" : "./",
+  // Absolute paths in production so deep links (/coach/students) load assets correctly.
+  base: process.env.VERCEL || process.env.NODE_ENV === "production" ? "/" : "./",
   server: {
     port: 3000,
     headers: {
