@@ -8,6 +8,7 @@ import { fetchAssignments, updateAssignment } from "@/lib/api/assignments";
 import { fetchGames } from "@/lib/api/games";
 import { fetchCoachMessages } from "@/lib/api/coaching";
 import NavLink from "@/components/NavLink";
+import JoinClassroomCard from "@/sections/coach/JoinClassroomCard";
 import { prepareNewAnalysisSession } from "@/hooks/useAnalysisSession";
 import { useRouter } from "@/hooks/useRouter";
 
@@ -60,6 +61,8 @@ export default function StudentHome() {
         <Typography color="text.secondary" sx={{ mb: 3 }}>
           Welcome, {user?.username}. View assignments and your synced games.
         </Typography>
+
+        <JoinClassroomCard />
 
         <Box sx={{ ...cardSx, mb: 3 }}>
           <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>

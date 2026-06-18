@@ -14,6 +14,7 @@ import { usePalette } from "@/hooks/usePalette";
 import { alpha } from "@mui/material/styles";
 import { fetchCoachDashboard } from "@/lib/api/coaching";
 import CoachShell from "@/sections/coach/CoachShell";
+import ClassroomPanel from "@/sections/coach/ClassroomPanel";
 import {
   CoachPageHeader,
   CoachStatCard,
@@ -40,6 +41,8 @@ export default function CoachDashboardPage() {
           title="Command Center"
           subtitle={`Welcome back, ${user?.username}. Your academy at a glance — students, workload, and who needs attention today.`}
         />
+
+        <ClassroomPanel />
 
         {isLoading ? (
           <CircularProgress />
@@ -228,7 +231,7 @@ export default function CoachDashboardPage() {
                 <CoachEmptyState
                   icon="mdi:account-plus-outline"
                   title="No students yet"
-                  description="Add students by username from the Students tab."
+                  description="Share your classroom code from the Students tab — students join from My Academy."
                 />
               ) : (
                 data.roster.slice(0, 8).map((r) => (

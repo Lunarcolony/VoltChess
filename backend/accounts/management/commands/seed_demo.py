@@ -1,7 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
-from academies.models import Academy, CoachStudentLink, Membership, MembershipRole
+from academies.models import Academy, Classroom, CoachStudentLink, Membership, MembershipRole
+from academies.classroom_codes import get_or_create_classroom_for_coach
 from accounts.models import UserRole
 from assignments.models import Assignment, AssignmentStatus
 
@@ -53,6 +54,10 @@ class Command(BaseCommand):
             defaults={"academy": academy},
         )
 
+        classroom = get_or_create_classroom_for_coach(coach)
+        classroom.name = "VoltChess Demo Classroom"
+        classroom.save(update_fields=["name", "updated_at"])
+
         Assignment.objects.get_or_create(
             coach=coach,
             student=student,
@@ -66,3 +71,4 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Demo data ready:"))
         self.stdout.write(f"  Coach login:   coach / {DEMO_PASSWORD}")
         self.stdout.write(f"  Student login: student / {DEMO_PASSWORD}")
+        self.stdout.write(f"  Classroom code: {classroom.join_code}")
