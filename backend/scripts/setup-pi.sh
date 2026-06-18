@@ -25,9 +25,9 @@ if [[ ! -f "$ENV_FILE" ]]; then
   cp "$BACKEND_DIR/.env.example" "$ENV_FILE"
   sed -i 's/\r$//' "$ENV_FILE" 2>/dev/null || sed -i '' 's/\r$//' "$ENV_FILE" 2>/dev/null || true
   LAN_IP="$(hostname -I | awk '{print $1}')"
-  if [[ -n "$LAN_IP" ]]; then
-    sed -i "s/192.168.8.132/$LAN_IP/g" "$ENV_FILE" 2>/dev/null || \
-      sed -i '' "s/192.168.8.132/$LAN_IP/g" "$ENV_FILE" 2>/dev/null || true
+  if [[ -n "$LAN_IP" ]] && grep -q "PI_LAN_IP_PLACEHOLDER" "$ENV_FILE" 2>/dev/null; then
+    sed -i "s/PI_LAN_IP_PLACEHOLDER/$LAN_IP/g" "$ENV_FILE" 2>/dev/null || \
+      sed -i '' "s/PI_LAN_IP_PLACEHOLDER/$LAN_IP/g" "$ENV_FILE" 2>/dev/null || true
     echo "    Set DJANGO_ALLOWED_HOSTS LAN IP to $LAN_IP"
   fi
   SECRET="$(python3 -c 'import secrets; print(secrets.token_urlsafe(48))')"

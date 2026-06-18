@@ -1,24 +1,43 @@
-"""One-off Pi deploy helper — run locally, not committed with secrets."""
+# Copy to scripts/_deploy_pi_once.py locally — this file is gitignored.
+# Usage:
+#   export PI_SSH_HOST=pi@192.168.x.x
+#   export PI_SSH_PASSWORD=...   # or use SSH keys
+#   python scripts/_deploy_pi_once.py
+
+"""One-off Pi deploy helper — configure via environment variables, not committed secrets."""
 import io
+import os
 import sys
 import tarfile
 from pathlib import Path
 
 import paramiko
 
-HOST = "192.168.8.132"
-USER = "jithesh"
-PASS = sys.argv[1] if len(sys.argv) > 1 else ""
-REMOTE = "/home/jithesh/VoltChess"
+HOST = os.environ.get("PI_SSH_HOST", "")
+USER = os.environ.get("PI_SSH_USER", "")
+PASS = os.environ.get("PI_SSH_PASSWORD", "")
+REMOTE = os.environ.get("PI_REMOTE_DIR", "~/VoltChess")
 LOCAL_BACKEND = Path(__file__).resolve().parent.parent / "backend"
 
-if not PASS:
-    print("Usage: python scripts/_deploy_pi_once.py <ssh-password>")
+if not HOST or not USER:
+    print("Set PI_SSH_HOST (user@host) and PI_SSH_USER if host has no user prefix.")
+    sys.exit(1)
+
+if "@" in HOST:
+    USER, HOST = HOST.split("@", 1)
+
+if not PASS and not os.environ.get("PI_SSH_KEY"):
+    print("Set PI_SSH_PASSWORD or configure SSH keys.")
     sys.exit(1)
 
 client = paramiko.SSHClient()
 client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-client.connect(HOST, username=USER, password=PASS, timeout=30)
+connect_kwargs: dict = {"hostname": HOST, "username": USER, "timeout": 30}
+if PASS:
+    connect_kwargs["password"] = PASS
+if os.environ.get("PI_SSH_KEY"):
+    connect_kwargs["key_filename"] = os.environ["PI_SSH_KEY"]
+client.connect(**connect_kwargs)
 print("SSH connected")
 
 stdin, stdout, stderr = client.exec_command(f"mkdir -p {REMOTE}")
@@ -60,7 +79,7 @@ code = stdout.channel.recv_exit_status()
 print("Exit code:", code)
 
 stdin, stdout, stderr = client.exec_command(
-    "cat /home/jithesh/VoltChess/backend/PUBLIC_API_URL.txt 2>/dev/null || echo NONE"
+    f"cat {REMOTE}/backend/PUBLIC_API_URL.txt 2>/dev/null || echo NONE"
 )
 tunnel_url = stdout.read().decode().strip()
 print("Tunnel URL:", tunnel_url)
@@ -70,11 +89,5 @@ if tunnel_url and tunnel_url != "NONE":
         f'curl -s -o /dev/null -w "%{{http_code}}" {tunnel_url}/api/health/'
     )
     print("Tunnel health:", stdout.read().decode())
-
-    stdin, stdout, stderr = client.exec_command(
-        f'curl -s -X POST {tunnel_url}/api/token/ -H "Content-Type: application/json" '
-        '-d \'{"username":"coach","password":"demo1234"}\' | head -c 80'
-    )
-    print("Login test:", stdout.read().decode())
 
 client.close()

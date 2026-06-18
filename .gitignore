@@ -1,11 +1,21 @@
 
 # dependencies
 node_modules
-/.vs
+.idea/
+.vs/
 
-# Local deploy scripts (voltchess.me workflow — keep off GitHub)
+# Local deploy scripts (never commit Pi SSH targets or passwords)
 sync-pi-tunnel-url.bat
 scripts/sync_pi_tunnel_url.py
+scripts/_deploy_pi_once.py
+
+# Python bytecode / local DB (also see backend/.gitignore)
+**/__pycache__/
+*.py[cod]
+backend/db.sqlite3
+
+# Local API override (use public/api-config.example.json as template)
+public/api-config.local.json
 
 # build output
 dist/

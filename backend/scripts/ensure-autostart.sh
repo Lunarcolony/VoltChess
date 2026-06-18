@@ -83,10 +83,10 @@ RestartSec=15
 WantedBy=multi-user.target voltchess.target
 EOF
 
-sudo tee /etc/systemd/system/voltchess.target >/dev/null <<'EOF'
+sudo tee /etc/systemd/system/voltchess.target >/dev/null <<EOF
 [Unit]
 Description=VoltChess Backend (API + HTTPS tunnel)
-Documentation=file:///home/jithesh/VoltChess/backend/DEPLOY_PI.md
+Documentation=file://${BACKEND_DIR}/DEPLOY_PI.md
 After=network-online.target
 Wants=voltchess-api.service voltchess-tunnel.service
 
