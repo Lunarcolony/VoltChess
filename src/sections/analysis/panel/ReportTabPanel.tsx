@@ -14,6 +14,8 @@ import LoadGameButton from "@/sections/loadGame/loadGameButton";
 import { useChessActions } from "@/hooks/useChessActions";
 import { useRouter } from "@/hooks/useRouter";
 import { prepareNewAnalysisSession } from "@/hooks/useAnalysisSession";
+import { useAuth } from "@/contexts/AuthContext";
+import { UserRole } from "@/types/user";
 import {
   boardAtom,
   evaluationProgressAtom,
@@ -32,6 +34,9 @@ export default function ReportTabPanel() {
   const { setPgn: setGamePgn } = useChessActions(gameAtom);
   const { resetToStartingPosition: resetBoard } = useChessActions(boardAtom);
   const setEval = useSetAtom(gameEvalAtom);
+  const { user } = useAuth();
+  const showCoachNotes =
+    user?.role === UserRole.Coach || user?.role === UserRole.Admin;
 
   const resetAndSetGamePgn = useCallback(
     (pgn: string) => {
@@ -72,9 +77,11 @@ export default function ReportTabPanel() {
           <EvalLeadPanel />
           <CriticalAnalysis />
 
-          <ReportSection title="Coach notes">
-            <MoveAnnotations />
-          </ReportSection>
+          {showCoachNotes && (
+            <ReportSection title="Coach notes">
+              <MoveAnnotations />
+            </ReportSection>
+          )}
         </>
       )}
 

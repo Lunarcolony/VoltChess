@@ -5,9 +5,12 @@ import { ReactNode } from "react";
 export default function NavLink({
   href,
   children,
+  fullWidth = true,
 }: {
   href: string;
   children: ReactNode;
+  /** false for inline header links (Sign in) so they don't stretch across the bar */
+  fullWidth?: boolean;
 }) {
   return (
     <MuiLink
@@ -15,7 +18,11 @@ export default function NavLink({
       href={href}
       underline="none"
       color="inherit"
-      sx={{ width: "100%" }}
+      sx={{
+        display: fullWidth ? "block" : "inline-flex",
+        width: fullWidth ? "100%" : "auto",
+        flexShrink: fullWidth ? undefined : 0,
+      }}
     >
       {children}
     </MuiLink>

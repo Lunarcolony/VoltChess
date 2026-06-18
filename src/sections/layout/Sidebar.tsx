@@ -18,7 +18,7 @@ import { useRouter } from "@/hooks/useRouter";
 import { usePalette } from "@/hooks/usePalette";
 import { alpha } from "@mui/material/styles";
 import { Link as MuiLink } from "@mui/material";
-import { SidebarAccount, MobileSignInButton } from "./SidebarAccount";
+import { SidebarAccount, MobileHeaderAccount } from "./SidebarAccount";
 import { UserRole } from "@/types/user";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -177,6 +177,7 @@ export default function Sidebar() {
             height: 52,
             display: "flex",
             alignItems: "center",
+            gap: 1,
             px: 1.5,
             bgcolor: palette.bg,
             borderBottom: `1px solid ${palette.border}`,
@@ -185,18 +186,32 @@ export default function Sidebar() {
         >
           <IconButton
             onClick={() => setMobileOpen(true)}
-            sx={{ color: palette.text }}
+            sx={{ color: palette.text, flexShrink: 0 }}
             aria-label="Open menu"
           >
             <Icon icon="mdi:menu" width={22} />
           </IconButton>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: 0.5, flex: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              flex: 1,
+              minWidth: 0,
+              overflow: "hidden",
+            }}
+          >
             <VoltChessLogo size={24} />
-            <Typography fontWeight={700} fontSize="0.95rem">
+            <Typography
+              fontWeight={700}
+              fontSize="0.95rem"
+              noWrap
+              sx={{ minWidth: 0 }}
+            >
               VoltChess
             </Typography>
           </Box>
-          <MobileSignInButton />
+          <MobileHeaderAccount />
         </Box>
 
         <Drawer

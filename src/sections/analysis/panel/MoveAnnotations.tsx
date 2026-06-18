@@ -19,6 +19,7 @@ import {
 import { usePalette } from "@/hooks/usePalette";
 import { useGameDatabase } from "@/hooks/useGameDatabase";
 import { syncAnalysisResult } from "@/lib/gameSync";
+import { UserRole } from "@/types/user";
 import { boardAtom, gameAtom, gameEvalAtom } from "@/sections/analysis/states";
 
 type Props = {
@@ -27,7 +28,9 @@ type Props = {
 
 export default function MoveAnnotations({ serverGameId }: Props) {
   const palette = usePalette();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
+  const canAccessSection =
+    user?.role === UserRole.Coach || user?.role === UserRole.Admin;
   const board = useAtomValue(boardAtom);
   const game = useAtomValue(gameAtom);
   const gameEval = useAtomValue(gameEvalAtom);
@@ -41,7 +44,11 @@ export default function MoveAnnotations({ serverGameId }: Props) {
   const { data: annotations = [] } = useQuery({
     queryKey: ["annotations", activeGameId],
     queryFn: () => fetchAnnotations(activeGameId!),
-    enabled: ENABLE_AUTHENTICATION && isAuthenticated && !!activeGameId,
+    enabled:
+      ENABLE_AUTHENTICATION &&
+      isAuthenticated &&
+      !!activeGameId &&
+      canAccessSection,
   });
 
   const [draft, setDraft] = useState("");
@@ -80,7 +87,14 @@ export default function MoveAnnotations({ serverGameId }: Props) {
     onSuccess: invalidate,
   });
 
-  if (!ENABLE_AUTHENTICATION || !isAuthenticated) return null;
+  if (
+    !ENABLE_AUTHENTICATION ||
+    loading ||
+    !isAuthenticated ||
+    !user ||
+    !canAccessSection
+  )
+    return null;
 
   if (!activeGameId && !gameEval) {
     return (

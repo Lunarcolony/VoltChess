@@ -4,7 +4,7 @@
  * Then update this file AND public/api-config.json
  */
 export const PRODUCTION_API_URL =
-  "https://heavily-laden-strike-mail.trycloudflare.com";
+  "https://palace-scored-entire-also.trycloudflare.com";
 
 const VOLT_CHESS_HOSTS = ["voltchess.me", "www.voltchess.me"];
 

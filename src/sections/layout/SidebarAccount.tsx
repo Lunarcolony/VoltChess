@@ -166,7 +166,7 @@ export function MobileSignInButton() {
   if (loading || isAuthenticated) return null;
 
   return (
-    <NavLink href="/login">
+    <NavLink href="/login" fullWidth={false}>
       <Button
         size="small"
         variant="contained"
@@ -176,6 +176,9 @@ export function MobileSignInButton() {
           fontSize: "0.8rem",
           textTransform: "none",
           borderRadius: 1.5,
+          whiteSpace: "nowrap",
+          flexShrink: 0,
+          px: 1.5,
           bgcolor: palette.accent,
           color: palette.onAccent,
           boxShadow: "none",
@@ -185,5 +188,105 @@ export function MobileSignInButton() {
         Sign in
       </Button>
     </NavLink>
+  );
+}
+
+export function MobileHeaderAccount() {
+  const palette = usePalette();
+  const router = useRouter();
+  const { user, logout, isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return <Box sx={{ width: 36, flexShrink: 0 }} />;
+  }
+
+  if (!isAuthenticated || !user) {
+    return <MobileSignInButton />;
+  }
+
+  const initial = user.username.charAt(0).toUpperCase();
+  const roleLabel = USER_ROLE_LABELS[user.role] ?? user.role;
+
+  const handleSignOut = () => {
+    logout();
+    router.push("/login");
+  };
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 0.75,
+        flexShrink: 0,
+        minWidth: 0,
+        maxWidth: "50%",
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 0.75,
+          minWidth: 0,
+          px: 0.75,
+          py: 0.35,
+          borderRadius: 1.5,
+          bgcolor: alpha(palette.text, 0.04),
+          border: `1px solid ${palette.borderSubtle}`,
+        }}
+      >
+        <Box
+          sx={{
+            width: 28,
+            height: 28,
+            borderRadius: "50%",
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontWeight: 700,
+            fontSize: "0.72rem",
+            bgcolor: alpha(palette.accent, 0.15),
+            color: palette.accent,
+          }}
+        >
+          {initial}
+        </Box>
+        <Box sx={{ minWidth: 0, display: { xs: "none", sm: "block" } }}>
+          <Typography
+            noWrap
+            sx={{ fontSize: "0.78rem", fontWeight: 600, lineHeight: 1.2 }}
+          >
+            {user.username}
+          </Typography>
+          <Typography
+            noWrap
+            sx={{ fontSize: "0.65rem", color: palette.textMuted, lineHeight: 1.2 }}
+          >
+            {roleLabel}
+          </Typography>
+        </Box>
+      </Box>
+      <Tooltip title="Sign out">
+        <IconButton
+          onClick={handleSignOut}
+          size="small"
+          aria-label="Sign out"
+          sx={{
+            flexShrink: 0,
+            width: 32,
+            height: 32,
+            color: palette.textMuted,
+            "&:hover": {
+              color: palette.text,
+              bgcolor: alpha(palette.text, 0.06),
+            },
+          }}
+        >
+          <Icon icon="mdi:logout" width={18} />
+        </IconButton>
+      </Tooltip>
+    </Box>
   );
 }
