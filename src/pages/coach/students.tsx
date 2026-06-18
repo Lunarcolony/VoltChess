@@ -17,15 +17,12 @@ import {
 import { Icon } from "@iconify/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import CoachShell from "@/sections/coach/CoachShell";
+import ClassroomPanel from "@/sections/coach/ClassroomPanel";
 import { CoachPageHeader, CoachEmptyState } from "@/sections/coach/CoachUi";
 import { engagementColor, PRIORITY_OPTIONS } from "@/sections/coach/constants";
 import { usePalette } from "@/hooks/usePalette";
 import { alpha } from "@mui/material/styles";
-import {
-  createCoachLink,
-  fetchCoachLinks,
-  updateCoachLink,
-} from "@/lib/api/academies";
+import { fetchCoachLinks, updateCoachLink } from "@/lib/api/academies";
 import { fetchCoachDashboard } from "@/lib/api/coaching";
 import NavLink from "@/components/NavLink";
 
@@ -34,8 +31,6 @@ export default function CoachStudentsPage() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [tagFilter, setTagFilter] = useState("");
-  const [addOpen, setAddOpen] = useState(false);
-  const [username, setUsername] = useState("");
   const [editId, setEditId] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
   const [tags, setTags] = useState("");
@@ -46,16 +41,6 @@ export default function CoachStudentsPage() {
   const { data: dashboard, isLoading } = useQuery({
     queryKey: ["coach-dashboard"],
     queryFn: fetchCoachDashboard,
-  });
-
-  const addMut = useMutation({
-    mutationFn: () => createCoachLink({ student_username: username.trim() }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["coach-dashboard"] });
-      qc.invalidateQueries({ queryKey: ["coach-links"] });
-      setAddOpen(false);
-      setUsername("");
-    },
   });
 
   const updateMut = useMutation({
@@ -108,13 +93,10 @@ export default function CoachStudentsPage() {
       <CoachShell>
         <CoachPageHeader
           title="Student roster"
-          subtitle="Search, tag, and set goals. Pin priority students and track engagement without leaving the coach hub."
-          action={
-            <Button variant="contained" onClick={() => setAddOpen(true)}>
-              Add student
-            </Button>
-          }
+          subtitle="Share your classroom code so students can join from My Academy. Search, tag, and set goals for everyone on your roster."
         />
+
+        <ClassroomPanel />
 
         <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", mb: 2 }}>
           <TextField
@@ -147,7 +129,7 @@ export default function CoachStudentsPage() {
           <CoachEmptyState
             icon="mdi:account-search-outline"
             title="No students match"
-            description="Add a student by their VoltChess username or adjust filters."
+            description="Share your classroom code above, or adjust your search filters."
           />
         ) : (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
@@ -225,32 +207,6 @@ export default function CoachStudentsPage() {
             ))}
           </Box>
         )}
-
-        <Dialog open={addOpen} onClose={() => setAddOpen(false)} fullWidth maxWidth="xs">
-          <DialogTitle>Add student</DialogTitle>
-          <DialogContent>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Enter the student&apos;s VoltChess username. They must already have registered.
-            </Typography>
-            <TextField
-              fullWidth
-              label="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              size="small"
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setAddOpen(false)}>Cancel</Button>
-            <Button
-              variant="contained"
-              disabled={!username.trim() || addMut.isPending}
-              onClick={() => addMut.mutate()}
-            >
-              Link student
-            </Button>
-          </DialogActions>
-        </Dialog>
 
         <Dialog open={!!editId} onClose={() => setEditId(null)} fullWidth maxWidth="sm">
           <DialogTitle>Student coaching profile</DialogTitle>

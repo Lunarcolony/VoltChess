@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Academy, CoachStudentLink, Membership
+from .models import Academy, Classroom, CoachStudentLink, Membership
 
 
 @admin.register(Academy)
@@ -17,3 +17,10 @@ class MembershipAdmin(admin.ModelAdmin):
 @admin.register(CoachStudentLink)
 class CoachStudentLinkAdmin(admin.ModelAdmin):
     list_display = ("coach", "student", "academy", "created_at")
+
+
+@admin.register(Classroom)
+class ClassroomAdmin(admin.ModelAdmin):
+    list_display = ("name", "coach", "join_code", "is_active", "updated_at")
+    list_filter = ("is_active",)
+    search_fields = ("join_code", "coach__username", "name")

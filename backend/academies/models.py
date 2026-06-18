@@ -85,3 +85,25 @@ class CoachStudentLink(models.Model):
 
     def __str__(self):
         return f"{self.coach.username} → {self.student.username}"
+
+
+class Classroom(models.Model):
+    """A coach's classroom — students join with a unique code instead of username lookup."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    coach = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="classroom",
+    )
+    name = models.CharField(max_length=200, default="My Classroom")
+    join_code = models.CharField(max_length=12, unique=True, db_index=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.name} ({self.join_code})"
