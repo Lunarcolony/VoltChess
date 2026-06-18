@@ -1,219 +1,290 @@
 import Head from "@/components/Head";
 import {
   Box,
+  Button,
   Chip,
   CircularProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
+  LinearProgress,
   Typography,
 } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCardSx, usePalette } from "@/hooks/usePalette";
+import { usePalette } from "@/hooks/usePalette";
 import { alpha } from "@mui/material/styles";
+import { fetchCoachDashboard } from "@/lib/api/coaching";
+import CoachShell from "@/sections/coach/CoachShell";
 import {
-  fetchCoachLinks,
-  fetchStudentStats,
-  avgAccuracy,
-} from "@/lib/api/academies";
-import { fetchAssignments } from "@/lib/api/assignments";
+  CoachPageHeader,
+  CoachStatCard,
+  CoachEmptyState,
+} from "@/sections/coach/CoachUi";
+import { engagementColor } from "@/sections/coach/constants";
 import NavLink from "@/components/NavLink";
 
-function StatCard({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string | number;
-  icon: string;
-}) {
+export default function CoachDashboardPage() {
   const palette = usePalette();
-  const cardSx = useCardSx();
-
-  return (
-    <Box sx={{ ...cardSx, flex: 1, minWidth: 140 }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-        <Icon icon={icon} width={20} color={palette.accent} />
-        <Typography variant="body2" color="text.secondary">
-          {label}
-        </Typography>
-      </Box>
-      <Typography variant="h5" fontWeight={700}>
-        {value}
-      </Typography>
-    </Box>
-  );
-}
-
-export default function CoachDashboard() {
-  const palette = usePalette();
-  const cardSx = useCardSx();
   const { user } = useAuth();
-
-  const { data: links = [], isLoading: linksLoading } = useQuery({
-    queryKey: ["coach-links"],
-    queryFn: fetchCoachLinks,
+  const { data, isLoading } = useQuery({
+    queryKey: ["coach-dashboard"],
+    queryFn: fetchCoachDashboard,
   });
-
-  const { data: assignments = [], isLoading: assignmentsLoading } = useQuery({
-    queryKey: ["assignments"],
-    queryFn: fetchAssignments,
-  });
-
-  const pendingCount = assignments.filter((a) => a.status === "pending").length;
 
   return (
     <>
       <Head>
-        <title>Coach Dashboard · VoltChess Academy</title>
+        <title>Coach Command Center · VoltChess Academy</title>
       </Head>
-      <Box sx={{ maxWidth: 1000, mx: "auto" }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
-          Coach Dashboard
-        </Typography>
-        <Typography color="text.secondary" sx={{ mb: 3 }}>
-          Welcome back, {user?.username}. Manage students, assignments, and synced
-          games.
-        </Typography>
+      <CoachShell>
+        <CoachPageHeader
+          title="Command Center"
+          subtitle={`Welcome back, ${user?.username}. Your academy at a glance — students, workload, and who needs attention today.`}
+        />
 
-        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 3 }}>
-          <StatCard
-            label="Students"
-            value={linksLoading ? "…" : links.length}
-            icon="mdi:account-group-outline"
+        {isLoading ? (
+          <CircularProgress />
+        ) : !data ? (
+          <CoachEmptyState
+            icon="mdi:account-tie"
+            title="Unable to load dashboard"
+            description="Check your API connection and try again."
           />
-          <StatCard
-            label="Assignments"
-            value={assignmentsLoading ? "…" : assignments.length}
-            icon="mdi:clipboard-text-outline"
-          />
-          <StatCard
-            label="Pending"
-            value={assignmentsLoading ? "…" : pendingCount}
-            icon="mdi:clock-outline"
-          />
-        </Box>
+        ) : (
+          <>
+            <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", mb: 3 }}>
+              <CoachStatCard
+                label="Students"
+                value={data.summary.students}
+                icon="mdi:account-group-outline"
+              />
+              <CoachStatCard
+                label="Overdue"
+                value={data.summary.assignments_overdue}
+                icon="mdi:alert-circle-outline"
+                accent="#ef4444"
+                hint={
+                  data.summary.assignments_due_soon
+                    ? `${data.summary.assignments_due_soon} due this week`
+                    : undefined
+                }
+              />
+              <CoachStatCard
+                label="In progress"
+                value={data.summary.assignments_in_progress}
+                icon="mdi:progress-clock"
+              />
+              <CoachStatCard
+                label="Analyzed games"
+                value={data.summary.analyzed_games_total}
+                icon="mdi:chart-timeline-variant"
+              />
+              <CoachStatCard
+                label="Active plans"
+                value={data.summary.active_training_plans}
+                icon="mdi:calendar-check-outline"
+              />
+              <CoachStatCard
+                label="Unread mail"
+                value={data.summary.unread_messages}
+                icon="mdi:email-outline"
+              />
+            </Box>
 
-        <Box sx={{ ...cardSx, mb: 3 }}>
-          <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-            Students
-          </Typography>
-          {linksLoading ? (
-            <CircularProgress size={28} />
-          ) : links.length === 0 ? (
-            <Typography color="text.secondary">
-              No students linked yet. Add coach–student links in the academy admin.
-            </Typography>
-          ) : (
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Student</TableCell>
-                  <TableCell>Games</TableCell>
-                  <TableCell>Avg accuracy</TableCell>
-                  <TableCell />
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {links.map((link) => (
-                  <StudentRow key={link.id} studentId={link.student.id} username={link.student.username} />
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </Box>
-
-        <Box sx={{ ...cardSx }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-            <Typography variant="h6" fontWeight={600}>
-              Recent assignments
-            </Typography>
-            <NavLink href="/coach/assignments">
-              <Typography fontSize="0.85rem" sx={{ color: palette.accent, fontWeight: 600 }}>
-                Manage →
-              </Typography>
-            </NavLink>
-          </Box>
-          {assignmentsLoading ? (
-            <CircularProgress size={28} />
-          ) : assignments.length === 0 ? (
-            <Typography color="text.secondary">No assignments yet.</Typography>
-          ) : (
-            assignments.slice(0, 8).map((a) => (
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
+                gap: 2,
+                mb: 3,
+              }}
+            >
               <Box
-                key={a.id}
                 sx={{
-                  py: 1.25,
-                  borderBottom: `1px solid ${palette.borderSubtle}`,
-                  "&:last-child": { borderBottom: 0 },
+                  bgcolor: palette.surfaceRaised,
+                  border: `1px solid ${palette.border}`,
+                  borderRadius: 2,
+                  p: 2.5,
                 }}
               >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-                  <Typography fontWeight={600} fontSize="0.9rem">
-                    {a.student.username}
-                  </Typography>
-                  <Chip
-                    label={a.status.replace("_", " ")}
-                    size="small"
-                    sx={{
-                      height: 22,
-                      fontSize: "0.7rem",
-                      bgcolor: alpha(palette.accent, 0.1),
-                      color: palette.accent,
-                    }}
-                  />
+                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+                  <Typography fontWeight={700}>At-risk students</Typography>
+                  <NavLink href="/coach/students">
+                    <Typography fontSize="0.8rem" sx={{ color: palette.accent, fontWeight: 600 }}>
+                      View roster →
+                    </Typography>
+                  </NavLink>
                 </Box>
-                <Typography variant="body2" color="text.secondary">
-                  {a.instructions}
-                </Typography>
+                {data.at_risk.length === 0 ? (
+                  <Typography variant="body2" color="text.secondary">
+                    Everyone looks on track. Nice work.
+                  </Typography>
+                ) : (
+                  data.at_risk.slice(0, 5).map((s) => (
+                    <Box
+                      key={s.link_id}
+                      sx={{
+                        py: 1.25,
+                        borderBottom: `1px solid ${palette.borderSubtle}`,
+                        "&:last-child": { borderBottom: 0 },
+                      }}
+                    >
+                      <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
+                        <NavLink href={`/coach/students/${s.student.id}`}>
+                          <Typography fontWeight={600} fontSize="0.9rem">
+                            {s.student.username}
+                          </Typography>
+                        </NavLink>
+                        <Chip
+                          label={`${s.engagement_score}%`}
+                          size="small"
+                          sx={{
+                            height: 22,
+                            bgcolor: alpha(engagementColor(s.engagement_score), 0.15),
+                            color: engagementColor(s.engagement_score),
+                            fontWeight: 700,
+                            fontSize: "0.7rem",
+                          }}
+                        />
+                      </Box>
+                      <Typography variant="caption" color="text.secondary">
+                        {s.reasons.join(" · ")}
+                      </Typography>
+                    </Box>
+                  ))
+                )}
               </Box>
-            ))
-          )}
-        </Box>
-      </Box>
+
+              <Box
+                sx={{
+                  bgcolor: palette.surfaceRaised,
+                  border: `1px solid ${palette.border}`,
+                  borderRadius: 2,
+                  p: 2.5,
+                }}
+              >
+                <Typography fontWeight={700} sx={{ mb: 2 }}>
+                  Recent activity
+                </Typography>
+                {data.activity.length === 0 ? (
+                  <Typography variant="body2" color="text.secondary">
+                    No recent student activity.
+                  </Typography>
+                ) : (
+                  data.activity.slice(0, 6).map((a, i) => (
+                    <Box
+                      key={`${a.at}-${i}`}
+                      sx={{
+                        display: "flex",
+                        gap: 1.25,
+                        py: 1,
+                        borderBottom: `1px solid ${palette.borderSubtle}`,
+                        "&:last-child": { borderBottom: 0 },
+                      }}
+                    >
+                      <Icon
+                        icon={
+                          a.type === "game_synced"
+                            ? "mdi:chess-pawn"
+                            : "mdi:clipboard-text-outline"
+                        }
+                        width={18}
+                        color={palette.accent}
+                        style={{ flexShrink: 0, marginTop: 2 }}
+                      />
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography fontSize="0.85rem" fontWeight={600} noWrap>
+                          {a.student_username}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" noWrap>
+                          {a.summary}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {new Date(a.at).toLocaleString()}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  ))
+                )}
+              </Box>
+            </Box>
+
+            <Box
+              sx={{
+                bgcolor: palette.surfaceRaised,
+                border: `1px solid ${palette.border}`,
+                borderRadius: 2,
+                p: 2.5,
+              }}
+            >
+              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+                <Typography fontWeight={700}>Student pulse</Typography>
+                <NavLink href="/coach/students">
+                  <Button size="small" variant="outlined">
+                    Manage students
+                  </Button>
+                </NavLink>
+              </Box>
+              {data.roster.length === 0 ? (
+                <CoachEmptyState
+                  icon="mdi:account-plus-outline"
+                  title="No students yet"
+                  description="Add students by username from the Students tab."
+                />
+              ) : (
+                data.roster.slice(0, 8).map((r) => (
+                  <Box
+                    key={r.link_id}
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: { xs: "1fr", sm: "1fr auto auto" },
+                      gap: 1,
+                      alignItems: "center",
+                      py: 1.25,
+                      borderBottom: `1px solid ${palette.borderSubtle}`,
+                    }}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      {r.pinned && (
+                        <Icon icon="mdi:pin" width={14} color={palette.accent} />
+                      )}
+                      <NavLink href={`/coach/students/${r.student.id}`}>
+                        <Typography fontWeight={600}>{r.student.username}</Typography>
+                      </NavLink>
+                      {r.priority === "high" && (
+                        <Chip label="High" size="small" color="error" sx={{ height: 20 }} />
+                      )}
+                    </Box>
+                    <Box sx={{ minWidth: 120 }}>
+                      <Typography variant="caption" color="text.secondary">
+                        Weekly games {r.games_this_week}
+                        {r.weekly_game_goal ? ` / ${r.weekly_game_goal}` : ""}
+                      </Typography>
+                      {r.weekly_game_goal ? (
+                        <LinearProgress
+                          variant="determinate"
+                          value={Math.min(
+                            100,
+                            (r.games_this_week / r.weekly_game_goal) * 100
+                          )}
+                          sx={{ mt: 0.5, height: 6, borderRadius: 3 }}
+                        />
+                      ) : null}
+                    </Box>
+                    <Typography
+                      fontWeight={700}
+                      fontSize="0.85rem"
+                      sx={{ color: engagementColor(r.engagement_score) }}
+                    >
+                      {r.avg_accuracy != null ? `${r.avg_accuracy}% acc` : "—"} ·{" "}
+                      {r.engagement_score}% engaged
+                    </Typography>
+                  </Box>
+                ))
+              )}
+            </Box>
+          </>
+        )}
+      </CoachShell>
     </>
-  );
-}
-
-function StudentRow({
-  studentId,
-  username,
-}: {
-  studentId: string;
-  username: string;
-}) {
-  const { data: stats, isLoading } = useQuery({
-    queryKey: ["student-stats", studentId],
-    queryFn: () => fetchStudentStats(studentId),
-  });
-
-  return (
-    <TableRow>
-      <TableCell>{username}</TableCell>
-      <TableCell>{isLoading ? "…" : stats?.total_games ?? 0}</TableCell>
-      <TableCell>
-        {isLoading
-          ? "…"
-          : stats && avgAccuracy(stats) != null
-            ? `${avgAccuracy(stats)!.toFixed(1)}%`
-            : "—"}
-      </TableCell>
-      <TableCell align="right">
-        <NavLink href={`/coach/students/${studentId}`}>
-          <Typography
-            component="span"
-            fontSize="0.85rem"
-            sx={{ color: "primary.main", fontWeight: 600, cursor: "pointer" }}
-          >
-            View
-          </Typography>
-        </NavLink>
-      </TableCell>
-    </TableRow>
   );
 }

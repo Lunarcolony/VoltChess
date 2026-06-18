@@ -42,6 +42,12 @@ class Membership(models.Model):
         return f"{self.user.username} @ {self.academy.name} ({self.role})"
 
 
+class LinkPriority(models.TextChoices):
+    LOW = "low", "Low"
+    NORMAL = "normal", "Normal"
+    HIGH = "high", "High"
+
+
 class CoachStudentLink(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     coach = models.ForeignKey(
@@ -61,6 +67,17 @@ class CoachStudentLink(models.Model):
         null=True,
         blank=True,
     )
+    coach_notes = models.TextField(blank=True)
+    tags = models.JSONField(default=list, blank=True)
+    priority = models.CharField(
+        max_length=10,
+        choices=LinkPriority.choices,
+        default=LinkPriority.NORMAL,
+    )
+    target_accuracy = models.FloatField(null=True, blank=True)
+    weekly_game_goal = models.PositiveSmallIntegerField(null=True, blank=True)
+    pinned = models.BooleanField(default=False)
+    last_reviewed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

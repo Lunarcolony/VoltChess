@@ -1,26 +1,80 @@
 import Head from "@/components/Head";
-import { Box, Button, Chip, CircularProgress, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  LinearProgress,
+  TextField,
+  Typography,
+} from "@mui/material";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
+import { useState } from "react";
 import { useCardSx, usePalette } from "@/hooks/usePalette";
 import { alpha } from "@mui/material/styles";
 import {
   avgAccuracy,
+  fetchCoachLinks,
   fetchStudentReport,
   fetchStudentStats,
+  updateCoachLink,
 } from "@/lib/api/academies";
 import { fetchGames } from "@/lib/api/games";
+import { fetchStudentTimeline } from "@/lib/api/coaching";
+import { CoachStatCard } from "@/sections/coach/CoachUi";
 import NavLink from "@/components/NavLink";
+import CoachShell from "@/sections/coach/CoachShell";
+
+function exportCsv(report: Awaited<ReturnType<typeof fetchStudentReport>>) {
+  const rows = [
+    ["date", "white", "black", "result", "has_eval", "white_accuracy", "black_accuracy"],
+    ...report.games.map((g) => [
+      g.date ?? "",
+      g.white.name,
+      g.black.name,
+      g.result ?? "",
+      g.has_eval ? "yes" : "no",
+      g.accuracy?.white ?? "",
+      g.accuracy?.black ?? "",
+    ]),
+  ];
+  const csv = rows.map((r) => r.join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${report.student.username}-games.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 export default function CoachStudentDetail() {
   const { id } = useParams<{ id: string }>();
   const palette = usePalette();
   const cardSx = useCardSx();
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["student-stats", id],
     queryFn: () => fetchStudentStats(id!),
     enabled: !!id,
+  });
+
+  const { data: link } = useQuery({
+    queryKey: ["coach-links"],
+    queryFn: fetchCoachLinks,
+    select: (links) => links.find((l) => l.student.id === id),
   });
 
   const { data: games = [], isLoading: gamesLoading } = useQuery({
@@ -29,119 +83,250 @@ export default function CoachStudentDetail() {
     enabled: !!id,
   });
 
-  const { data: report, refetch: loadReport, isFetching: reportLoading } =
-    useQuery({
-      queryKey: ["student-report", id],
-      queryFn: () => fetchStudentReport(id!),
-      enabled: false,
-    });
+  const { data: timeline } = useQuery({
+    queryKey: ["student-timeline", id],
+    queryFn: () => fetchStudentTimeline(id!),
+    enabled: !!id,
+  });
 
-  const downloadReport = async () => {
-    const { data } = await loadReport();
-    if (!data) return;
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${data.student.username}-report.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const { refetch: loadReport, isFetching: reportLoading } = useQuery({
+      queryKey: ["student-report", id, dateFrom, dateTo],
+      queryFn: () =>
+        fetchStudentReport(id!, dateFrom || undefined, dateTo || undefined),
+      enabled: false,
+  });
+
+  const blunderGame = games.find((g) => g.has_eval);
+
+  const markReviewed = () => {
+    if (!link) return;
+    updateCoachLink(link.id, { last_reviewed_at: new Date().toISOString() });
   };
 
   return (
     <>
       <Head>
-        <title>Student · VoltChess Academy</title>
+        <title>{stats?.username ?? "Student"} · VoltChess Academy</title>
       </Head>
-      <Box sx={{ maxWidth: 900, mx: "auto" }}>
-        <NavLink href="/coach">
-          <Typography
-            variant="body2"
-            sx={{ color: palette.textMuted, mb: 2, display: "inline-block" }}
-          >
-            ← Back to Coach Dashboard
+      <CoachShell>
+        <NavLink href="/coach/students">
+          <Typography variant="body2" sx={{ color: palette.textMuted, mb: 2, display: "inline-block" }}>
+            ← Back to roster
           </Typography>
         </NavLink>
 
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
-          <Typography variant="h4" fontWeight={700}>
-            {stats?.username ?? "Student"}
-          </Typography>
-          <Button
-            variant="outlined"
-            size="small"
-            disabled={reportLoading}
-            onClick={downloadReport}
-          >
-            {reportLoading ? "Exporting…" : "Export report"}
-          </Button>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, flexWrap: "wrap", gap: 2 }}>
+          <Box>
+            <Typography variant="h4" fontWeight={800}>
+              {stats?.username ?? "Student"}
+            </Typography>
+            {link && (
+              <Box sx={{ display: "flex", gap: 0.75, mt: 1, flexWrap: "wrap" }}>
+                {(link.tags ?? []).map((t) => (
+                  <Chip key={t} label={t} size="small" />
+                ))}
+                {link.priority === "high" && (
+                  <Chip label="High priority" size="small" color="error" />
+                )}
+              </Box>
+            )}
+          </Box>
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+            <NavLink href={`/coach/assignments`}>
+              <Button size="small" variant="contained">
+                Quick assign
+              </Button>
+            </NavLink>
+            <NavLink href={`/coach/messages`}>
+              <Button size="small" variant="outlined">
+                Message
+              </Button>
+            </NavLink>
+            <Button size="small" variant="outlined" onClick={markReviewed}>
+              Mark reviewed
+            </Button>
+          </Box>
         </Box>
 
         {statsLoading ? (
           <CircularProgress />
         ) : stats ? (
-          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 3 }}>
-            <Box sx={{ ...cardSx, minWidth: 120 }}>
-              <Typography variant="body2" color="text.secondary">
-                Games
-              </Typography>
-              <Typography variant="h5" fontWeight={700}>
-                {stats.total_games}
-              </Typography>
-            </Box>
-            <Box sx={{ ...cardSx, minWidth: 120 }}>
-              <Typography variant="body2" color="text.secondary">
-                With analysis
-              </Typography>
-              <Typography variant="h5" fontWeight={700}>
-                {stats.analyzed_games}
-              </Typography>
-            </Box>
-            <Box sx={{ ...cardSx, minWidth: 120 }}>
-              <Typography variant="body2" color="text.secondary">
-                Avg accuracy
-              </Typography>
-              <Typography variant="h5" fontWeight={700}>
-                {avgAccuracy(stats) != null
-                  ? `${avgAccuracy(stats)!.toFixed(1)}%`
-                  : "—"}
-              </Typography>
-            </Box>
-            <Box sx={{ ...cardSx, minWidth: 120 }}>
-              <Typography variant="body2" color="text.secondary">
-                Blunders
-              </Typography>
-              <Typography variant="h5" fontWeight={700}>
-                {(stats.blunders.white ?? 0) + (stats.blunders.black ?? 0)}
-              </Typography>
-            </Box>
+          <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", mb: 3 }}>
+            <CoachStatCard label="Games" value={stats.total_games} icon="mdi:chess-pawn" />
+            <CoachStatCard label="Analyzed" value={stats.analyzed_games} icon="mdi:chart-line" />
+            <CoachStatCard
+              label="Avg accuracy"
+              value={avgAccuracy(stats) != null ? `${avgAccuracy(stats)!.toFixed(1)}%` : "—"}
+              icon="mdi:target"
+            />
+            <CoachStatCard
+              label="Blunders"
+              value={(stats.blunders.white ?? 0) + (stats.blunders.black ?? 0)}
+              icon="mdi:alert"
+              accent="#ef4444"
+            />
+            <CoachStatCard
+              label="Pending work"
+              value={stats.pending_assignments}
+              icon="mdi:clipboard-clock-outline"
+            />
           </Box>
         ) : null}
 
-        {report && (
+        {link?.weekly_game_goal && timeline && (
           <Box sx={{ ...cardSx, mb: 3 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
-              Report preview
+            <Typography fontWeight={700} sx={{ mb: 1 }}>
+              Weekly activity vs goal ({link.weekly_game_goal} games/week)
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {report.games.filter((g) => g.has_eval).length} analyzed games ·{" "}
-              {report.assignments.length} assignments · generated{" "}
-              {new Date(report.generated_at).toLocaleString()}
+            <Box sx={{ height: 200 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={timeline.weekly_games}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={palette.borderSubtle} />
+                  <XAxis
+                    dataKey="week_start"
+                    tick={{ fontSize: 10, fill: palette.textMuted }}
+                    tickFormatter={(v) => v.slice(5)}
+                  />
+                  <YAxis tick={{ fill: palette.textMuted, fontSize: 11 }} />
+                  <Tooltip />
+                  <Area
+                    type="monotone"
+                    dataKey="games"
+                    stroke={palette.accent}
+                    fill={alpha(palette.accent, 0.2)}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </Box>
+          </Box>
+        )}
+
+        {link?.target_accuracy && stats && (
+          <Box sx={{ ...cardSx, mb: 3 }}>
+            <Typography fontWeight={700} sx={{ mb: 1 }}>
+              Accuracy target: {link.target_accuracy}%
+            </Typography>
+            <LinearProgress
+              variant="determinate"
+              value={Math.min(
+                100,
+                ((avgAccuracy(stats) ?? 0) / link.target_accuracy) * 100
+              )}
+              sx={{ height: 10, borderRadius: 5 }}
+            />
+          </Box>
+        )}
+
+        {link?.coach_notes && (
+          <Box sx={{ ...cardSx, mb: 3 }}>
+            <Typography fontWeight={700} sx={{ mb: 1 }}>
+              Private coach notes
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: "pre-wrap" }}>
+              {link.coach_notes}
             </Typography>
           </Box>
         )}
 
+        <Box sx={{ ...cardSx, mb: 3 }}>
+          <Typography fontWeight={700} sx={{ mb: 2 }}>
+            Export & report
+          </Typography>
+          <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", mb: 2 }}>
+            <TextField
+              label="From"
+              type="date"
+              size="small"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              label="To"
+              type="date"
+              size="small"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+            />
+          </Box>
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+            <Button
+              variant="outlined"
+              size="small"
+              disabled={reportLoading}
+              onClick={async () => {
+                const { data } = await loadReport();
+                if (data) {
+                  const blob = new Blob([JSON.stringify(data, null, 2)], {
+                    type: "application/json",
+                  });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `${data.student.username}-report.json`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }
+              }}
+            >
+              Export JSON
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              disabled={reportLoading}
+              onClick={async () => {
+                const { data } = await loadReport();
+                if (data) exportCsv(data);
+              }}
+            >
+              Export CSV
+            </Button>
+            {blunderGame && (
+              <NavLink href={`/analysis?gameId=${blunderGame.id}`}>
+                <Button size="small" variant="contained">
+                  Review latest analyzed game
+                </Button>
+              </NavLink>
+            )}
+          </Box>
+        </Box>
+
+        {timeline && timeline.timeline.length > 0 && (
+          <Box sx={{ ...cardSx, mb: 3 }}>
+            <Typography fontWeight={700} sx={{ mb: 2 }}>
+              Activity timeline
+            </Typography>
+            {timeline.timeline.slice(0, 12).map((ev, i) => (
+              <Box
+                key={`${ev.at}-${i}`}
+                sx={{
+                  py: 1,
+                  borderBottom: `1px solid ${palette.borderSubtle}`,
+                  "&:last-child": { borderBottom: 0 },
+                }}
+              >
+                <Typography fontSize="0.85rem" fontWeight={600}>
+                  {ev.title}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {new Date(ev.at).toLocaleString()} · {ev.type}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        )}
+
         <Box sx={cardSx}>
-          <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+          <Typography fontWeight={700} sx={{ mb: 2 }}>
             Synced games
           </Typography>
           {gamesLoading ? (
             <CircularProgress size={28} />
           ) : games.length === 0 ? (
             <Typography color="text.secondary">
-              No games synced yet. Student can analyze games while signed in.
+              No games synced yet. Ask the student to analyze while signed in.
             </Typography>
           ) : (
             games.map((g) => (
@@ -176,11 +361,8 @@ export default function CoachStudentDetail() {
                     />
                   )}
                   <NavLink href={`/analysis?gameId=${g.id}`}>
-                    <Typography
-                      fontSize="0.85rem"
-                      sx={{ color: palette.accent, fontWeight: 600 }}
-                    >
-                      Open
+                    <Typography fontSize="0.85rem" sx={{ color: palette.accent, fontWeight: 600 }}>
+                      Open in analysis
                     </Typography>
                   </NavLink>
                 </Box>
@@ -188,7 +370,7 @@ export default function CoachStudentDetail() {
             ))
           )}
         </Box>
-      </Box>
+      </CoachShell>
     </>
   );
 }

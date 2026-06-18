@@ -23,7 +23,12 @@ const Thanks = lazy(() => import("@/pages/thanks"));
 const BlogIndex = lazy(() => import("@/pages/blog/index"));
 const BlogPost = lazy(() => import("@/pages/blog/post"));
 const CoachDashboard = lazy(() => import("@/pages/coach/index"));
+const CoachStudents = lazy(() => import("@/pages/coach/students"));
 const CoachAssignments = lazy(() => import("@/pages/coach/assignments"));
+const CoachTemplates = lazy(() => import("@/pages/coach/templates"));
+const CoachMessages = lazy(() => import("@/pages/coach/messages"));
+const CoachPlans = lazy(() => import("@/pages/coach/plans"));
+const CoachAnalytics = lazy(() => import("@/pages/coach/analytics"));
 const CoachStudentDetail = lazy(() => import("@/pages/coach/student-detail"));
 const StudentHome = lazy(() => import("@/pages/student/index"));
 
@@ -69,10 +74,50 @@ function App() {
                 }
               />
               <Route
+                path="/coach/students"
+                element={
+                  <RoleRoute allowed={[UserRole.Coach, UserRole.Admin]}>
+                    <CoachStudents />
+                  </RoleRoute>
+                }
+              />
+              <Route
                 path="/coach/assignments"
                 element={
                   <RoleRoute allowed={[UserRole.Coach, UserRole.Admin]}>
                     <CoachAssignments />
+                  </RoleRoute>
+                }
+              />
+              <Route
+                path="/coach/templates"
+                element={
+                  <RoleRoute allowed={[UserRole.Coach, UserRole.Admin]}>
+                    <CoachTemplates />
+                  </RoleRoute>
+                }
+              />
+              <Route
+                path="/coach/messages"
+                element={
+                  <RoleRoute allowed={[UserRole.Coach, UserRole.Admin]}>
+                    <CoachMessages />
+                  </RoleRoute>
+                }
+              />
+              <Route
+                path="/coach/plans"
+                element={
+                  <RoleRoute allowed={[UserRole.Coach, UserRole.Admin]}>
+                    <CoachPlans />
+                  </RoleRoute>
+                }
+              />
+              <Route
+                path="/coach/analytics"
+                element={
+                  <RoleRoute allowed={[UserRole.Coach, UserRole.Admin]}>
+                    <CoachAnalytics />
                   </RoleRoute>
                 }
               />

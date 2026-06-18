@@ -92,8 +92,14 @@ class CoachStudentLinkViewSet(viewsets.ModelViewSet):
             raise PermissionDenied(
                 "Only coaches and admins can create coach–student links."
             )
+        student_username = self.request.data.get("student_username")
         student_id = self.request.data.get("student_id")
-        student = get_object_or_404(User, pk=student_id)
+        if student_username:
+            student = get_object_or_404(User, username=student_username.strip())
+        else:
+            student = get_object_or_404(User, pk=student_id)
+        if student.role != User.UserRole.STUDENT and user.role != User.UserRole.ADMIN:
+            raise PermissionDenied("Can only link student accounts.")
         serializer.save(coach=user, student=student)
 
 

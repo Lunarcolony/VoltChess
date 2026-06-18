@@ -6,6 +6,13 @@ export type CoachStudentLink = {
   coach: User;
   student: User;
   academy: string | null;
+  coach_notes: string;
+  tags: string[];
+  priority: "low" | "normal" | "high";
+  target_accuracy: number | null;
+  weekly_game_goal: number | null;
+  pinned: boolean;
+  last_reviewed_at: string | null;
   created_at: string;
 };
 
@@ -32,6 +39,37 @@ export function avgAccuracy(stats: StudentStats): number | null {
 export async function fetchCoachLinks(): Promise<CoachStudentLink[]> {
   const res = await api.get<CoachStudentLink[]>("/api/coach-links/");
   return res.data;
+}
+
+export async function createCoachLink(data: {
+  student_username?: string;
+  student_id?: string;
+}): Promise<CoachStudentLink> {
+  const res = await api.post<CoachStudentLink>("/api/coach-links/", data);
+  return res.data;
+}
+
+export async function updateCoachLink(
+  id: string,
+  data: Partial<
+    Pick<
+      CoachStudentLink,
+      | "coach_notes"
+      | "tags"
+      | "priority"
+      | "target_accuracy"
+      | "weekly_game_goal"
+      | "pinned"
+      | "last_reviewed_at"
+    >
+  >
+): Promise<CoachStudentLink> {
+  const res = await api.patch<CoachStudentLink>(`/api/coach-links/${id}/`, data);
+  return res.data;
+}
+
+export async function deleteCoachLink(id: string): Promise<void> {
+  await api.delete(`/api/coach-links/${id}/`);
 }
 
 export async function fetchStudentStats(

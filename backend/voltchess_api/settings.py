@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "games",
     "assignments",
     "annotations",
+    "coaching",
 ]
 
 MIDDLEWARE = [
