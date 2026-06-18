@@ -13,6 +13,21 @@ class AssignmentStatus(models.TextChoices):
     CANCELLED = "cancelled", "Cancelled"
 
 
+class AssignmentCategory(models.TextChoices):
+    GENERAL = "general", "General"
+    OPENING = "opening", "Opening"
+    TACTICS = "tactics", "Tactics"
+    ENDGAME = "endgame", "Endgame"
+    GAME_REVIEW = "game_review", "Game review"
+    HOMEWORK = "homework", "Homework"
+
+
+class AssignmentPriority(models.TextChoices):
+    LOW = "low", "Low"
+    NORMAL = "normal", "Normal"
+    HIGH = "high", "High"
+
+
 class Assignment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     coach = models.ForeignKey(
@@ -32,8 +47,19 @@ class Assignment(models.Model):
         blank=True,
         related_name="assignments",
     )
+    title = models.CharField(max_length=200, blank=True)
     pgn = models.TextField(blank=True)
     instructions = models.TextField()
+    category = models.CharField(
+        max_length=30,
+        choices=AssignmentCategory.choices,
+        default=AssignmentCategory.GENERAL,
+    )
+    priority = models.CharField(
+        max_length=10,
+        choices=AssignmentPriority.choices,
+        default=AssignmentPriority.NORMAL,
+    )
     due_date = models.DateField(null=True, blank=True)
     status = models.CharField(
         max_length=20,

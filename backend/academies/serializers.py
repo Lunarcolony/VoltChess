@@ -27,9 +27,33 @@ class MembershipSerializer(serializers.ModelSerializer):
 class CoachStudentLinkSerializer(serializers.ModelSerializer):
     coach = UserSerializer(read_only=True)
     student = UserSerializer(read_only=True)
-    student_id = serializers.UUIDField(write_only=True)
+    student_id = serializers.UUIDField(write_only=True, required=False)
+    student_username = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = CoachStudentLink
-        fields = ("id", "coach", "student", "student_id", "academy", "created_at")
+        fields = (
+            "id",
+            "coach",
+            "student",
+            "student_id",
+            "student_username",
+            "academy",
+            "coach_notes",
+            "tags",
+            "priority",
+            "target_accuracy",
+            "weekly_game_goal",
+            "pinned",
+            "last_reviewed_at",
+            "created_at",
+        )
         read_only_fields = ("id", "coach", "student", "created_at")
+
+    def validate(self, attrs):
+        if self.instance is None:
+            if not attrs.get("student_id") and not attrs.get("student_username"):
+                raise serializers.ValidationError(
+                    "Provide student_id or student_username."
+                )
+        return attrs

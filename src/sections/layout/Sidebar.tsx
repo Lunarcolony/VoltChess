@@ -37,14 +37,9 @@ function navForRole(role: UserRole | undefined, isAuthenticated: boolean): NavIt
   const items = [...BASE_NAV];
   if (role === UserRole.Coach || role === UserRole.Admin) {
     items.splice(1, 0, {
-      label: "Coach",
-      icon: "mdi:account-group-outline",
+      label: "Coach Hub",
+      icon: "mdi:view-dashboard-outline",
       href: "/coach",
-    });
-    items.splice(2, 0, {
-      label: "Assignments",
-      icon: "mdi:clipboard-text-outline",
-      href: "/coach/assignments",
     });
   }
   if (role === UserRole.Student) {

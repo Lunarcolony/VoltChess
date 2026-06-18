@@ -11,4 +11,5 @@ urlpatterns = [
     path("api/", include("games.urls")),
     path("api/", include("assignments.urls")),
     path("api/", include("annotations.urls")),
+    path("api/", include("coaching.urls")),
 ]

@@ -6,6 +6,7 @@ import { useCardSx, usePalette } from "@/hooks/usePalette";
 import { alpha } from "@mui/material/styles";
 import { fetchAssignments, updateAssignment } from "@/lib/api/assignments";
 import { fetchGames } from "@/lib/api/games";
+import { fetchCoachMessages } from "@/lib/api/coaching";
 import NavLink from "@/components/NavLink";
 import { prepareNewAnalysisSession } from "@/hooks/useAnalysisSession";
 import { useRouter } from "@/hooks/useRouter";
@@ -25,6 +26,11 @@ export default function StudentHome() {
   const { data: games = [], isLoading: gamesLoading } = useQuery({
     queryKey: ["my-games"],
     queryFn: () => fetchGames(),
+  });
+
+  const { data: messages = [] } = useQuery({
+    queryKey: ["coach-messages"],
+    queryFn: fetchCoachMessages,
   });
 
   const statusMut = useMutation({
@@ -125,6 +131,30 @@ export default function StudentHome() {
             ))
           )}
         </Box>
+
+        {messages.length > 0 && (
+          <Box sx={{ ...cardSx, mb: 3 }}>
+            <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+              Coach messages
+            </Typography>
+            {messages.slice(0, 5).map((m) => (
+              <Box
+                key={m.id}
+                sx={{
+                  py: 1.25,
+                  borderBottom: `1px solid ${palette.borderSubtle}`,
+                }}
+              >
+                <Typography fontWeight={600} fontSize="0.9rem">
+                  {m.subject}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {m.body}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        )}
 
         <Box sx={cardSx}>
           <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
