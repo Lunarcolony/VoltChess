@@ -19,6 +19,15 @@ export default defineConfig({
       "Cross-Origin-Embedder-Policy": "require-corp",
       "Cross-Origin-Opener-Policy": "same-origin",
     },
+    // Dev-only: proxy /api to your local or Pi backend without exposing LAN IPs in client code.
+    // Set API_PROXY_TARGET in .env (not VITE_*) — e.g. http://127.0.0.1:8000
+    proxy: {
+      "/api": {
+        target: process.env.API_PROXY_TARGET || "http://127.0.0.1:8000",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   build: {
     outDir: "dist",

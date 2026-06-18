@@ -4,12 +4,19 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from django.core.exceptions import ImproperlyConfigured
+
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-insecure-change-me")
-DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() == "true"
+DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"
+
+if not DEBUG and SECRET_KEY in ("dev-insecure-change-me", ""):
+    raise ImproperlyConfigured(
+        "Set a strong DJANGO_SECRET_KEY in backend/.env before running in production."
+    )
 
 _raw_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 ALLOWED_HOSTS = (

@@ -45,7 +45,7 @@ bash backend/scripts/ensure-autostart.sh
 cat ~/VoltChess/backend/PUBLIC_API_URL.txt
 ```
 
-Then update `src/config/apiUrl.ts` and `vercel.json`, or set up a **named** Cloudflare tunnel for a permanent URL (see Production section below).
+Then update `VITE_API_URL` in Vercel (Project → Environment Variables), or set `apiUrl` in `public/api-config.json` on your host — **do not commit live tunnel URLs to GitHub**. For a permanent URL, set up a **named** Cloudflare tunnel (see Production section below).
 
 Verify:
 
@@ -62,7 +62,7 @@ In Vercel → Project → Settings → Environment Variables:
 
 | Variable | Example |
 |----------|---------|
-| `VITE_API_URL` | `http://192.168.8.132:8000` |
+| `VITE_API_URL` | `http://<your-pi-lan-ip>:8000` |
 
 Redeploy. **Note:** Browsers on the same network can reach the Pi; users on the public internet cannot use a private LAN IP.
 

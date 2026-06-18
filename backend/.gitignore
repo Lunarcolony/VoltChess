@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+
+# Local secrets and runtime data
+.env
+db.sqlite3
+*.log
+tunnel.log
+PUBLIC_API_URL.txt
+staticfiles/

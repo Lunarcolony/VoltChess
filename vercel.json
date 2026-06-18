@@ -2,11 +2,6 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "build": {
-    "env": {
-      "VITE_API_URL": "https://palace-scored-entire-also.trycloudflare.com"
-    }
-  },
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
   "headers": [
     {
