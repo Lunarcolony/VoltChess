@@ -189,6 +189,9 @@ def games_pending_browser_analysis(student, limit: int = 5) -> list[Game]:
             analysis_status__in=(
                 AnalysisStatus.PENDING,
                 AnalysisStatus.IN_PROGRESS,
+                # Retry games that previously failed (e.g. transient engine /
+                # browser issues) instead of leaving them stuck forever.
+                AnalysisStatus.FAILED,
             ),
         )
         .exclude(external_id="")
@@ -319,6 +322,9 @@ def student_sync_overview(student) -> dict:
         "games_pending": games.filter(analysis_status=AnalysisStatus.PENDING).count(),
         "games_in_progress": games.filter(
             analysis_status=AnalysisStatus.IN_PROGRESS
+        ).count(),
+        "games_failed": games.filter(
+            analysis_status=AnalysisStatus.FAILED
         ).count(),
         "last_sync_at": max(
             (l.last_sync_at for l in links if l.last_sync_at),
