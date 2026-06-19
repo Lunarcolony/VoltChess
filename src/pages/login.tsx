@@ -16,13 +16,7 @@ import { useRouter } from "@/hooks/useRouter";
 import { usePalette } from "@/hooks/usePalette";
 import AuthLayout from "@/sections/auth/AuthLayout";
 import { getApiErrorMessage } from "@/lib/apiErrors";
-import { UserRole } from "@/types/user";
-
-function landingForRole(role: UserRole): string {
-  if (role === UserRole.Student) return "/student";
-  if (role === UserRole.Coach || role === UserRole.Admin) return "/coach";
-  return "/";
-}
+import { landingForRole } from "@/lib/auth";
 
 function LoginForm() {
   const router = useRouter();

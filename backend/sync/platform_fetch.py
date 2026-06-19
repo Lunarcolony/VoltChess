@@ -13,6 +13,19 @@ import requests
 SYNC_GAME_LIMIT = 30
 REQUEST_TIMEOUT = 25
 
+# Chess.com's public API is fronted by Cloudflare, which returns 403 ("Just a
+# moment…") for requests that do not send a real User-Agent. Lichess also asks
+# integrations to identify themselves. Always send a descriptive UA so imports
+# don't silently fail with "user not found".
+USER_AGENT = "VoltChess/1.0 (+https://voltchess.me; chess analysis academy)"
+
+
+def _get(url: str, *, headers: dict | None = None) -> requests.Response:
+    merged = {"User-Agent": USER_AGENT}
+    if headers:
+        merged.update(headers)
+    return requests.get(url, headers=merged, timeout=REQUEST_TIMEOUT)
+
 
 @dataclass
 class FetchedGame:
@@ -80,25 +93,34 @@ def _parse_chesscom_game(raw: dict) -> FetchedGame | None:
 
 def fetch_chesscom_games(username: str, limit: int = SYNC_GAME_LIMIT) -> list[FetchedGame]:
     username = username.strip().lower()
-    now = datetime.now(timezone.utc)
-    year = now.year
-    month = now.month
+
+    # Resolve the player's monthly archives instead of guessing the current /
+    # previous month: a player who hasn't played recently still imports their
+    # latest games, and empty months don't surface as spurious 404s.
+    archives_url = f"https://api.chess.com/pub/player/{username}/games/archives"
+    archives_resp = _get(archives_url)
+    if archives_resp.status_code == 404:
+        raise ValueError(f"Chess.com user '{username}' not found.")
+    if archives_resp.status_code >= 400:
+        raise ValueError(
+            f"Chess.com is unavailable right now (status {archives_resp.status_code})."
+        )
+
+    archives = (archives_resp.json() if archives_resp.content else {}).get(
+        "archives"
+    ) or []
 
     games: list[dict] = []
-
-    def fetch_month(y: int, m: int) -> None:
-        url = f"https://api.chess.com/pub/player/{username}/games/{y}/{m:02d}"
-        resp = requests.get(url, timeout=REQUEST_TIMEOUT)
+    # Newest month first; stop once we have enough games.
+    for archive_url in reversed(archives):
+        if len(games) >= limit:
+            break
+        resp = _get(archive_url)
+        if resp.status_code >= 400:
+            continue
         data = resp.json() if resp.content else {}
-        if resp.status_code >= 400 and data.get("message") != "Date cannot be set in the future":
-            raise ValueError(f"Chess.com user '{username}' not found or unavailable.")
-        games.extend(data.get("games") or [])
-
-    fetch_month(year, month)
-    if len(games) < limit:
-        prev_month = 12 if month == 1 else month - 1
-        prev_year = year - 1 if month == 1 else year
-        fetch_month(prev_year, prev_month)
+        month_games = data.get("games") or []
+        games.extend(month_games)
 
     parsed: list[FetchedGame] = []
     for raw in sorted(games, key=lambda g: g.get("end_time") or 0, reverse=True):
@@ -160,13 +182,13 @@ def fetch_lichess_games(username: str, limit: int = SYNC_GAME_LIMIT) -> list[Fet
         f"https://lichess.org/api/games/user/{username}"
         f"?max={limit}&pgnInJson=true&sort=dateDesc&clocks=true"
     )
-    resp = requests.get(
-        url,
-        headers={"Accept": "application/x-ndjson"},
-        timeout=REQUEST_TIMEOUT,
-    )
+    resp = _get(url, headers={"Accept": "application/x-ndjson"})
+    if resp.status_code == 404:
+        raise ValueError(f"Lichess user '{username}' not found.")
     if resp.status_code >= 400:
-        raise ValueError(f"Lichess user '{username}' not found or unavailable.")
+        raise ValueError(
+            f"Lichess is unavailable right now (status {resp.status_code})."
+        )
 
     parsed: list[FetchedGame] = []
     for line in resp.text.split("\n"):
