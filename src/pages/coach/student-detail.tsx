@@ -348,7 +348,7 @@ export default function CoachStudentDetail() {
               size="small"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              InputLabelProps={{ shrink: true }}
+              slotProps={{ inputLabel: { shrink: true } }}
             />
             <TextField
               label="To"
@@ -356,7 +356,7 @@ export default function CoachStudentDetail() {
               size="small"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              InputLabelProps={{ shrink: true }}
+              slotProps={{ inputLabel: { shrink: true } }}
             />
           </Box>
           <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>

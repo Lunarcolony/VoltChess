@@ -96,11 +96,11 @@ const Thanks: React.FC = () => {
                 <Typography variant="h5" gutterBottom sx={{ color: "#4bffef" }}>
                   🛠️ Technologies
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   • <strong>Stockfish</strong>: Advanced chess engine for
                   real-time analysis.
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   • <strong>VoltChess</strong>: Free chess game review and
                   Stockfish analysis in your browser.
                 </Typography>
@@ -128,13 +128,13 @@ const Thanks: React.FC = () => {
                 <Typography variant="h5" gutterBottom sx={{ color: "#ff4bf5" }}>
                   🧑‍🚀 Contributors
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   • <strong>Jithesh</strong>: Lead developer, architecture.
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   • <strong>Nomoru</strong>: UX design + animations.
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   • <strong>Quartx</strong>: Engine integration wizardry.
                 </Typography>
               </CardContent>

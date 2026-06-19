@@ -1,8 +1,8 @@
-import axios from "axios";
+import { isAxiosError } from "axios";
 import { getApiBaseUrl } from "@/config/apiUrl";
 
 export function getApiErrorMessage(err: unknown): string {
-  if (!axios.isAxiosError(err)) {
+  if (!isAxiosError(err)) {
     return "Something went wrong. Please try again.";
   }
 

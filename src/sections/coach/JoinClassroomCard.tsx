@@ -95,8 +95,10 @@ export default function JoinClassroomCard() {
             setPreviewError(null);
           }}
           sx={{ minWidth: 200, flex: 1 }}
-          inputProps={{
-            style: { fontFamily: "monospace", letterSpacing: "0.08em" },
+          slotProps={{
+            htmlInput: {
+              style: { fontFamily: "monospace", letterSpacing: "0.08em" },
+            },
           }}
         />
         <Button

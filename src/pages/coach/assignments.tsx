@@ -198,7 +198,7 @@ export default function CoachAssignmentsPage() {
         onChange={(e) => setDueDate(e.target.value)}
         size="small"
         fullWidth
-        InputLabelProps={{ shrink: true }}
+        slotProps={{ inputLabel: { shrink: true } }}
       />
       <TextField
         label="PGN (optional)"
@@ -414,7 +414,7 @@ export default function CoachAssignmentsPage() {
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
               size="small"
-              InputLabelProps={{ shrink: true }}
+              slotProps={{ inputLabel: { shrink: true } }}
             />
           </DialogContent>
           <DialogActions>

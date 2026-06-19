@@ -10,7 +10,7 @@ import {
   InputLabel,
   OutlinedInput,
   Button,
-  Grid,
+  Grid2 as Grid,
 } from "@mui/material";
 import { useEffect } from "react";
 import { useAtom } from "jotai";
@@ -66,7 +66,7 @@ export default function EngineSettingsDialog({ open, onClose }: Props) {
         </Typography>
 
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth>
               <InputLabel id="engine-select-label">Engine</InputLabel>
               <Select
@@ -88,7 +88,7 @@ export default function EngineSettingsDialog({ open, onClose }: Props) {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <Slider
               label="Maximum depth"
               value={depth}
@@ -99,7 +99,7 @@ export default function EngineSettingsDialog({ open, onClose }: Props) {
             />
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <Slider
               label="Number of lines"
               value={multiPv}
@@ -110,7 +110,7 @@ export default function EngineSettingsDialog({ open, onClose }: Props) {
             />
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <Slider
               label="Board hue"
               value={boardHue}
@@ -120,11 +120,11 @@ export default function EngineSettingsDialog({ open, onClose }: Props) {
             />
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid size={12}>
             <ArrowOptions />
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Slider
               label="Number of threads"
               value={engineWorkersNb}

@@ -141,14 +141,14 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
       maxWidth="xs"
       slotProps={{
         backdrop: { sx: { bgcolor: "rgba(0, 0, 0, 0.85)" } },
-      }}
-      PaperProps={{
-        sx: {
-          bgcolor: palette.surfaceRaised,
-          border: `1px solid ${palette.border}`,
-          borderRadius: 3,
-          overflow: "visible",
-          mx: 2,
+        paper: {
+          sx: {
+            bgcolor: palette.surfaceRaised,
+            border: `1px solid ${palette.border}`,
+            borderRadius: 3,
+            overflow: "visible",
+            mx: 2,
+          },
         },
       }}
     >

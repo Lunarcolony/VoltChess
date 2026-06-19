@@ -124,11 +124,13 @@ export function KeyboardShortcuts({ onShortcut }: KeyboardShortcutsProps) {
         onClose={() => setOpen(false)}
         maxWidth="md"
         fullWidth
-        PaperProps={{
-          sx: {
-            background: "rgba(40, 44, 52, 0.95)",
-            backdropFilter: "blur(8px)",
-            border: "1.5px solid #3a3f4b",
+        slotProps={{
+          paper: {
+            sx: {
+              background: "rgba(40, 44, 52, 0.95)",
+              backdropFilter: "blur(8px)",
+              border: "1.5px solid #3a3f4b",
+            },
           },
         }}
       >

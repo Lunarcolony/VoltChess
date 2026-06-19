@@ -130,9 +130,11 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 </ListItemIcon>
                 <ListItemText
                   primary={label}
-                  primaryTypographyProps={{
-                    fontSize: "0.9rem",
-                    fontWeight: isActive ? 600 : 500,
+                  slotProps={{
+                    primary: {
+                      fontSize: "0.9rem",
+                      fontWeight: isActive ? 600 : 500,
+                    },
                   }}
                 />
               </ListItemButton>
@@ -231,7 +233,7 @@ export default function Sidebar() {
         <Drawer
           open={mobileOpen}
           onClose={() => setMobileOpen(false)}
-          PaperProps={{ sx: { bgcolor: palette.bg } }}
+          slotProps={{ paper: { sx: { bgcolor: palette.bg } } }}
         >
           <SidebarContent onNavigate={() => setMobileOpen(false)} />
         </Drawer>
