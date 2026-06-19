@@ -121,13 +121,19 @@ export const useGameDatabase = (shouldFetchGames?: boolean) => {
     if (typeof gameId !== "string") {
       setGameFromUrl(undefined);
       setServerGameFromUrl(undefined);
-      return;
+      return undefined;
     }
 
     if (isServerGameId(gameId)) {
       setGameFromUrl(undefined);
-      fetchGame(gameId)
-        .then((serverGame) => {
+
+      let cancelled = false;
+      let pollId: ReturnType<typeof setInterval> | undefined;
+
+      const load = async () => {
+        try {
+          const serverGame = await fetchGame(gameId);
+          if (cancelled) return false;
           setServerGameFromUrl({
             serverId: serverGame.id,
             pgn: serverGame.pgn,
@@ -142,18 +148,38 @@ export const useGameDatabase = (shouldFetchGames?: boolean) => {
                 }
               : undefined,
           });
-        })
-        .catch(() => setServerGameFromUrl(undefined));
-      return;
+          // The report is generated in the background; keep polling until the
+          // saved eval shows up so an opened "still analyzing" game fills in on
+          // its own (no manual reload, no foreground re-analysis).
+          return !!serverGame.eval;
+        } catch {
+          if (!cancelled) setServerGameFromUrl(undefined);
+          return false;
+        }
+      };
+
+      void load().then((hasEval) => {
+        if (cancelled || hasEval) return;
+        pollId = setInterval(async () => {
+          const done = await load();
+          if (done && pollId) clearInterval(pollId);
+        }, 5000);
+      });
+
+      return () => {
+        cancelled = true;
+        if (pollId) clearInterval(pollId);
+      };
     }
 
     setServerGameFromUrl(undefined);
     const localId = parseInt(gameId, 10);
     if (Number.isNaN(localId)) {
       setGameFromUrl(undefined);
-      return;
+      return undefined;
     }
     getGame(localId).then((game) => setGameFromUrl(game));
+    return undefined;
   }, [gameId, getGame]);
 
   const isReady = db !== null;

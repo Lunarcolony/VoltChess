@@ -1,4 +1,4 @@
-import { Box, Button } from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { useCallback } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Chess } from "chess.js";
@@ -30,7 +30,7 @@ export default function ReportTabPanel() {
   const game = useAtomValue(gameAtom);
   const gameEval = useAtomValue(gameEvalAtom);
   const progress = useAtomValue(evaluationProgressAtom);
-  const { reanalyzeGame, engineReady } = useAnalyzeGame();
+  const { reanalyzeGame, engineReady, isServerGame } = useAnalyzeGame();
   const { setPgn: setGamePgn } = useChessActions(gameAtom);
   const { resetToStartingPosition: resetBoard } = useChessActions(boardAtom);
   const setEval = useSetAtom(gameEvalAtom);
@@ -49,13 +49,46 @@ export default function ReportTabPanel() {
 
   const hasMoves = game.history().length > 0;
   const isAnalyzing = progress > 0;
-  const needsReanalysis = hasMoves && !gameEval && !isAnalyzing;
+  // A synced game whose report hasn't been saved yet: it's being generated in
+  // the background, so show a "preparing" notice (the page polls the server and
+  // fills in automatically) rather than the generic "load a game" empty state.
+  const serverReportPending = isServerGame && hasMoves && !gameEval;
+  const needsReanalysis =
+    hasMoves && !gameEval && !isAnalyzing && !isServerGame;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
       <EvaluationProgress />
 
-      {!gameEval && !isAnalyzing && <AnalysisEmptyState />}
+      {serverReportPending && !isAnalyzing && (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            p: 2,
+            mb: 1.5,
+            borderRadius: 1.5,
+            border: (t) => `1px dashed ${t.palette.divider}`,
+          }}
+        >
+          <CircularProgress size={22} />
+          <Box>
+            <Typography variant="body2" fontWeight={600}>
+              Preparing your report…
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              This game is being analyzed in the background. The report and move
+              classifications will appear here automatically — no need to
+              re-analyze.
+            </Typography>
+          </Box>
+        </Box>
+      )}
+
+      {!gameEval && !isAnalyzing && !serverReportPending && (
+        <AnalysisEmptyState />
+      )}
 
       {gameEval && (
         <>
@@ -85,7 +118,7 @@ export default function ReportTabPanel() {
         </>
       )}
 
-      {!gameEval && !isAnalyzing && (
+      {!gameEval && !isAnalyzing && !serverReportPending && (
         <ReportSection title="Evaluation graph" tourId="eval-graph" noPadding>
           <EvaluationGraphSection
             sticky={false}

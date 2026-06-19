@@ -11,7 +11,6 @@ import {
 } from "./helpers/parseResults";
 import { computeAccuracy } from "./helpers/accuracy";
 import { getIsStalemate, getWhoIsCheckmated } from "../chess";
-import { getLichessEval } from "../lichess";
 import { getMovesClassification } from "./helpers/moveClassification";
 import { computeEstimatedElo } from "./helpers/estimateElo";
 import { EngineWorker, WorkerJob } from "@/types/engine";
@@ -254,59 +253,66 @@ export class UciEngine {
     this.isReady = false;
     setEvaluationProgress?.(1);
 
-    await this.setMultiPv(multiPv);
-    await this.sendCommandsToEachWorker(["ucinewgame", "isready"], "readyok");
-    this.setWorkersNb(workersNb);
-
     const positions: PositionEval[] = new Array(fens.length);
-    let completed = 0;
 
-    const updateEval = (index: number, positionEval: PositionEval) => {
-      completed++;
-      positions[index] = positionEval;
-      const progress = completed / fens.length;
-      setEvaluationProgress?.(99 - Math.exp(-4 * progress) * 99);
-    };
+    try {
+      await this.setMultiPv(multiPv);
+      await this.sendCommandsToEachWorker(["ucinewgame", "isready"], "readyok");
+      await this.setWorkersNb(workersNb);
 
-    await Promise.all(
-      fens.map(async (fen, i) => {
-        const whoIsCheckmated = getWhoIsCheckmated(fen);
-        if (whoIsCheckmated) {
-          updateEval(i, {
-            lines: [
-              {
-                pv: [],
-                depth: 0,
-                multiPv: 1,
-                mate: whoIsCheckmated === "w" ? -1 : 1,
-              },
-            ],
-          });
-          return;
-        }
+      let completed = 0;
 
-        const isStalemate = getIsStalemate(fen);
-        if (isStalemate) {
-          updateEval(i, {
-            lines: [
-              {
-                pv: [],
-                depth: 0,
-                multiPv: 1,
-                cp: 0,
-              },
-            ],
-          });
-          return;
-        }
+      const updateEval = (index: number, positionEval: PositionEval) => {
+        completed++;
+        positions[index] = positionEval;
+        const progress = completed / fens.length;
+        setEvaluationProgress?.(99 - Math.exp(-4 * progress) * 99);
+      };
 
-        const result = await this.evaluatePosition(fen, depth, workersNb);
-        updateEval(i, result);
-      })
-    );
+      await Promise.all(
+        fens.map(async (fen, i) => {
+          const whoIsCheckmated = getWhoIsCheckmated(fen);
+          if (whoIsCheckmated) {
+            updateEval(i, {
+              lines: [
+                {
+                  pv: [],
+                  depth: 0,
+                  multiPv: 1,
+                  mate: whoIsCheckmated === "w" ? -1 : 1,
+                },
+              ],
+            });
+            return;
+          }
 
-    await this.setWorkersNb(1);
-    this.isReady = true;
+          const isStalemate = getIsStalemate(fen);
+          if (isStalemate) {
+            updateEval(i, {
+              lines: [
+                {
+                  pv: [],
+                  depth: 0,
+                  multiPv: 1,
+                  cp: 0,
+                },
+              ],
+            });
+            return;
+          }
+
+          const result = await this.evaluatePosition(fen, depth, workersNb);
+          updateEval(i, result);
+        })
+      );
+
+      await this.setWorkersNb(1);
+    } finally {
+      // Always restore readiness even if evaluation throws, so a single failed
+      // (or aborted) analysis never bricks the engine for the rest of the
+      // session.
+      this.isReady = true;
+    }
 
     const positionsWithClassification = getMovesClassification(
       positions,
@@ -336,18 +342,9 @@ export class UciEngine {
   private async evaluatePosition(
     fen: string,
     depth = 16,
-    workersNb: number
+    _workersNb?: number
   ): Promise<PositionEval> {
-    if (workersNb < 2) {
-      const lichessEval = await getLichessEval(fen, this.multiPv);
-      if (
-        lichessEval.lines.length >= this.multiPv &&
-        lichessEval.lines[0].depth >= depth
-      ) {
-        return lichessEval;
-      }
-    }
-
+    void _workersNb;
     const results = await this.sendCommands(
       [`position fen ${fen}`, `go depth ${depth}`],
       "bestmove"
@@ -364,8 +361,6 @@ export class UciEngine {
   }: EvaluatePositionWithUpdateParams): Promise<PositionEval> {
     this.throwErrorIfNotReady();
 
-    const lichessEvalPromise = getLichessEval(fen, multiPv);
-
     await this.stopAllCurrentJobs();
     await this.setMultiPv(multiPv);
 
@@ -374,17 +369,6 @@ export class UciEngine {
       const parsedResults = parseEvaluationResults(messages, fen);
       setPartialEval(parsedResults);
     };
-
-    console.log(`Evaluating position: ${fen}`);
-
-    const lichessEval = await lichessEvalPromise;
-    if (
-      lichessEval.lines.length >= multiPv &&
-      lichessEval.lines[0].depth >= depth
-    ) {
-      setPartialEval?.(lichessEval);
-      return lichessEval;
-    }
 
     const results = await this.sendCommands(
       [`position fen ${fen}`, `go depth ${depth}`],
