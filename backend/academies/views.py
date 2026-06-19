@@ -128,6 +128,23 @@ class CoachStudentLinkViewSet(viewsets.ModelViewSet):
         except IntegrityError:
             raise ValidationError({"detail": "This student is already linked to you."})
 
+    # Fields a student is allowed to manage on their own link. Everything else
+    # (coaching notes, goals, tags, …) stays coach/admin-only.
+    STUDENT_EDITABLE_FIELDS = {"platform", "platform_username", "sync_enabled"}
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        if user.role == User.UserRole.STUDENT:
+            link = serializer.instance
+            if link.student_id != user.pk:
+                raise PermissionDenied("You can only update your own profile.")
+            disallowed = set(serializer.validated_data) - self.STUDENT_EDITABLE_FIELDS
+            if disallowed:
+                raise PermissionDenied(
+                    "Students can only update their own chess platform account."
+                )
+        serializer.save()
+
 
 class StudentStatsView(APIView):
     permission_classes = (permissions.IsAuthenticated,)

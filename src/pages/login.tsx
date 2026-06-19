@@ -16,6 +16,13 @@ import { useRouter } from "@/hooks/useRouter";
 import { usePalette } from "@/hooks/usePalette";
 import AuthLayout from "@/sections/auth/AuthLayout";
 import { getApiErrorMessage } from "@/lib/apiErrors";
+import { UserRole } from "@/types/user";
+
+function landingForRole(role: UserRole): string {
+  if (role === UserRole.Student) return "/student";
+  if (role === UserRole.Coach || role === UserRole.Admin) return "/coach";
+  return "/";
+}
 
 function LoginForm() {
   const router = useRouter();
@@ -42,11 +49,12 @@ function LoginForm() {
 
     setLoading(true);
     try {
-      await login(username.trim(), password);
-      const from =
-        (location.state as { from?: { pathname: string } })?.from?.pathname ??
-        "/";
-      router.push(from);
+      const me = await login(username.trim(), password);
+      const from = (location.state as { from?: { pathname: string } })?.from
+        ?.pathname;
+      // Honor an explicit deep link the user was sent to login from; otherwise
+      // drop them on their role's home so they don't have to hunt for it.
+      router.push(from && from !== "/" ? from : landingForRole(me.role));
     } catch (err: unknown) {
       setError(getApiErrorMessage(err));
     } finally {

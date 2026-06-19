@@ -18,6 +18,7 @@ export type SyncOverview = {
   games_analyzed: number;
   games_pending: number;
   games_in_progress: number;
+  games_failed?: number;
   last_sync_at: string | null;
 };
 

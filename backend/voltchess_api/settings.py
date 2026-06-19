@@ -136,7 +136,11 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+    # Long-lived sessions so students/coaches are not asked to sign in
+    # repeatedly. The refresh token rotates on every use and the frontend
+    # refreshes it proactively, so an actively-used session effectively never
+    # expires within this window.
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=12),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=90),
     "ROTATE_REFRESH_TOKENS": True,
 }

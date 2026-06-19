@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { isAxiosError } from "axios";
-import api from "@/api";
+import api, { refreshAccessToken } from "@/api";
 import { ENABLE_AUTHENTICATION } from "@/constants";
 import {
   clearAuthStorage,
@@ -23,7 +23,7 @@ type AuthContextValue = {
   user: User | null;
   loading: boolean;
   isAuthenticated: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<User>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 };
@@ -80,6 +80,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void refreshUser();
   }, [refreshUser]);
 
+  // Keep the session alive while the tab is open: proactively rotate the
+  // access token well before it expires so an actively-used app effectively
+  // never forces a re-login (and avoids a 401 round-trip on the next request).
+  useEffect(() => {
+    if (!ENABLE_AUTHENTICATION) return;
+    const REFRESH_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6h (< 12h access lifetime)
+    const tick = () => {
+      if (hasStoredSession()) void refreshAccessToken();
+    };
+    const id = window.setInterval(tick, REFRESH_INTERVAL_MS);
+    return () => window.clearInterval(id);
+  }, []);
+
   useEffect(() => {
     const onExpired = () => {
       setUser(null);
@@ -102,6 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(me.data);
       writeCachedUser(me.data);
       setLoading(false);
+      return me.data;
     } catch {
       clearAuthStorage();
       setUser(null);
