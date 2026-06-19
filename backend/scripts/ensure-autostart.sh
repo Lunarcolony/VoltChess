@@ -25,7 +25,7 @@ if [[ ! -x "$CLOUDFLARED" ]]; then
   sudo chmod +x "$CLOUDFLARED"
 fi
 
-chmod +x "$SCRIPT_DIR/start-tunnel.sh" "$SCRIPT_DIR/setup-tunnel.sh" 2>/dev/null || true
+chmod +x "$SCRIPT_DIR/start-tunnel.sh" "$SCRIPT_DIR/start-tunnel-cloudflare.sh" "$SCRIPT_DIR/start-tunnel-fallback.sh" "$SCRIPT_DIR/setup-tunnel.sh" "$SCRIPT_DIR/recover-tunnel.sh" 2>/dev/null || true
 
 GUNICORN_BIND="0.0.0.0:8000"
 GUNICORN_WORKERS="2"
@@ -77,7 +77,7 @@ Group=$PI_USER
 WorkingDirectory=$BACKEND_DIR
 ExecStart=$BACKEND_DIR/scripts/start-tunnel.sh
 Restart=always
-RestartSec=15
+RestartSec=60
 
 [Install]
 WantedBy=multi-user.target voltchess.target
