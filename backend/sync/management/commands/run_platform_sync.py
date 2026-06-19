@@ -13,12 +13,23 @@ class Command(BaseCommand):
         parser.add_argument(
             "--sync-only",
             action="store_true",
-            help="Only import games, skip Stockfish analysis",
+            help="(default behaviour) Only import games, skip server analysis",
+        )
+        parser.add_argument(
+            "--analyze",
+            action="store_true",
+            help=(
+                "Also run the server-side Stockfish analysis queue. Off by "
+                "default: server-side analysis is single-PV and cannot produce "
+                "the full report (accuracy / move classifications), and once a "
+                "game has any eval the student's browser stops analyzing it. "
+                "Prefer browser-side analysis for complete reports."
+            ),
         )
         parser.add_argument(
             "--analyze-only",
             action="store_true",
-            help="Only run server analysis queue",
+            help="Only run server analysis queue (implies --analyze)",
         )
         parser.add_argument(
             "--max-analyze",
@@ -28,6 +39,8 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        run_analysis = options["analyze"] or options["analyze_only"]
+
         if not options["analyze_only"]:
             links = (
                 CoachStudentLink.objects.filter(sync_enabled=True)
@@ -50,6 +63,11 @@ class Command(BaseCommand):
                         )
                     )
 
-        if not options["sync_only"]:
+        if run_analysis and not options["sync_only"]:
             result = process_server_queue(max_games=options["max_analyze"])
             self.stdout.write(self.style.SUCCESS(f"Server analysis: {result}"))
+        elif not run_analysis:
+            self.stdout.write(
+                "Skipping server-side analysis (browser-authoritative). "
+                "Pass --analyze to opt in."
+            )

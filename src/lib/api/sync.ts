@@ -75,6 +75,11 @@ export async function claimGameAnalysis(
   return res.data;
 }
 
+/** Return a claimed-but-unfinished game to the queue (browser gave up). */
+export async function releaseGameAnalysis(gameId: string): Promise<void> {
+  await api.post(`/api/sync/games/${gameId}/release/`);
+}
+
 export async function completeGameAnalysis(
   gameId: string,
   evalPayload: {

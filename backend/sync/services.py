@@ -16,7 +16,10 @@ from .platform_fetch import SYNC_GAME_LIMIT, fetch_platform_games
 User = get_user_model()
 
 PRESENCE_ONLINE_SECONDS = 120
-BROWSER_CLAIM_TIMEOUT = timedelta(minutes=8)
+# How long a browser "claim" is trusted before another worker may take the game
+# over. Kept short so a tab that is closed mid-analysis doesn't leave a game
+# stuck for a long time.
+BROWSER_CLAIM_TIMEOUT = timedelta(minutes=4)
 SERVER_PENDING_TIMEOUT = timedelta(minutes=3)
 
 
@@ -258,19 +261,69 @@ def games_pending_server_analysis(limit: int = 3) -> list[Game]:
     return eligible
 
 
-def claim_game_for_browser(game: Game) -> Game:
-    game.analysis_status = AnalysisStatus.IN_PROGRESS
-    game.analysis_source = "browser"
-    game.analysis_claimed_at = timezone.now()
-    game.save(
-        update_fields=[
-            "analysis_status",
-            "analysis_source",
-            "analysis_claimed_at",
-            "updated_at",
-        ]
-    )
-    return game
+def claim_game_for_browser(game_id, student) -> Game | None:
+    """Atomically claim a game for browser-side analysis.
+
+    Returns the claimed game, or None if it can't be claimed (already analyzed,
+    or another worker holds a fresh claim). Row-locking prevents two tabs / the
+    server queue from analyzing the same game at once.
+    """
+    now = timezone.now()
+    stale_claim = now - BROWSER_CLAIM_TIMEOUT
+
+    with transaction.atomic():
+        try:
+            game = Game.objects.select_for_update().get(
+                pk=game_id, owner=student
+            )
+        except Game.DoesNotExist:
+            return None
+
+        if hasattr(game, "eval"):
+            return None
+
+        already_claimed = (
+            game.analysis_status == AnalysisStatus.IN_PROGRESS
+            and game.analysis_claimed_at is not None
+            and game.analysis_claimed_at > stale_claim
+        )
+        if already_claimed:
+            return None
+
+        game.analysis_status = AnalysisStatus.IN_PROGRESS
+        game.analysis_source = "browser"
+        game.analysis_claimed_at = now
+        game.save(
+            update_fields=[
+                "analysis_status",
+                "analysis_source",
+                "analysis_claimed_at",
+                "updated_at",
+            ]
+        )
+        return game
+
+
+def release_game_for_retry(game_id, student) -> bool:
+    """Return an unfinished, browser-claimed game to PENDING so it can be picked
+    up again promptly (used when a browser worker fails or abandons a game)."""
+    with transaction.atomic():
+        try:
+            game = Game.objects.select_for_update().get(
+                pk=game_id, owner=student
+            )
+        except Game.DoesNotExist:
+            return False
+
+        if hasattr(game, "eval"):
+            return True
+
+        game.analysis_status = AnalysisStatus.PENDING
+        game.analysis_claimed_at = None
+        game.save(
+            update_fields=["analysis_status", "analysis_claimed_at", "updated_at"]
+        )
+        return True
 
 
 def mark_analysis_complete(game: Game, source: str) -> None:
@@ -314,18 +367,28 @@ def student_sync_overview(student) -> dict:
             }
         )
 
-    games = Game.objects.filter(owner=student)
+    # Whether a saved eval (report) exists is the source of truth for
+    # "analyzed" — not analysis_status, which can drift (e.g. a tab closed
+    # mid-flight). This keeps a game that already has a report from being shown
+    # as perpetually "analyzing".
+    games = list(Game.objects.filter(owner=student).select_related("eval"))
+    analyzed = sum(1 for g in games if hasattr(g, "eval"))
+    not_analyzed = [g for g in games if not hasattr(g, "eval")]
+    in_progress = sum(
+        1 for g in not_analyzed if g.analysis_status == AnalysisStatus.IN_PROGRESS
+    )
+    failed = sum(
+        1 for g in not_analyzed if g.analysis_status == AnalysisStatus.FAILED
+    )
+    pending = len(not_analyzed) - in_progress - failed
+
     return {
         "platform_links": platform_links,
-        "games_total": games.count(),
-        "games_analyzed": games.filter(analysis_status=AnalysisStatus.COMPLETE).count(),
-        "games_pending": games.filter(analysis_status=AnalysisStatus.PENDING).count(),
-        "games_in_progress": games.filter(
-            analysis_status=AnalysisStatus.IN_PROGRESS
-        ).count(),
-        "games_failed": games.filter(
-            analysis_status=AnalysisStatus.FAILED
-        ).count(),
+        "games_total": len(games),
+        "games_analyzed": analyzed,
+        "games_pending": pending,
+        "games_in_progress": in_progress,
+        "games_failed": failed,
         "last_sync_at": max(
             (l.last_sync_at for l in links if l.last_sync_at),
             default=None,

@@ -6,6 +6,7 @@ from .views import (
     PendingAnalysisView,
     PresenceView,
     ProcessServerQueueView,
+    ReleaseAnalysisView,
     SyncOverviewView,
     SyncTriggerView,
 )
@@ -28,6 +29,11 @@ urlpatterns = [
         "sync/games/<uuid:game_id>/complete/",
         CompleteAnalysisView.as_view(),
         name="sync-complete-analysis",
+    ),
+    path(
+        "sync/games/<uuid:game_id>/release/",
+        ReleaseAnalysisView.as_view(),
+        name="sync-release-analysis",
     ),
     path(
         "sync/process-server/",
