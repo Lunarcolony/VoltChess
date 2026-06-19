@@ -51,7 +51,7 @@ function navForRole(
   }
   if (role === UserRole.Student) {
     items.splice(1, 0, {
-      label: "My Academy",
+      label: "My Hub",
       icon: "mdi:school-outline",
       href: "/student",
     });

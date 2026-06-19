@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
 import { getApiBaseUrl, resolveApiBaseUrl } from "@/config/apiUrl";
 import {
   clearAuthStorage,
@@ -26,6 +26,40 @@ api.interceptors.request.use(
 
 let refreshPromise: Promise<string | null> | null = null;
 
+/**
+ * Exchange the stored refresh token for a fresh access token (single-flight:
+ * concurrent callers share one in-flight request). The session is only cleared
+ * when the refresh token itself is rejected (401) — transient network errors
+ * keep the session so the user is not logged out spuriously. Callers (the 401
+ * interceptor and the proactive refresh timer in AuthContext) share this.
+ */
+export async function refreshAccessToken(): Promise<string | null> {
+  const refresh = getRefreshToken();
+  if (!refresh) return null;
+
+  if (!refreshPromise) {
+    refreshPromise = api
+      .post("/api/token/refresh/", { refresh })
+      .then((res) => {
+        const access = res.data.access as string;
+        const nextRefresh = (res.data.refresh as string | undefined) ?? refresh;
+        setTokens(access, nextRefresh);
+        return access as string | null;
+      })
+      .catch((err) => {
+        if (isAxiosError(err) && err.response?.status === 401) {
+          clearAuthStorage();
+        }
+        return null;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+
+  return refreshPromise;
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -39,31 +73,11 @@ api.interceptors.response.use(
     }
 
     original._retry = true;
-    const refresh = getRefreshToken();
-    if (!refresh) {
+    if (!getRefreshToken()) {
       return Promise.reject(error);
     }
 
-    if (!refreshPromise) {
-      refreshPromise = api
-        .post("/api/token/refresh/", { refresh })
-        .then((res) => {
-          const access = res.data.access as string;
-          const nextRefresh =
-            (res.data.refresh as string | undefined) ?? refresh;
-          setTokens(access, nextRefresh);
-          return access;
-        })
-        .catch(() => {
-          clearAuthStorage();
-          return null;
-        })
-        .finally(() => {
-          refreshPromise = null;
-        });
-    }
-
-    const access = await refreshPromise;
+    const access = await refreshAccessToken();
     if (!access) {
       return Promise.reject(error);
     }
