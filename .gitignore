@@ -7,7 +7,10 @@ node_modules
 # Local deploy scripts (never commit Pi SSH targets or passwords)
 sync-pi-tunnel-url.bat
 scripts/sync_pi_tunnel_url.py
+deploy-pi.bat
 scripts/_deploy_pi_once.py
+scripts/_deploy_coaching_pi.py
+scripts/_fix_pi_tunnel.py
 
 # Python bytecode / local DB (also see backend/.gitignore)
 **/__pycache__/
