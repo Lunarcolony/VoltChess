@@ -138,5 +138,9 @@ export function useAnalyzeGame() {
     gameEval,
     evaluationProgress,
     engineReady: !!engine?.getIsReady(),
+    // Synced games are analyzed once in the background and their report is
+    // saved on the server, so opening one should never kick off a fresh
+    // foreground analysis.
+    isServerGame: !!serverGameFromUrl,
   };
 }
