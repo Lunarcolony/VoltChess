@@ -16,7 +16,7 @@ const Login = lazy(() => import("@/pages/login"));
 const Openings = lazy(() => import("@/pages/openings"));
 const Play = lazy(() => import("@/pages/play"));
 const Puzzles = lazy(() => import("@/pages/puzzles"));
-const Reanalysis = lazy(() => import("@/pages/reanalysis"));
+const Review = lazy(() => import("@/pages/review"));
 const Register = lazy(() => import("@/pages/register"));
 const TermsAndConditions = lazy(() => import("@/pages/terms-and-conditions"));
 const Thanks = lazy(() => import("@/pages/thanks"));
@@ -64,7 +64,8 @@ function App() {
               <Route path="/openings" element={<Openings />} />
               <Route path="/play" element={<Play />} />
               <Route path="/puzzles" element={<Puzzles />} />
-              <Route path="/reanalysis" element={<Reanalysis />} />
+              {/* Read-only saved-report viewer (no engine). Hubs link here. */}
+              <Route path="/review" element={<Review />} />
               <Route
                 path="/coach"
                 element={

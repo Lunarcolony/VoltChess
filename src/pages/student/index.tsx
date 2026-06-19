@@ -205,7 +205,7 @@ export default function StudentHome() {
                 <Button
                   size="small"
                   sx={{ ml: "auto" }}
-                  onClick={() => router.push("/reanalysis")}
+                  onClick={() => router.push("/analysis")}
                   startIcon={<span style={{ fontSize: 14 }}>+</span>}
                 >
                   Analyze new
@@ -311,7 +311,7 @@ export default function StudentHome() {
                                 sx={{ height: 20, fontSize: "0.65rem" }}
                               />
                             )}
-                            <NavLink href={`/analysis?gameId=${g.id}`}>
+                            <NavLink href={`/review?gameId=${g.id}`}>
                               <Typography
                                 fontSize="0.8rem"
                                 fontWeight={600}

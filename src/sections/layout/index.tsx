@@ -5,7 +5,7 @@ import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { useRouter } from "@/hooks/useRouter";
 
 /** Routes that render edge-to-edge without page padding */
-const FULL_BLEED_ROUTES = ["/analysis", "/reanalysis"];
+const FULL_BLEED_ROUTES = ["/analysis", "/review"];
 
 /** Auth entry — no sidebar (Academy sign-in / register) */
 const AUTH_ROUTES = ["/login", "/register", "/sign-in"];

@@ -393,7 +393,7 @@ export default function CoachStudentDetail() {
               Export CSV
             </Button>
             {blunderGame && (
-              <NavLink href={`/analysis?gameId=${blunderGame.id}`}>
+              <NavLink href={`/review?gameId=${blunderGame.id}`}>
                 <Button size="small" variant="contained">
                   Review latest analyzed game
                 </Button>
@@ -469,12 +469,12 @@ export default function CoachStudentDetail() {
                       }}
                     />
                   )}
-                  <NavLink href={`/analysis?gameId=${g.id}`}>
+                  <NavLink href={`/review?gameId=${g.id}`}>
                     <Typography
                       fontSize="0.85rem"
                       sx={{ color: palette.accent, fontWeight: 600 }}
                     >
-                      Open in analysis
+                      Open report
                     </Typography>
                   </NavLink>
                 </Box>
