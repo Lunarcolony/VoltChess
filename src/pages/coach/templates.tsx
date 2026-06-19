@@ -18,7 +18,10 @@ import { Icon } from "@iconify/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import CoachShell from "@/sections/coach/CoachShell";
 import { CoachPageHeader, CoachEmptyState } from "@/sections/coach/CoachUi";
-import { ASSIGNMENT_CATEGORIES, formatCategory } from "@/sections/coach/constants";
+import {
+  ASSIGNMENT_CATEGORIES,
+  formatCategory,
+} from "@/sections/coach/constants";
 import { usePalette } from "@/hooks/usePalette";
 import {
   createLessonTemplate,
@@ -69,7 +72,13 @@ export default function CoachTemplatesPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["lesson-templates"] });
       setOpen(false);
-      setForm({ title: "", category: "homework", instructions: "", pgn: "", estimated_minutes: "" });
+      setForm({
+        title: "",
+        category: "homework",
+        instructions: "",
+        pgn: "",
+        estimated_minutes: "",
+      });
     },
   });
 
@@ -113,7 +122,13 @@ export default function CoachTemplatesPage() {
             description="Save your best assignments as templates to reuse across students."
           />
         ) : (
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+              gap: 2,
+            }}
+          >
             {templates.map((t) => (
               <Box
                 key={t.id}
@@ -124,12 +139,20 @@ export default function CoachTemplatesPage() {
                   border: `1px solid ${palette.border}`,
                 }}
               >
-                <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 1,
+                  }}
+                >
                   <Typography fontWeight={700}>{t.title}</Typography>
                   <IconButton
                     size="small"
                     onClick={() =>
-                      updateLessonTemplate(t.id, { is_favorite: !t.is_favorite }).then(() =>
+                      updateLessonTemplate(t.id, {
+                        is_favorite: !t.is_favorite,
+                      }).then(() =>
                         qc.invalidateQueries({ queryKey: ["lesson-templates"] })
                       )
                     }
@@ -144,14 +167,26 @@ export default function CoachTemplatesPage() {
                 <Box sx={{ display: "flex", gap: 0.75, my: 1 }}>
                   <Chip label={formatCategory(t.category)} size="small" />
                   {t.estimated_minutes && (
-                    <Chip label={`${t.estimated_minutes} min`} size="small" variant="outlined" />
+                    <Chip
+                      label={`${t.estimated_minutes} min`}
+                      size="small"
+                      variant="outlined"
+                    />
                   )}
                 </Box>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 1.5 }}
+                >
                   {t.instructions.slice(0, 160)}
                 </Typography>
                 <Box sx={{ display: "flex", gap: 1 }}>
-                  <Button size="small" variant="contained" onClick={() => setApplyTpl(t)}>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    onClick={() => setApplyTpl(t)}
+                  >
                     Assign
                   </Button>
                   <Button
@@ -171,39 +206,110 @@ export default function CoachTemplatesPage() {
           </Box>
         )}
 
-        <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
+        <Dialog
+          open={open}
+          onClose={() => setOpen(false)}
+          fullWidth
+          maxWidth="sm"
+        >
           <DialogTitle>Create template</DialogTitle>
-          <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
-            <TextField label="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} size="small" />
-            <TextField select label="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} size="small">
+          <DialogContent
+            sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}
+          >
+            <TextField
+              label="Title"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              size="small"
+            />
+            <TextField
+              select
+              label="Category"
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              size="small"
+            >
               {ASSIGNMENT_CATEGORIES.map((c) => (
-                <MenuItem key={c.value} value={c.value}>{c.label}</MenuItem>
+                <MenuItem key={c.value} value={c.value}>
+                  {c.label}
+                </MenuItem>
               ))}
             </TextField>
-            <TextField label="Instructions" multiline minRows={3} value={form.instructions} onChange={(e) => setForm({ ...form, instructions: e.target.value })} size="small" />
-            <TextField label="PGN" multiline minRows={2} value={form.pgn} onChange={(e) => setForm({ ...form, pgn: e.target.value })} size="small" />
-            <TextField label="Est. minutes" type="number" value={form.estimated_minutes} onChange={(e) => setForm({ ...form, estimated_minutes: e.target.value })} size="small" />
+            <TextField
+              label="Instructions"
+              multiline
+              minRows={3}
+              value={form.instructions}
+              onChange={(e) =>
+                setForm({ ...form, instructions: e.target.value })
+              }
+              size="small"
+            />
+            <TextField
+              label="PGN"
+              multiline
+              minRows={2}
+              value={form.pgn}
+              onChange={(e) => setForm({ ...form, pgn: e.target.value })}
+              size="small"
+            />
+            <TextField
+              label="Est. minutes"
+              type="number"
+              value={form.estimated_minutes}
+              onChange={(e) =>
+                setForm({ ...form, estimated_minutes: e.target.value })
+              }
+              size="small"
+            />
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpen(false)}>Cancel</Button>
-            <Button variant="contained" disabled={!form.title.trim() || !form.instructions.trim() || createMut.isPending} onClick={() => createMut.mutate()}>
+            <Button
+              variant="contained"
+              disabled={
+                !form.title.trim() ||
+                !form.instructions.trim() ||
+                createMut.isPending
+              }
+              onClick={() => createMut.mutate()}
+            >
               Save template
             </Button>
           </DialogActions>
         </Dialog>
 
-        <Dialog open={!!applyTpl} onClose={() => setApplyTpl(null)} fullWidth maxWidth="xs">
+        <Dialog
+          open={!!applyTpl}
+          onClose={() => setApplyTpl(null)}
+          fullWidth
+          maxWidth="xs"
+        >
           <DialogTitle>Assign template</DialogTitle>
           <DialogContent>
-            <TextField select fullWidth label="Student" value={studentId} onChange={(e) => setStudentId(e.target.value)} size="small" sx={{ mt: 1 }}>
+            <TextField
+              select
+              fullWidth
+              label="Student"
+              value={studentId}
+              onChange={(e) => setStudentId(e.target.value)}
+              size="small"
+              sx={{ mt: 1 }}
+            >
               {links.map((l) => (
-                <MenuItem key={l.id} value={l.student.id}>{l.student.username}</MenuItem>
+                <MenuItem key={l.id} value={l.student.id}>
+                  {l.student.username}
+                </MenuItem>
               ))}
             </TextField>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setApplyTpl(null)}>Cancel</Button>
-            <Button variant="contained" disabled={!studentId || applyMut.isPending} onClick={() => applyMut.mutate()}>
+            <Button
+              variant="contained"
+              disabled={!studentId || applyMut.isPending}
+              onClick={() => applyMut.mutate()}
+            >
               Create assignment
             </Button>
           </DialogActions>

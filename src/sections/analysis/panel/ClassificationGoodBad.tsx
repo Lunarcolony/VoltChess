@@ -153,7 +153,9 @@ function ClassificationColumn({
                   cursor: whiteNb ? "pointer" : "default",
                   fontWeight: 500,
                 }}
-                onClick={() => whiteNb && handleClick(classification, Color.White)}
+                onClick={() =>
+                  whiteNb && handleClick(classification, Color.White)
+                }
               >
                 {whiteNb}
               </Typography>
@@ -185,7 +187,9 @@ function ClassificationColumn({
                   cursor: blackNb ? "pointer" : "default",
                   fontWeight: 500,
                 }}
-                onClick={() => blackNb && handleClick(classification, Color.Black)}
+                onClick={() =>
+                  blackNb && handleClick(classification, Color.Black)
+                }
               >
                 {blackNb}
               </Typography>

@@ -75,7 +75,6 @@ export const ANALYSIS_TOUR_STEPS = [
   {
     id: "done",
     title: "You're all set!",
-    content:
-      "Load more games from the home page anytime. Happy analyzing!",
+    content: "Load more games from the home page anytime. Happy analyzing!",
   },
 ] as const;

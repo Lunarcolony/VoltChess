@@ -161,14 +161,25 @@ export default function CoachStudentsPage() {
                 }}
               >
                 <Box>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      flexWrap: "wrap",
+                    }}
+                  >
                     <IconButton
                       size="small"
                       onClick={() =>
-                        updateCoachLink(r.link_id, { pinned: !r.pinned }).then(() => {
-                          qc.invalidateQueries({ queryKey: ["coach-dashboard"] });
-                          qc.invalidateQueries({ queryKey: ["coach-links"] });
-                        })
+                        updateCoachLink(r.link_id, { pinned: !r.pinned }).then(
+                          () => {
+                            qc.invalidateQueries({
+                              queryKey: ["coach-dashboard"],
+                            });
+                            qc.invalidateQueries({ queryKey: ["coach-links"] });
+                          }
+                        )
                       }
                       aria-label={r.pinned ? "Unpin" : "Pin"}
                     >
@@ -187,7 +198,10 @@ export default function CoachStudentsPage() {
                       label={`${r.engagement_score}% engaged`}
                       size="small"
                       sx={{
-                        bgcolor: alpha(engagementColor(r.engagement_score), 0.12),
+                        bgcolor: alpha(
+                          engagementColor(r.engagement_score),
+                          0.12
+                        ),
                         color: engagementColor(r.engagement_score),
                         fontWeight: 700,
                       }}
@@ -196,19 +210,43 @@ export default function CoachStudentsPage() {
                       <Chip key={t} label={t} size="small" variant="outlined" />
                     ))}
                   </Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                    {r.stats.total_games} games · {r.stats.analyzed_games} analyzed ·{" "}
-                    {r.avg_accuracy != null ? `${r.avg_accuracy}% avg accuracy` : "No accuracy yet"}
-                    {r.days_inactive != null ? ` · last active ${r.days_inactive}d ago` : ""}
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: 0.5 }}
+                  >
+                    {r.stats.total_games} games · {r.stats.analyzed_games}{" "}
+                    analyzed ·{" "}
+                    {r.avg_accuracy != null
+                      ? `${r.avg_accuracy}% avg accuracy`
+                      : "No accuracy yet"}
+                    {r.days_inactive != null
+                      ? ` · last active ${r.days_inactive}d ago`
+                      : ""}
                   </Typography>
                   {r.coach_notes_preview && (
-                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, display: "block" }}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ mt: 0.75, display: "block" }}
+                    >
                       Note: {r.coach_notes_preview}
                     </Typography>
                   )}
                 </Box>
-                <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start", flexWrap: "wrap" }}>
-                  <Button size="small" variant="outlined" onClick={() => openEdit(r.link_id)}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 1,
+                    alignItems: "flex-start",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => openEdit(r.link_id)}
+                  >
                     Edit profile
                   </Button>
                   <NavLink href={`/coach/students/${r.student.id}`}>
@@ -222,9 +260,16 @@ export default function CoachStudentsPage() {
           </Box>
         )}
 
-        <Dialog open={!!editId} onClose={() => setEditId(null)} fullWidth maxWidth="sm">
+        <Dialog
+          open={!!editId}
+          onClose={() => setEditId(null)}
+          fullWidth
+          maxWidth="sm"
+        >
           <DialogTitle>Student coaching profile</DialogTitle>
-          <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
+          <DialogContent
+            sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}
+          >
             <TextField
               label="Private coach notes"
               multiline
@@ -287,7 +332,11 @@ export default function CoachStudentsPage() {
               onChange={(e) => setPlatformUsername(e.target.value)}
               size="small"
               disabled={!platform}
-              placeholder={platform === "lichess" ? "lichess_username" : "chesscom_username"}
+              placeholder={
+                platform === "lichess"
+                  ? "lichess_username"
+                  : "chesscom_username"
+              }
             />
             <TextField
               select

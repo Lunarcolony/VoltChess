@@ -120,7 +120,8 @@ function PlayerDominanceRow({
   const playerColor = isWhite
     ? REPORT_COLORS.whitePlayer
     : REPORT_COLORS.blackPlayer;
-  const canJump = profile.worstLeakMoveIdx !== null && profile.worstLeakPct >= 5;
+  const canJump =
+    profile.worstLeakMoveIdx !== null && profile.worstLeakPct >= 5;
 
   return (
     <Box

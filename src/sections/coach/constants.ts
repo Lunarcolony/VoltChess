@@ -14,16 +14,32 @@ export const PRIORITY_OPTIONS = [
 ] as const;
 
 export const COACH_NAV = [
-  { label: "Command Center", href: "/coach", icon: "mdi:view-dashboard-outline" },
-  { label: "Students", href: "/coach/students", icon: "mdi:account-group-outline" },
+  {
+    label: "Command Center",
+    href: "/coach",
+    icon: "mdi:view-dashboard-outline",
+  },
+  {
+    label: "Students",
+    href: "/coach/students",
+    icon: "mdi:account-group-outline",
+  },
   {
     label: "Assignments",
     href: "/coach/assignments",
     icon: "mdi:clipboard-text-outline",
   },
-  { label: "Templates", href: "/coach/templates", icon: "mdi:book-open-variant" },
+  {
+    label: "Templates",
+    href: "/coach/templates",
+    icon: "mdi:book-open-variant",
+  },
   { label: "Messages", href: "/coach/messages", icon: "mdi:email-outline" },
-  { label: "Training Plans", href: "/coach/plans", icon: "mdi:calendar-month-outline" },
+  {
+    label: "Training Plans",
+    href: "/coach/plans",
+    icon: "mdi:calendar-month-outline",
+  },
   { label: "Analytics", href: "/coach/analytics", icon: "mdi:chart-line" },
 ] as const;
 

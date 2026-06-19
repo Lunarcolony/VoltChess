@@ -122,7 +122,11 @@ function buildProfile(
     badMoveOpportunities++;
     const target = entry.before - 5;
     let ownMovesChecked = 0;
-    for (let j = entry.ply + 1; j < positions.length && ownMovesChecked < 2; j++) {
+    for (
+      let j = entry.ply + 1;
+      j < positions.length && ownMovesChecked < 2;
+      j++
+    ) {
       const isPlayerMove = isWhite ? j % 2 === 1 : j % 2 === 0;
       if (!isPlayerMove) continue;
       ownMovesChecked++;
@@ -207,7 +211,10 @@ export function computePositionDominance(positions: PositionEval[]): {
 } {
   const whiteBuilt = buildProfile(true, positions);
   const blackBuilt = buildProfile(false, positions);
-  const dominance = normalizeShare(whiteBuilt.qualityRaw, blackBuilt.qualityRaw);
+  const dominance = normalizeShare(
+    whiteBuilt.qualityRaw,
+    blackBuilt.qualityRaw
+  );
 
   const phases = (["opening", "middlegame", "endgame"] as PhaseId[]).reduce(
     (acc, id) => {
@@ -225,7 +232,9 @@ export function computePositionDominance(positions: PositionEval[]): {
     {} as Record<PhaseId, PhaseStats>
   );
 
-  const blackPhases = (["opening", "middlegame", "endgame"] as PhaseId[]).reduce(
+  const blackPhases = (
+    ["opening", "middlegame", "endgame"] as PhaseId[]
+  ).reduce(
     (acc, id) => {
       const phaseShare = normalizeShare(
         whiteBuilt.phases[id].qualityRaw,

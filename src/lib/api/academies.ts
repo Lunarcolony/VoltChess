@@ -73,7 +73,10 @@ export async function updateCoachLink(
     >
   >
 ): Promise<CoachStudentLink> {
-  const res = await api.patch<CoachStudentLink>(`/api/coach-links/${id}/`, data);
+  const res = await api.patch<CoachStudentLink>(
+    `/api/coach-links/${id}/`,
+    data
+  );
   return res.data;
 }
 
@@ -122,8 +125,11 @@ export async function fetchStudentReport(
   from?: string,
   to?: string
 ): Promise<StudentReport> {
-  const res = await api.get<StudentReport>(`/api/students/${studentId}/report/`, {
-    params: { from, to },
-  });
+  const res = await api.get<StudentReport>(
+    `/api/students/${studentId}/report/`,
+    {
+      params: { from, to },
+    }
+  );
   return res.data;
 }

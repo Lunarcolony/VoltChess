@@ -17,7 +17,11 @@ import CoachShell from "@/sections/coach/CoachShell";
 import { CoachPageHeader } from "@/sections/coach/CoachUi";
 import { usePalette } from "@/hooks/usePalette";
 import { fetchCoachLinks } from "@/lib/api/academies";
-import { createTrainingPlan, fetchTrainingPlans, updateTrainingPlan } from "@/lib/api/coaching";
+import {
+  createTrainingPlan,
+  fetchTrainingPlans,
+  updateTrainingPlan,
+} from "@/lib/api/coaching";
 
 export default function CoachPlansPage() {
   const palette = usePalette();
@@ -108,8 +112,9 @@ export default function CoachPlansPage() {
                   <Button
                     size="small"
                     onClick={() =>
-                      updateTrainingPlan(p.id, { status: "completed" }).then(() =>
-                        qc.invalidateQueries({ queryKey: ["training-plans"] })
+                      updateTrainingPlan(p.id, { status: "completed" }).then(
+                        () =>
+                          qc.invalidateQueries({ queryKey: ["training-plans"] })
                       )
                     }
                   >
@@ -134,9 +139,16 @@ export default function CoachPlansPage() {
           ))
         )}
 
-        <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
+        <Dialog
+          open={open}
+          onClose={() => setOpen(false)}
+          fullWidth
+          maxWidth="sm"
+        >
           <DialogTitle>Create training plan</DialogTitle>
-          <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
+          <DialogContent
+            sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}
+          >
             <TextField
               select
               label="Student"

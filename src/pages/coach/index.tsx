@@ -109,10 +109,19 @@ export default function CoachDashboardPage() {
                   p: 2.5,
                 }}
               >
-                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mb: 2,
+                  }}
+                >
                   <Typography fontWeight={700}>At-risk students</Typography>
                   <NavLink href="/coach/students">
-                    <Typography fontSize="0.8rem" sx={{ color: palette.accent, fontWeight: 600 }}>
+                    <Typography
+                      fontSize="0.8rem"
+                      sx={{ color: palette.accent, fontWeight: 600 }}
+                    >
                       View roster →
                     </Typography>
                   </NavLink>
@@ -131,7 +140,13 @@ export default function CoachDashboardPage() {
                         "&:last-child": { borderBottom: 0 },
                       }}
                     >
-                      <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: 1,
+                        }}
+                      >
                         <NavLink href={`/coach/students/${s.student.id}`}>
                           <Typography fontWeight={600} fontSize="0.9rem">
                             {s.student.username}
@@ -142,7 +157,10 @@ export default function CoachDashboardPage() {
                           size="small"
                           sx={{
                             height: 22,
-                            bgcolor: alpha(engagementColor(s.engagement_score), 0.15),
+                            bgcolor: alpha(
+                              engagementColor(s.engagement_score),
+                              0.15
+                            ),
                             color: engagementColor(s.engagement_score),
                             fontWeight: 700,
                             fontSize: "0.7rem",
@@ -198,7 +216,11 @@ export default function CoachDashboardPage() {
                         <Typography fontSize="0.85rem" fontWeight={600} noWrap>
                           {a.student_username}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" noWrap>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          noWrap
+                        >
                           {a.summary}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
@@ -219,7 +241,9 @@ export default function CoachDashboardPage() {
                 p: 2.5,
               }}
             >
-              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+              <Box
+                sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}
+              >
                 <Typography fontWeight={700}>Student pulse</Typography>
                 <NavLink href="/coach/students">
                   <Button size="small" variant="outlined">
@@ -248,13 +272,24 @@ export default function CoachDashboardPage() {
                   >
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       {r.pinned && (
-                        <Icon icon="mdi:pin" width={14} color={palette.accent} />
+                        <Icon
+                          icon="mdi:pin"
+                          width={14}
+                          color={palette.accent}
+                        />
                       )}
                       <NavLink href={`/coach/students/${r.student.id}`}>
-                        <Typography fontWeight={600}>{r.student.username}</Typography>
+                        <Typography fontWeight={600}>
+                          {r.student.username}
+                        </Typography>
                       </NavLink>
                       {r.priority === "high" && (
-                        <Chip label="High" size="small" color="error" sx={{ height: 20 }} />
+                        <Chip
+                          label="High"
+                          size="small"
+                          color="error"
+                          sx={{ height: 20 }}
+                        />
                       )}
                     </Box>
                     <Box sx={{ minWidth: 120 }}>
@@ -278,8 +313,8 @@ export default function CoachDashboardPage() {
                       fontSize="0.85rem"
                       sx={{ color: engagementColor(r.engagement_score) }}
                     >
-                      {r.avg_accuracy != null ? `${r.avg_accuracy}% acc` : "—"} ·{" "}
-                      {r.engagement_score}% engaged
+                      {r.avg_accuracy != null ? `${r.avg_accuracy}% acc` : "—"}{" "}
+                      · {r.engagement_score}% engaged
                     </Typography>
                   </Box>
                 ))

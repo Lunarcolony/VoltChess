@@ -6,7 +6,11 @@ import { usePalette } from "@/hooks/usePalette";
 import { alpha } from "@mui/material/styles";
 import { COACH_NAV } from "./constants";
 
-export default function CoachShell({ children }: { children: React.ReactNode }) {
+export default function CoachShell({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const palette = usePalette();
   const router = useRouter();
   const navigate = useNavigate();

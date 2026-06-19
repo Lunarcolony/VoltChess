@@ -99,7 +99,10 @@ function Puzzles() {
   }, [initializePuzzle]);
 
   const playOpponentReplies = useCallback(
-    (gameCopy: Chess, startIndex: number): { game: Chess; nextIndex: number } => {
+    (
+      gameCopy: Chess,
+      startIndex: number
+    ): { game: Chess; nextIndex: number } => {
       let idx = startIndex;
       while (idx < currentPuzzle.solution.length) {
         const uci = currentPuzzle.solution[idx];
@@ -187,12 +190,9 @@ function Puzzles() {
     <>
       <PageTitle title="Puzzles — VoltChess" />
 
-      <Alert
-        severity="warning"
-        sx={{ mb: 2 }}
-        onClose={() => {}}
-      >
-        This puzzles page is still under development — puzzles, hints and scoring may change.
+      <Alert severity="warning" sx={{ mb: 2 }} onClose={() => {}}>
+        This puzzles page is still under development — puzzles, hints and
+        scoring may change.
       </Alert>
 
       <PageContainer
@@ -200,7 +200,11 @@ function Puzzles() {
         subtitle={currentPuzzle.description}
         action={
           <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-            <Chip label={`Score ${Math.round(score)}`} variant="outlined" size="small" />
+            <Chip
+              label={`Score ${Math.round(score)}`}
+              variant="outlined"
+              size="small"
+            />
             <Chip
               label={`${currentPuzzleIndex + 1} / ${puzzles.length}`}
               variant="outlined"
@@ -236,18 +240,33 @@ function Puzzles() {
               </Typography>
 
               <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 1 }}
+                >
                   Themes
                 </Typography>
                 <Box sx={{ display: "flex", gap: 0.75, flexWrap: "wrap" }}>
                   {currentPuzzle.themes.map((theme) => (
-                    <Chip key={theme} label={theme} size="small" variant="outlined" />
+                    <Chip
+                      key={theme}
+                      label={theme}
+                      size="small"
+                      variant="outlined"
+                    />
                   ))}
                 </Box>
               </Box>
 
               <Box sx={{ mb: 3 }}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.75 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mb: 0.75,
+                  }}
+                >
                   <Typography variant="body2" color="text.secondary">
                     Progress
                   </Typography>
@@ -284,7 +303,9 @@ function Puzzles() {
                       const m = hintGame.move(uciMoveParams(hintMove));
                       setFeedback({
                         show: true,
-                        message: m ? `Hint: try ${m.san}` : "Look for a forcing move.",
+                        message: m
+                          ? `Hint: try ${m.san}`
+                          : "Look for a forcing move.",
                         type: "info",
                       });
                     } catch {
@@ -299,7 +320,11 @@ function Puzzles() {
                 >
                   Hint
                 </Button>
-                <Button variant="outlined" size="small" onClick={initializePuzzle}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={initializePuzzle}
+                >
                   Reset
                 </Button>
                 <Button

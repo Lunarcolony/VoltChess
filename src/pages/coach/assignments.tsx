@@ -75,8 +75,13 @@ export default function CoachAssignmentsPage() {
   });
 
   const updateMut = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof updateAssignment>[1] }) =>
-      updateAssignment(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Parameters<typeof updateAssignment>[1];
+    }) => updateAssignment(id, data),
     onSuccess: () => {
       invalidate();
       setEditItem(null);
@@ -106,7 +111,8 @@ export default function CoachAssignmentsPage() {
   const dueCalendar = useMemo(() => {
     const map = new Map<string, Assignment[]>();
     assignments.forEach((a) => {
-      if (!a.due_date || a.status === "completed" || a.status === "cancelled") return;
+      if (!a.due_date || a.status === "completed" || a.status === "cancelled")
+        return;
       const list = map.get(a.due_date) ?? [];
       list.push(a);
       map.set(a.due_date, list);
@@ -245,7 +251,9 @@ export default function CoachAssignmentsPage() {
             {formFields}
             <Button
               variant="contained"
-              disabled={!studentId || !instructions.trim() || createMut.isPending}
+              disabled={
+                !studentId || !instructions.trim() || createMut.isPending
+              }
               onClick={() => {
                 createMut.mutate({
                   student_id: studentId,
@@ -284,7 +292,11 @@ export default function CoachAssignmentsPage() {
                   minHeight: 200,
                 }}
               >
-                <Typography fontWeight={700} fontSize="0.85rem" sx={{ mb: 1.5, textTransform: "capitalize" }}>
+                <Typography
+                  fontWeight={700}
+                  fontSize="0.85rem"
+                  sx={{ mb: 1.5, textTransform: "capitalize" }}
+                >
                   {status.replace("_", " ")} ({byStatus[status].length})
                 </Typography>
                 {byStatus[status].map((a) => (
@@ -292,7 +304,9 @@ export default function CoachAssignmentsPage() {
                     key={a.id}
                     assignment={a}
                     onEdit={() => setEditItem(a)}
-                    onStatus={(s) => updateMut.mutate({ id: a.id, data: { status: s } })}
+                    onStatus={(s) =>
+                      updateMut.mutate({ id: a.id, data: { status: s } })
+                    }
                   />
                 ))}
               </Box>
@@ -322,7 +336,8 @@ export default function CoachAssignmentsPage() {
                   <Typography fontWeight={700}>{date}</Typography>
                   {items.map((a) => (
                     <Typography key={a.id} variant="body2" sx={{ mt: 0.75 }}>
-                      {a.student.username}: {a.title || a.instructions.slice(0, 60)}
+                      {a.student.username}:{" "}
+                      {a.title || a.instructions.slice(0, 60)}
                     </Typography>
                   ))}
                 </Box>
@@ -340,15 +355,24 @@ export default function CoachAssignmentsPage() {
                 key={a.id}
                 assignment={a}
                 onEdit={() => setEditItem(a)}
-                onStatus={(s) => updateMut.mutate({ id: a.id, data: { status: s } })}
+                onStatus={(s) =>
+                  updateMut.mutate({ id: a.id, data: { status: s } })
+                }
                 list
               />
             ))
           ))}
 
-        <Dialog open={bulkOpen} onClose={() => setBulkOpen(false)} fullWidth maxWidth="sm">
+        <Dialog
+          open={bulkOpen}
+          onClose={() => setBulkOpen(false)}
+          fullWidth
+          maxWidth="sm"
+        >
           <DialogTitle>Bulk assign</DialogTitle>
-          <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
+          <DialogContent
+            sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}
+          >
             <Typography variant="body2" color="text.secondary">
               Select students to receive the same assignment.
             </Typography>
@@ -370,7 +394,12 @@ export default function CoachAssignmentsPage() {
                 label={l.student.username}
               />
             ))}
-            <TextField label="Title" value={title} onChange={(e) => setTitle(e.target.value)} size="small" />
+            <TextField
+              label="Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              size="small"
+            />
             <TextField
               label="Instructions"
               value={instructions}
@@ -393,7 +422,9 @@ export default function CoachAssignmentsPage() {
             <Button
               variant="contained"
               disabled={
-                selectedStudents.length === 0 || !instructions.trim() || bulkMut.isPending
+                selectedStudents.length === 0 ||
+                !instructions.trim() ||
+                bulkMut.isPending
               }
               onClick={() =>
                 bulkMut.mutate({
@@ -412,15 +443,24 @@ export default function CoachAssignmentsPage() {
           </DialogActions>
         </Dialog>
 
-        <Dialog open={!!editItem} onClose={() => setEditItem(null)} fullWidth maxWidth="sm">
+        <Dialog
+          open={!!editItem}
+          onClose={() => setEditItem(null)}
+          fullWidth
+          maxWidth="sm"
+        >
           <DialogTitle>Edit assignment</DialogTitle>
-          <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
+          <DialogContent
+            sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}
+          >
             {editItem && (
               <>
                 <TextField
                   label="Title"
                   defaultValue={editItem.title}
-                  onChange={(e) => setEditItem({ ...editItem, title: e.target.value })}
+                  onChange={(e) =>
+                    setEditItem({ ...editItem, title: e.target.value })
+                  }
                   size="small"
                 />
                 <TextField
@@ -511,11 +551,22 @@ function AssignmentCard({
         <Typography fontWeight={700} fontSize="0.85rem">
           {a.student.username}
         </Typography>
-        <Chip label={formatCategory(a.category)} size="small" sx={{ height: 20, fontSize: "0.65rem" }} />
+        <Chip
+          label={formatCategory(a.category)}
+          size="small"
+          sx={{ height: 20, fontSize: "0.65rem" }}
+        />
         {a.priority === "high" && (
           <Chip label="High" size="small" color="error" sx={{ height: 20 }} />
         )}
-        {overdue && <Chip label="Overdue" size="small" color="error" sx={{ height: 20 }} />}
+        {overdue && (
+          <Chip
+            label="Overdue"
+            size="small"
+            color="error"
+            sx={{ height: 20 }}
+          />
+        )}
       </Box>
       <Typography fontWeight={600} fontSize="0.85rem">
         {a.title || "Untitled"}
@@ -542,7 +593,11 @@ function AssignmentCard({
             <Button size="small" onClick={() => onStatus("completed")}>
               Complete
             </Button>
-            <Button size="small" color="warning" onClick={() => onStatus("cancelled")}>
+            <Button
+              size="small"
+              color="warning"
+              onClick={() => onStatus("cancelled")}
+            >
               Cancel
             </Button>
           </>

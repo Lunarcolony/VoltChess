@@ -31,7 +31,9 @@ export function markOnboardingComplete(): void {
 export function getStoredUsername(): StoredUsername | null {
   if (typeof window === "undefined") return null;
 
-  const chessCom = parseUsernameList(localStorage.getItem(CHESSCOM_USERNAME_KEY));
+  const chessCom = parseUsernameList(
+    localStorage.getItem(CHESSCOM_USERNAME_KEY)
+  );
   if (chessCom) {
     return { username: chessCom, platform: "chesscom" };
   }
@@ -64,7 +66,10 @@ function readUsernameList(key: string): string[] {
   return [];
 }
 
-export function saveUsername(username: string, platform: OnboardingPlatform): void {
+export function saveUsername(
+  username: string,
+  platform: OnboardingPlatform
+): void {
   const key =
     platform === "chesscom" ? CHESSCOM_USERNAME_KEY : LICHESS_USERNAME_KEY;
   const trimmed = username.trim();

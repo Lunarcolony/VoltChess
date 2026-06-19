@@ -54,7 +54,11 @@ export function CoachStatCard({
         {value}
       </Typography>
       {hint && (
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ mt: 0.5, display: "block" }}
+        >
           {hint}
         </Typography>
       )}
@@ -83,7 +87,11 @@ export function CoachPageHeader({
       }}
     >
       <Box>
-        <Typography variant="h4" fontWeight={800} sx={{ letterSpacing: "-0.02em" }}>
+        <Typography
+          variant="h4"
+          fontWeight={800}
+          sx={{ letterSpacing: "-0.02em" }}
+        >
           {title}
         </Typography>
         {subtitle && (

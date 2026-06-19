@@ -1,11 +1,5 @@
 import { Icon } from "@iconify/react";
-import {
-  Box,
-  Button,
-  IconButton,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import NavLink from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -115,7 +109,9 @@ export function SidebarAccount({ onNavigate }: { onNavigate?: () => void }) {
           >
             {user.username}
           </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.15 }}>
+          <Box
+            sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.15 }}
+          >
             <Icon
               icon={roleIcon(user.role)}
               width={12}
@@ -262,7 +258,11 @@ export function MobileHeaderAccount() {
           </Typography>
           <Typography
             noWrap
-            sx={{ fontSize: "0.65rem", color: palette.textMuted, lineHeight: 1.2 }}
+            sx={{
+              fontSize: "0.65rem",
+              color: palette.textMuted,
+              lineHeight: 1.2,
+            }}
           >
             {roleLabel}
           </Typography>

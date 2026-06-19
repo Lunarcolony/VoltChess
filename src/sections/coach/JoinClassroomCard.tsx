@@ -78,8 +78,9 @@ export default function JoinClassroomCard() {
         </Typography>
       </Box>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Ask your coach for their classroom code (e.g. <strong>VC-ABC123</strong>). We&apos;ll
-        show you their name before you join — so you never connect to the wrong coach.
+        Ask your coach for their classroom code (e.g. <strong>VC-ABC123</strong>
+        ). We&apos;ll show you their name before you join — so you never connect
+        to the wrong coach.
       </Typography>
 
       <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 2 }}>
@@ -94,7 +95,9 @@ export default function JoinClassroomCard() {
             setPreviewError(null);
           }}
           sx={{ minWidth: 200, flex: 1 }}
-          inputProps={{ style: { fontFamily: "monospace", letterSpacing: "0.08em" } }}
+          inputProps={{
+            style: { fontFamily: "monospace", letterSpacing: "0.08em" },
+          }}
         />
         <Button
           variant="outlined"
@@ -112,7 +115,11 @@ export default function JoinClassroomCard() {
       )}
 
       {successMsg && (
-        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccessMsg(null)}>
+        <Alert
+          severity="success"
+          sx={{ mb: 2 }}
+          onClose={() => setSuccessMsg(null)}
+        >
           {successMsg}
         </Alert>
       )}
@@ -135,7 +142,12 @@ export default function JoinClassroomCard() {
           <Typography variant="body2" sx={{ mb: 1.5 }}>
             Coach: <strong>{preview.coach_username}</strong>
           </Typography>
-          <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1.5 }}>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            display="block"
+            sx={{ mb: 1.5 }}
+          >
             Code: {preview.join_code}
           </Typography>
           {!preview.already_member && (

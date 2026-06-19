@@ -1,6 +1,12 @@
 import React from "react";
-import { Grid2 as Grid } from "@mui/material";
-import { Typography, Card, CardContent, Box, Container } from "@mui/material";
+import {
+  Grid2 as Grid,
+  Typography,
+  Card,
+  CardContent,
+  Box,
+  Container,
+} from "@mui/material";
 import { motion } from "framer-motion";
 
 const MotionCard = motion(Card);

@@ -59,9 +59,13 @@ function LoginForm() {
       title="Sign in"
       subtitle="Access your academy account to sync games and view student progress."
       banner={
-        <Alert severity="warning" icon={<Icon icon="mdi:information-outline" width={22} />}>
+        <Alert
+          severity="warning"
+          icon={<Icon icon="mdi:information-outline" width={22} />}
+        >
           Sign-in is only required for <strong>chess academies</strong> and{" "}
-          <strong>enrolled learners</strong>. Casual game review does not need an account.
+          <strong>enrolled learners</strong>. Casual game review does not need
+          an account.
         </Alert>
       }
     >
@@ -123,7 +127,10 @@ function LoginForm() {
           sx={{ mt: 2.5, textAlign: "center" }}
         >
           Don&apos;t have an account?{" "}
-          <Link href="/register" style={{ color: palette.accent, fontWeight: 600 }}>
+          <Link
+            href="/register"
+            style={{ color: palette.accent, fontWeight: 600 }}
+          >
             Create one
           </Link>
         </Typography>

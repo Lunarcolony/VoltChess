@@ -104,8 +104,8 @@ export default function BlogArticle({ post }: Props) {
             Try it now — free game review
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Load a Chess.com link, Lichess game, or PGN and get Stockfish analysis
-            in your browser.
+            Load a Chess.com link, Lichess game, or PGN and get Stockfish
+            analysis in your browser.
           </Typography>
           <Button
             component={Link}

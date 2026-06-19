@@ -58,7 +58,12 @@ export default function GameMovesCard() {
           </Typography>
         </Box>
 
-        <Typography fontSize="0.78rem" fontWeight={600} noWrap textAlign="right">
+        <Typography
+          fontSize="0.78rem"
+          fontWeight={600}
+          noWrap
+          textAlign="right"
+        >
           {black.name}
           {black.rating ? ` (${black.rating})` : ""}
         </Typography>

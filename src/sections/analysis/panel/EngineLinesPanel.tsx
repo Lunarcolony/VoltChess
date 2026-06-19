@@ -1,24 +1,14 @@
 import { Box, Skeleton, Typography } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { useAtomValue } from "jotai";
-import {
-  boardAtom,
-  currentPositionAtom,
-  engineMultiPvAtom,
-} from "../states";
+import { boardAtom, currentPositionAtom, engineMultiPvAtom } from "../states";
 import { getLineEvalLabel, moveLineUciToSan } from "@/lib/chess";
 import { useChessActions } from "@/hooks/useChessActions";
 import { LineEval } from "@/types/eval";
 import { usePalette } from "@/hooks/usePalette";
 import PrettyMoveSan from "@/components/prettyMoveSan";
 
-function EngineLineRow({
-  line,
-  isBest,
-}: {
-  line: LineEval;
-  isBest: boolean;
-}) {
+function EngineLineRow({ line, isBest }: { line: LineEval; isBest: boolean }) {
   const palette = usePalette();
   const board = useAtomValue(boardAtom);
   const { addMoves } = useChessActions(boardAtom);
@@ -46,18 +36,32 @@ function EngineLineRow({
         borderRadius: 1,
         mb: 0.5,
         bgcolor: isBest ? "rgba(34, 172, 56, 0.08)" : "transparent",
-        border: isBest ? `1px solid rgba(34, 172, 56, 0.25)` : "1px solid transparent",
+        border: isBest
+          ? "1px solid rgba(34, 172, 56, 0.25)"
+          : "1px solid transparent",
         "&:hover": { bgcolor: palette.surface },
       }}
     >
       {isBest ? (
-        <Icon icon="mdi:crown" width={18} color={palette.accent} style={{ flexShrink: 0, marginTop: 2 }} />
+        <Icon
+          icon="mdi:crown"
+          width={18}
+          color={palette.accent}
+          style={{ flexShrink: 0, marginTop: 2 }}
+        />
       ) : (
         <Box sx={{ width: 18, flexShrink: 0 }} />
       )}
 
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, flexWrap: "wrap" }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 0.75,
+            flexWrap: "wrap",
+          }}
+        >
           {showSkeleton ? (
             <Skeleton width={60} height={20} />
           ) : (
@@ -72,15 +76,22 @@ function EngineLineRow({
                   borderRadius: 0.75,
                   fontSize: "0.75rem",
                   fontWeight: 600,
-                  bgcolor: isBlackCp ? palette.playerDarkBg : palette.playerLightBg,
-                  color: isBlackCp ? palette.playerDarkText : palette.playerLightText,
+                  bgcolor: isBlackCp
+                    ? palette.playerDarkBg
+                    : palette.playerLightBg,
+                  color: isBlackCp
+                    ? palette.playerDarkText
+                    : palette.playerLightText,
                   border: `1px solid ${palette.border}`,
                 }}
               >
                 {lineLabel}
               </Typography>
               {isBest && (
-                <Typography fontSize="0.75rem" sx={{ color: "#22ac38", fontWeight: 600 }}>
+                <Typography
+                  fontSize="0.75rem"
+                  sx={{ color: "#22ac38", fontWeight: 600 }}
+                >
                   is best
                 </Typography>
               )}
@@ -147,7 +158,10 @@ export default function EngineLinesPanel() {
         overflowY: "auto",
         pr: 0.25,
         "&::-webkit-scrollbar": { width: 4 },
-        "&::-webkit-scrollbar-thumb": { bgcolor: palette.border, borderRadius: 2 },
+        "&::-webkit-scrollbar-thumb": {
+          bgcolor: palette.border,
+          borderRadius: 2,
+        },
       }}
     >
       {engineLines.map((line, idx) => (

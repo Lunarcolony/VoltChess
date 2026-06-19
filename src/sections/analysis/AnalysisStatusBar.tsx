@@ -51,7 +51,11 @@ export default function AnalysisStatusBar() {
         <Chip
           size="small"
           icon={<Icon icon="mdi:cog" width={14} />}
-          label={isAnalyzing ? `Analyzing ${Math.round(progress)}%` : "Engine analysis"}
+          label={
+            isAnalyzing
+              ? `Analyzing ${Math.round(progress)}%`
+              : "Engine analysis"
+          }
           color={step === "analyze" ? "primary" : "default"}
           variant={step === "analyze" ? "filled" : "outlined"}
         />

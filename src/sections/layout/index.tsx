@@ -52,7 +52,13 @@ export default function Layout({ children }: PropsWithChildren) {
 
   return (
     <AppThemeProvider>
-      <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}>
+      <Box
+        sx={{
+          display: "flex",
+          minHeight: "100vh",
+          bgcolor: "background.default",
+        }}
+      >
         <Sidebar />
         <MainContent>{children}</MainContent>
       </Box>

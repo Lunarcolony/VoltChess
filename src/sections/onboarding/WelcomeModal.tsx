@@ -32,7 +32,11 @@ interface Props {
 }
 
 const PLATFORM_TABS = [
-  { value: GameOrigin.ChessCom, label: "Chess.com", platform: "chesscom" as const },
+  {
+    value: GameOrigin.ChessCom,
+    label: "Chess.com",
+    platform: "chesscom" as const,
+  },
   { value: GameOrigin.Lichess, label: "Lichess", platform: "lichess" as const },
 ] as const;
 
@@ -49,7 +53,9 @@ function PlatformBadge({ platform }: { platform: OnboardingPlatform }) {
         px: 1.25,
         py: 0.5,
         borderRadius: 999,
-        bgcolor: isChessCom ? "rgba(34, 172, 56, 0.15)" : "rgba(255, 255, 255, 0.08)",
+        bgcolor: isChessCom
+          ? "rgba(34, 172, 56, 0.15)"
+          : "rgba(255, 255, 255, 0.08)",
         border: `1px solid ${isChessCom ? "rgba(34, 172, 56, 0.45)" : palette.border}`,
         color: isChessCom ? "#4ade80" : palette.text,
         fontSize: "0.8rem",
@@ -93,10 +99,7 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
   const activePlatform: OnboardingPlatform =
     tab === GameOrigin.Lichess ? "lichess" : "chesscom";
 
-  const loadGame = async (
-    user: string,
-    userPlatform: OnboardingPlatform
-  ) => {
+  const loadGame = async (user: string, userPlatform: OnboardingPlatform) => {
     setError("");
     setLoading(true);
     setStep("loading");
@@ -202,7 +205,11 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
                   flexShrink: 0,
                 }}
               >
-                <Icon icon="mdi:chess-knight" width={26} color={palette.accent} />
+                <Icon
+                  icon="mdi:chess-knight"
+                  width={26}
+                  color={palette.accent}
+                />
               </Box>
               <Box
                 sx={{
@@ -233,7 +240,14 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
               </Box>
             </Box>
 
-            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 3 }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                mb: 3,
+              }}
+            >
               <Box
                 sx={{
                   width: 88,
@@ -285,9 +299,7 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
               color="primary"
               fullWidth
               disabled={loading}
-              onClick={() =>
-                loadGame(storedUser.username, storedUser.platform)
-              }
+              onClick={() => loadGame(storedUser.username, storedUser.platform)}
               sx={{
                 py: 1.35,
                 borderRadius: 2,
