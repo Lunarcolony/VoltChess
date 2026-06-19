@@ -2,7 +2,9 @@ import { EngineWorker } from "@/types/engine";
 import { isIosDevice, isMobileDevice } from "./shared";
 
 export const getEngineWorker = (enginePath: string): EngineWorker => {
-  console.log(`Creating worker from ${enginePath}`);
+  if (import.meta.env.DEV) {
+    console.log(`Creating worker from ${enginePath}`);
+  }
 
   const worker = new window.Worker(enginePath);
 

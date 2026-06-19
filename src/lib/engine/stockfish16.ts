@@ -11,7 +11,9 @@ export class Stockfish16 {
     }
 
     const multiThreadIsSupported = isMultiThreadSupported();
-    if (!multiThreadIsSupported) console.log("Single thread mode");
+    if (!multiThreadIsSupported && import.meta.env.DEV) {
+      console.log("Single thread mode");
+    }
 
     const enginePath = multiThreadIsSupported
       ? "engines/stockfish-16/stockfish-nnue-16.js"
