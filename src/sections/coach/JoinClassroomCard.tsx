@@ -8,9 +8,10 @@ import {
   Typography,
 } from "@mui/material";
 import { Icon } from "@iconify/react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePalette } from "@/hooks/usePalette";
 import { alpha } from "@mui/material/styles";
+import { fetchCoachLinks } from "@/lib/api/academies";
 import {
   joinClassroom,
   previewClassroomJoin,
@@ -21,11 +22,17 @@ import { getApiErrorMessage } from "@/lib/apiErrors";
 export default function JoinClassroomCard() {
   const palette = usePalette();
   const qc = useQueryClient();
+  const [showJoinForm, setShowJoinForm] = useState(false);
   const [code, setCode] = useState("");
   const [preview, setPreview] = useState<ClassroomPreview | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  const { data: enrollments = [], isLoading: enrollmentsLoading } = useQuery({
+    queryKey: ["coach-links"],
+    queryFn: fetchCoachLinks,
+  });
 
   const joinMut = useMutation({
     mutationFn: () => joinClassroom(preview!.join_code),
@@ -37,6 +44,7 @@ export default function JoinClassroomCard() {
       );
       setPreview(null);
       setCode("");
+      setShowJoinForm(false);
       qc.invalidateQueries({ queryKey: ["coach-links"] });
       qc.invalidateQueries({ queryKey: ["assignments"] });
     },
@@ -61,6 +69,8 @@ export default function JoinClassroomCard() {
     }
   };
 
+  const hasEnrollments = enrollments.length > 0;
+
   return (
     <Box
       sx={{
@@ -74,41 +84,65 @@ export default function JoinClassroomCard() {
       <Box sx={{ display: "flex", gap: 1.25, mb: 1.5, alignItems: "center" }}>
         <Icon icon="mdi:school-outline" width={24} color={palette.accent} />
         <Typography variant="h6" fontWeight={700}>
-          Join your coach&apos;s classroom
+          {hasEnrollments ? "Your coaches" : "Join your coach's classroom"}
         </Typography>
       </Box>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Ask your coach for their classroom code (e.g. <strong>VC-ABC123</strong>). We&apos;ll
-        show you their name before you join — so you never connect to the wrong coach.
-      </Typography>
 
-      <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 2 }}>
-        <TextField
-          size="small"
-          label="Classroom code"
-          placeholder="VC-ABC123"
-          value={code}
-          onChange={(e) => {
-            setCode(e.target.value.toUpperCase());
-            setPreview(null);
-            setPreviewError(null);
-          }}
-          sx={{ minWidth: 200, flex: 1 }}
-          inputProps={{ style: { fontFamily: "monospace", letterSpacing: "0.08em" } }}
-        />
-        <Button
-          variant="outlined"
-          disabled={checking || !code.trim()}
-          onClick={handleVerify}
-        >
-          {checking ? "Checking…" : "Verify code"}
-        </Button>
-      </Box>
-
-      {previewError && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {previewError}
-        </Alert>
+      {enrollmentsLoading ? (
+        <CircularProgress size={24} sx={{ mb: 2 }} />
+      ) : hasEnrollments ? (
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+            You&apos;re enrolled — no need to enter your classroom code again.
+          </Typography>
+          {enrollments.map((link) => (
+            <Box
+              key={link.id}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                py: 1,
+                px: 1.5,
+                mb: 1,
+                borderRadius: 1.5,
+                bgcolor: alpha(palette.accent, 0.08),
+                border: `1px solid ${alpha(palette.accent, 0.25)}`,
+              }}
+            >
+              <Icon icon="mdi:account-tie" width={20} color={palette.accent} />
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography fontWeight={600} fontSize="0.9rem">
+                  {link.coach.username}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Joined{" "}
+                  {new Date(link.created_at).toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </Typography>
+              </Box>
+              <Icon icon="mdi:check-circle" width={20} color={palette.accent} />
+            </Box>
+          ))}
+          {!showJoinForm && (
+            <Button
+              size="small"
+              variant="text"
+              onClick={() => setShowJoinForm(true)}
+              sx={{ mt: 0.5 }}
+            >
+              Join another classroom
+            </Button>
+          )}
+        </Box>
+      ) : (
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Ask your coach for their classroom code (e.g. <strong>VC-ABC123</strong>). We&apos;ll
+          show you their name before you join — so you never connect to the wrong coach.
+        </Typography>
       )}
 
       {successMsg && (
@@ -117,49 +151,89 @@ export default function JoinClassroomCard() {
         </Alert>
       )}
 
-      {preview && (
-        <Box
-          sx={{
-            p: 2,
-            borderRadius: 2,
-            bgcolor: alpha(palette.accent, 0.08),
-            border: `1px solid ${alpha(palette.accent, 0.3)}`,
-          }}
-        >
-          <Typography fontWeight={700} sx={{ mb: 0.5 }}>
-            {preview.already_member ? "Already enrolled" : "Confirm join"}
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 0.5 }}>
-            Classroom: <strong>{preview.classroom_name}</strong>
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 1.5 }}>
-            Coach: <strong>{preview.coach_username}</strong>
-          </Typography>
-          <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1.5 }}>
-            Code: {preview.join_code}
-          </Typography>
-          {!preview.already_member && (
+      {(!hasEnrollments || showJoinForm) && (
+        <>
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 2 }}>
+            <TextField
+              size="small"
+              label="Classroom code"
+              placeholder="VC-ABC123"
+              value={code}
+              onChange={(e) => {
+                setCode(e.target.value.toUpperCase());
+                setPreview(null);
+                setPreviewError(null);
+              }}
+              sx={{ minWidth: 200, flex: 1 }}
+              inputProps={{
+                style: { fontFamily: "monospace", letterSpacing: "0.08em" },
+              }}
+            />
             <Button
-              variant="contained"
-              disabled={joinMut.isPending}
-              onClick={() => joinMut.mutate()}
-              startIcon={
-                joinMut.isPending ? (
-                  <CircularProgress size={16} color="inherit" />
-                ) : (
-                  <Icon icon="mdi:login" width={18} />
-                )
-              }
+              variant="outlined"
+              disabled={checking || !code.trim()}
+              onClick={handleVerify}
             >
-              Join this classroom
+              {checking ? "Checking…" : "Verify code"}
             </Button>
-          )}
-          {joinMut.isError && (
-            <Alert severity="error" sx={{ mt: 1.5 }}>
-              {getApiErrorMessage(joinMut.error)}
+          </Box>
+
+          {previewError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {previewError}
             </Alert>
           )}
-        </Box>
+
+          {preview && (
+            <Box
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                bgcolor: alpha(palette.accent, 0.08),
+                border: `1px solid ${alpha(palette.accent, 0.3)}`,
+              }}
+            >
+              <Typography fontWeight={700} sx={{ mb: 0.5 }}>
+                {preview.already_member ? "Already enrolled" : "Confirm join"}
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 0.5 }}>
+                Classroom: <strong>{preview.classroom_name}</strong>
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1.5 }}>
+                Coach: <strong>{preview.coach_username}</strong>
+              </Typography>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                display="block"
+                sx={{ mb: 1.5 }}
+              >
+                Code: {preview.join_code}
+              </Typography>
+              {!preview.already_member && (
+                <Button
+                  variant="contained"
+                  disabled={joinMut.isPending}
+                  onClick={() => joinMut.mutate()}
+                  startIcon={
+                    joinMut.isPending ? (
+                      <CircularProgress size={16} color="inherit" />
+                    ) : (
+                      <Icon icon="mdi:login" width={18} />
+                    )
+                  }
+                >
+                  Join this classroom
+                </Button>
+              )}
+              {joinMut.isError && (
+                <Alert severity="error" sx={{ mt: 1.5 }}>
+                  {getApiErrorMessage(joinMut.error)}
+                </Alert>
+              )}
+            </Box>
+          )}
+        </>
       )}
     </Box>
   );

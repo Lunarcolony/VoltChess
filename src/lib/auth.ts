@@ -1,4 +1,5 @@
-import { ACCESS_TOKEN, ENABLE_AUTHENTICATION } from "@/constants";
+import { ENABLE_AUTHENTICATION } from "@/constants";
+import { hasStoredSession } from "@/lib/authStorage";
 
 /**
  * Check if user authentication is required and if user is authenticated
@@ -12,7 +13,7 @@ export const isUserAuthenticated = (): boolean => {
 
   // If authentication is enabled, check for valid token
   if (typeof window !== "undefined") {
-    return !!localStorage.getItem(ACCESS_TOKEN);
+    return hasStoredSession();
   }
   return false;
 };
@@ -33,8 +34,6 @@ export const getAuthStatus = (): string => {
   }
 
   const hasToken =
-    typeof window !== "undefined"
-      ? !!localStorage.getItem(ACCESS_TOKEN)
-      : false;
+    typeof window !== "undefined" ? hasStoredSession() : false;
   return hasToken ? "User authenticated" : "User not authenticated";
 };
