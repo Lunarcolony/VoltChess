@@ -81,7 +81,9 @@ function GameDatabase() {
         width: 90,
         getActions: ({ id }) => [
           <GridActionsCellItem
-            icon={<Icon icon="streamline:magnifying-glass-solid" width="20px" />}
+            icon={
+              <Icon icon="streamline:magnifying-glass-solid" width="20px" />
+            }
             label="Analyze"
             onClick={() => router.push(`/analysis?gameId=${id}`)}
             key={`local-${id}`}
@@ -94,7 +96,9 @@ function GameDatabase() {
         width: 80,
         getActions: ({ id }) => [
           <GridActionsCellItem
-            icon={<Icon icon="mdi:delete-outline" color={red[400]} width="20px" />}
+            icon={
+              <Icon icon="mdi:delete-outline" color={red[400]} width="20px" />
+            }
             label="Delete"
             onClick={handleDeleteLocal(id)}
             key={`del-${id}`}
@@ -113,8 +117,7 @@ function GameDatabase() {
         headerName: "Game",
         flex: 1,
         minWidth: 200,
-        valueGetter: (_, row) =>
-          `${row.white.name} vs ${row.black.name}`,
+        valueGetter: (_, row) => `${row.white.name} vs ${row.black.name}`,
       },
       { field: "result", headerName: "Result", width: 80 },
       {
@@ -130,7 +133,9 @@ function GameDatabase() {
         width: 90,
         getActions: ({ id }) => [
           <GridActionsCellItem
-            icon={<Icon icon="streamline:magnifying-glass-solid" width="20px" />}
+            icon={
+              <Icon icon="streamline:magnifying-glass-solid" width="20px" />
+            }
             label="Analyze"
             onClick={() => router.push(`/analysis?gameId=${id}`)}
             key={`srv-${id}`}
@@ -143,7 +148,9 @@ function GameDatabase() {
         width: 80,
         getActions: ({ id }) => [
           <GridActionsCellItem
-            icon={<Icon icon="mdi:delete-outline" color={red[400]} width="20px" />}
+            icon={
+              <Icon icon="mdi:delete-outline" color={red[400]} width="20px" />
+            }
             label="Delete"
             onClick={handleDeleteServer(id)}
             key={`srv-del-${id}`}
@@ -157,7 +164,13 @@ function GameDatabase() {
   const showServerTab = ENABLE_AUTHENTICATION && isAuthenticated;
 
   return (
-    <Grid container justifyContent="center" alignItems="center" gap={4} marginTop={6}>
+    <Grid
+      container
+      justifyContent="center"
+      alignItems="center"
+      gap={4}
+      marginTop={6}
+    >
       <PageTitle title="VoltChess Game Database — Save & Review Your Games" />
 
       <Grid container justifyContent="center" size={12}>
@@ -188,7 +201,8 @@ function GameDatabase() {
         ) : (
           <>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              {serverGames.length} synced game{serverGames.length !== 1 && "s"} (academy)
+              {serverGames.length} synced game{serverGames.length !== 1 && "s"}{" "}
+              (academy)
             </Typography>
             <DataGrid
               rows={serverGames}

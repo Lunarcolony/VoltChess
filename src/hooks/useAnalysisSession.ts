@@ -97,7 +97,11 @@ export function useAnalysisSession() {
       try {
         const session = JSON.parse(raw) as AnalysisSession;
         if (session.pgn) {
-          applyGame(session.pgn, session.eval, session.boardOrientation ?? true);
+          applyGame(
+            session.pgn,
+            session.eval,
+            session.boardOrientation ?? true
+          );
           return;
         }
       } catch {
@@ -138,7 +142,8 @@ export function useAnalysisSession() {
     } else if (serverGameFromUrl) {
       const fromServer = new Chess();
       fromServer.loadPgn(serverGameFromUrl.pgn);
-      if (game.history().join() === fromServer.history().join() && gameEval) return;
+      if (game.history().join() === fromServer.history().join() && gameEval)
+        return;
 
       applyGame(
         serverGameFromUrl.pgn,

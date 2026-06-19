@@ -40,7 +40,12 @@ export default function MovesClassificationsRecap() {
           {white.name}
         </Typography>
 
-        <Typography flex={0.6} align="center" fontSize="0.75rem" color="text.secondary">
+        <Typography
+          flex={0.6}
+          align="center"
+          fontSize="0.75rem"
+          color="text.secondary"
+        >
           Moves
         </Typography>
 

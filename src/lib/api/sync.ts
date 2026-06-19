@@ -32,7 +32,9 @@ export type SyncTriggerResult = {
   results?: SyncTriggerResult[];
 };
 
-export async function fetchSyncOverview(studentId?: string): Promise<SyncOverview> {
+export async function fetchSyncOverview(
+  studentId?: string
+): Promise<SyncOverview> {
   const res = await api.get<SyncOverview>("/api/sync/overview/", {
     params: studentId ? { student_id: studentId } : undefined,
   });
@@ -43,7 +45,10 @@ export async function triggerSync(payload?: {
   link_id?: string;
   student_id?: string;
 }): Promise<SyncTriggerResult> {
-  const res = await api.post<SyncTriggerResult>("/api/sync/trigger/", payload ?? {});
+  const res = await api.post<SyncTriggerResult>(
+    "/api/sync/trigger/",
+    payload ?? {}
+  );
   return res.data;
 }
 
@@ -51,15 +56,21 @@ export async function sendSyncPresence(browserBusy: boolean): Promise<void> {
   await api.post("/api/sync/presence/", { browser_busy: browserBusy });
 }
 
-export async function fetchPendingAnalysis(limit = 3): Promise<ServerGameDetail[]> {
+export async function fetchPendingAnalysis(
+  limit = 3
+): Promise<ServerGameDetail[]> {
   const res = await api.get<ServerGameDetail[]>("/api/sync/pending-analysis/", {
     params: { limit },
   });
   return res.data;
 }
 
-export async function claimGameAnalysis(gameId: string): Promise<ServerGameDetail> {
-  const res = await api.post<ServerGameDetail>(`/api/sync/games/${gameId}/claim/`);
+export async function claimGameAnalysis(
+  gameId: string
+): Promise<ServerGameDetail> {
+  const res = await api.post<ServerGameDetail>(
+    `/api/sync/games/${gameId}/claim/`
+  );
   return res.data;
 }
 
@@ -81,6 +92,8 @@ export async function processServerAnalysisQueue(maxGames = 3): Promise<{
   attempted?: number;
   reason?: string;
 }> {
-  const res = await api.post("/api/sync/process-server/", { max_games: maxGames });
+  const res = await api.post("/api/sync/process-server/", {
+    max_games: maxGames,
+  });
   return res.data;
 }

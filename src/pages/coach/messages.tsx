@@ -90,13 +90,23 @@ export default function CoachMessagesPage() {
                 border: `1px solid ${palette.border}`,
               }}
             >
-              <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 1,
+                }}
+              >
                 <Typography fontWeight={700}>{m.subject}</Typography>
                 <Typography variant="caption" color="text.secondary">
                   {new Date(m.created_at).toLocaleString()}
                 </Typography>
               </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 0.75 }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mb: 0.75 }}
+              >
                 To {m.student_username}
               </Typography>
               <Typography variant="body2">{m.body}</Typography>
@@ -104,20 +114,56 @@ export default function CoachMessagesPage() {
           ))
         )}
 
-        <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
+        <Dialog
+          open={open}
+          onClose={() => setOpen(false)}
+          fullWidth
+          maxWidth="sm"
+        >
           <DialogTitle>Compose message</DialogTitle>
-          <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
-            <TextField select label="Student" value={studentId} onChange={(e) => setStudentId(e.target.value)} size="small">
+          <DialogContent
+            sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}
+          >
+            <TextField
+              select
+              label="Student"
+              value={studentId}
+              onChange={(e) => setStudentId(e.target.value)}
+              size="small"
+            >
               {links.map((l) => (
-                <MenuItem key={l.id} value={l.student.id}>{l.student.username}</MenuItem>
+                <MenuItem key={l.id} value={l.student.id}>
+                  {l.student.username}
+                </MenuItem>
               ))}
             </TextField>
-            <TextField label="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} size="small" />
-            <TextField label="Message" multiline minRows={4} value={body} onChange={(e) => setBody(e.target.value)} size="small" />
+            <TextField
+              label="Subject"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              size="small"
+            />
+            <TextField
+              label="Message"
+              multiline
+              minRows={4}
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              size="small"
+            />
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpen(false)}>Cancel</Button>
-            <Button variant="contained" disabled={!studentId || !subject.trim() || !body.trim() || sendMut.isPending} onClick={() => sendMut.mutate()}>
+            <Button
+              variant="contained"
+              disabled={
+                !studentId ||
+                !subject.trim() ||
+                !body.trim() ||
+                sendMut.isPending
+              }
+              onClick={() => sendMut.mutate()}
+            >
               Send
             </Button>
           </DialogActions>

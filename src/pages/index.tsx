@@ -63,12 +63,7 @@ function Home() {
       prepareNewAnalysisSession(pgn, boardOrientation);
       await router.push(withTour ? "/analysis?tour=1" : "/analysis");
     },
-    [
-      router,
-      resetAndSetGamePgn,
-      setBoardOrientation,
-      setEvaluationProgress,
-    ]
+    [router, resetAndSetGamePgn, setBoardOrientation, setEvaluationProgress]
   );
 
   const handleOnboardingGameLoaded = useCallback(
@@ -134,7 +129,11 @@ function Home() {
       <Box sx={{ maxWidth: 960, mx: "auto" }}>
         <Typography
           variant="h1"
-          sx={{ mb: 0.5, color: palette.text, fontSize: { xs: "1.75rem", sm: "2.125rem" } }}
+          sx={{
+            mb: 0.5,
+            color: palette.text,
+            fontSize: { xs: "1.75rem", sm: "2.125rem" },
+          }}
         >
           {onboardingReady && showOnboarding
             ? "Free Chess Game Review"
@@ -185,12 +184,15 @@ function Home() {
             border: `1px solid ${palette.border}`,
           }}
         >
-          <Typography variant="h2" sx={{ fontSize: "1.1rem", fontWeight: 700, mb: 1 }}>
+          <Typography
+            variant="h2"
+            sx={{ fontSize: "1.1rem", fontWeight: 700, mb: 1 }}
+          >
             Chess game review & analysis guides
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Learn how to review games free, import from Chess.com and Lichess, and
-            use Stockfish to find blunders.
+            Learn how to review games free, import from Chess.com and Lichess,
+            and use Stockfish to find blunders.
           </Typography>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             {BLOG_POSTS.slice(0, 5).map((post) => (

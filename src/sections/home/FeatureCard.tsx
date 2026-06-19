@@ -23,7 +23,14 @@ export default function FeatureCard({
   const cardSx = useCardSx();
 
   return (
-    <Box sx={{ ...cardSx, display: "flex", flexDirection: "column", height: "100%" }}>
+    <Box
+      sx={{
+        ...cardSx,
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+      }}
+    >
       <Box
         sx={{
           width: 40,
@@ -43,7 +50,11 @@ export default function FeatureCard({
       <Typography variant="h3" sx={{ mb: 1 }}>
         {title}
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, flex: 1 }}>
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{ mb: 2.5, flex: 1 }}
+      >
         {description}
       </Typography>
 

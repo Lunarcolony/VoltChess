@@ -1,5 +1,9 @@
 import { useAtomValue, useSetAtom } from "jotai";
-import { gameAtom as playGameAtom, isGameInProgressAtom, playerColorAtom } from "./states";
+import {
+  gameAtom as playGameAtom,
+  isGameInProgressAtom,
+  playerColorAtom,
+} from "./states";
 import { Button, Grid2 as Grid, Typography } from "@mui/material";
 import { Color } from "@/types/enums";
 import { setGameHeaders } from "@/lib/chess";
@@ -60,12 +64,22 @@ export default function GameRecap() {
   };
 
   return (
-    <Grid container justifyContent="center" alignItems="center" gap={2} size={12}>
+    <Grid
+      container
+      justifyContent="center"
+      alignItems="center"
+      gap={2}
+      size={12}
+    >
       <Grid container justifyContent="center" size={12}>
         <Typography align="center">{getResultLabel()}</Typography>
       </Grid>
 
-      <Button variant="contained" color="primary" onClick={handleOpenGameAnalysis}>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleOpenGameAnalysis}
+      >
         Analyze this game
       </Button>
     </Grid>

@@ -38,7 +38,15 @@ import CoachShell from "@/sections/coach/CoachShell";
 
 function exportCsv(report: Awaited<ReturnType<typeof fetchStudentReport>>) {
   const rows = [
-    ["date", "white", "black", "result", "has_eval", "white_accuracy", "black_accuracy"],
+    [
+      "date",
+      "white",
+      "black",
+      "result",
+      "has_eval",
+      "white_accuracy",
+      "black_accuracy",
+    ],
     ...report.games.map((g) => [
       g.date ?? "",
       g.white.name,
@@ -106,10 +114,10 @@ export default function CoachStudentDetail() {
   });
 
   const { refetch: loadReport, isFetching: reportLoading } = useQuery({
-      queryKey: ["student-report", id, dateFrom, dateTo],
-      queryFn: () =>
-        fetchStudentReport(id!, dateFrom || undefined, dateTo || undefined),
-      enabled: false,
+    queryKey: ["student-report", id, dateFrom, dateTo],
+    queryFn: () =>
+      fetchStudentReport(id!, dateFrom || undefined, dateTo || undefined),
+    enabled: false,
   });
 
   const blunderGame = games.find((g) => g.has_eval);
@@ -126,12 +134,23 @@ export default function CoachStudentDetail() {
       </Head>
       <CoachShell>
         <NavLink href="/coach/students">
-          <Typography variant="body2" sx={{ color: palette.textMuted, mb: 2, display: "inline-block" }}>
+          <Typography
+            variant="body2"
+            sx={{ color: palette.textMuted, mb: 2, display: "inline-block" }}
+          >
             ← Back to roster
           </Typography>
         </NavLink>
 
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, flexWrap: "wrap", gap: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            mb: 2,
+            flexWrap: "wrap",
+            gap: 2,
+          }}
+        >
           <Box>
             <Typography variant="h4" fontWeight={800}>
               {stats?.username ?? "Student"}
@@ -148,12 +167,12 @@ export default function CoachStudentDetail() {
             )}
           </Box>
           <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-            <NavLink href={`/coach/assignments`}>
+            <NavLink href={"/coach/assignments"}>
               <Button size="small" variant="contained">
                 Quick assign
               </Button>
             </NavLink>
-            <NavLink href={`/coach/messages`}>
+            <NavLink href={"/coach/messages"}>
               <Button size="small" variant="outlined">
                 Message
               </Button>
@@ -175,7 +194,9 @@ export default function CoachStudentDetail() {
                   {link.platform === "lichess" ? "Lichess" : "Chess.com"}:{" "}
                   <strong>{link.platform_username}</strong>
                 </Typography>
-                <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 1.5 }}>
+                <Box
+                  sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 1.5 }}
+                >
                   <Chip
                     size="small"
                     label={`${syncOverview.games_analyzed} analyzed`}
@@ -210,8 +231,8 @@ export default function CoachStudentDetail() {
               </>
             ) : (
               <Typography variant="body2" color="text.secondary">
-                Set this student&apos;s Chess.com or Lichess username on the roster
-                (Edit profile) to enable automatic import and reports.
+                Set this student&apos;s Chess.com or Lichess username on the
+                roster (Edit profile) to enable automatic import and reports.
               </Typography>
             )}
           </Box>
@@ -221,11 +242,23 @@ export default function CoachStudentDetail() {
           <CircularProgress />
         ) : stats ? (
           <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", mb: 3 }}>
-            <CoachStatCard label="Games" value={stats.total_games} icon="mdi:chess-pawn" />
-            <CoachStatCard label="Analyzed" value={stats.analyzed_games} icon="mdi:chart-line" />
+            <CoachStatCard
+              label="Games"
+              value={stats.total_games}
+              icon="mdi:chess-pawn"
+            />
+            <CoachStatCard
+              label="Analyzed"
+              value={stats.analyzed_games}
+              icon="mdi:chart-line"
+            />
             <CoachStatCard
               label="Avg accuracy"
-              value={avgAccuracy(stats) != null ? `${avgAccuracy(stats)!.toFixed(1)}%` : "—"}
+              value={
+                avgAccuracy(stats) != null
+                  ? `${avgAccuracy(stats)!.toFixed(1)}%`
+                  : "—"
+              }
               icon="mdi:target"
             />
             <CoachStatCard
@@ -250,7 +283,10 @@ export default function CoachStudentDetail() {
             <Box sx={{ height: 200 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={timeline.weekly_games}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={palette.borderSubtle} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={palette.borderSubtle}
+                  />
                   <XAxis
                     dataKey="week_start"
                     tick={{ fontSize: 10, fill: palette.textMuted }}
@@ -291,7 +327,11 @@ export default function CoachStudentDetail() {
             <Typography fontWeight={700} sx={{ mb: 1 }}>
               Private coach notes
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: "pre-wrap" }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ whiteSpace: "pre-wrap" }}
+            >
               {link.coach_notes}
             </Typography>
           </Box>
@@ -308,7 +348,7 @@ export default function CoachStudentDetail() {
               size="small"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              InputLabelProps={{ shrink: true }}
+              slotProps={{ inputLabel: { shrink: true } }}
             />
             <TextField
               label="To"
@@ -316,7 +356,7 @@ export default function CoachStudentDetail() {
               size="small"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              InputLabelProps={{ shrink: true }}
+              slotProps={{ inputLabel: { shrink: true } }}
             />
           </Box>
           <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
@@ -430,7 +470,10 @@ export default function CoachStudentDetail() {
                     />
                   )}
                   <NavLink href={`/analysis?gameId=${g.id}`}>
-                    <Typography fontSize="0.85rem" sx={{ color: palette.accent, fontWeight: 600 }}>
+                    <Typography
+                      fontSize="0.85rem"
+                      sx={{ color: palette.accent, fontWeight: 600 }}
+                    >
                       Open in analysis
                     </Typography>
                   </NavLink>

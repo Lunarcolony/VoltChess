@@ -51,7 +51,9 @@ export default function HomeGameLoader({ onGameLoaded }: Props) {
       onGameLoaded(game, boardOrientation);
     } catch (e) {
       setError(
-        e instanceof Error ? `${e.message}` : "Invalid PGN. Please check the input."
+        e instanceof Error
+          ? `${e.message}`
+          : "Invalid PGN. Please check the input."
       );
     }
   };
@@ -121,7 +123,13 @@ export default function HomeGameLoader({ onGameLoaded }: Props) {
         )}
 
         {tab === GameOrigin.ChessCom && (
-          <Box sx={{ mt: 3, pt: 2, borderTop: `1px solid ${palette.borderSubtle}` }}>
+          <Box
+            sx={{
+              mt: 3,
+              pt: 2,
+              borderTop: `1px solid ${palette.borderSubtle}`,
+            }}
+          >
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
               Try it out:
             </Typography>
@@ -150,7 +158,11 @@ export default function HomeGameLoader({ onGameLoaded }: Props) {
         )}
       </Box>
 
-      <Snackbar open={!!error} autoHideDuration={4000} onClose={() => setError("")}>
+      <Snackbar
+        open={!!error}
+        autoHideDuration={4000}
+        onClose={() => setError("")}
+      >
         <Alert severity="error" variant="filled" onClose={() => setError("")}>
           {error}
         </Alert>

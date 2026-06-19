@@ -258,7 +258,7 @@ export default function Board({
             width={squareWidth}
             height={squareWidth}
             sx={{
-              backgroundImage: `url(/piece/maestro/${piece}.svg)`,
+              backgroundImage: `url(/piece/${pieceSet}/${piece}.svg)`,
               backgroundSize: "contain",
             }}
           />

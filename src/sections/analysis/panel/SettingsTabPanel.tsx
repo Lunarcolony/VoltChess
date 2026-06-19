@@ -1,10 +1,4 @@
-import {
-  Box,
-  Button,
-  Stack,
-  Switch,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Stack, Switch, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { Icon } from "@iconify/react";
 import { ReactNode, useState } from "react";

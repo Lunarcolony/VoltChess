@@ -49,7 +49,9 @@ export default function StudentSyncPanel() {
 
   if (!data) return null;
 
-  const configured = data.platform_links.filter((l) => l.platform && l.platform_username);
+  const configured = data.platform_links.filter(
+    (l) => l.platform && l.platform_username
+  );
 
   return (
     <Box
@@ -69,15 +71,15 @@ export default function StudentSyncPanel() {
       </Box>
 
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Your coach links your Chess.com or Lichess account. VoltChess imports your
-        last 30 games, analyzes them in your browser when you&apos;re online, or on
-        the academy server when you&apos;re away.
+        Your coach links your Chess.com or Lichess account. VoltChess imports
+        your last 30 games, analyzes them in your browser when you&apos;re
+        online, or on the academy server when you&apos;re away.
       </Typography>
 
       {configured.length === 0 ? (
         <Typography variant="body2" color="text.secondary">
-          No platform account configured yet — ask your coach to set it on your roster
-          profile.
+          No platform account configured yet — ask your coach to set it on your
+          roster profile.
         </Typography>
       ) : (
         <>
@@ -142,7 +144,13 @@ export default function StudentSyncPanel() {
       {data.games_total > 0 && (
         <Box sx={{ mt: 2 }}>
           <NavLink href="/student#synced-games">
-            <Typography sx={{ color: palette.accent, fontWeight: 600, fontSize: "0.9rem" }}>
+            <Typography
+              sx={{
+                color: palette.accent,
+                fontWeight: 600,
+                fontSize: "0.9rem",
+              }}
+            >
               View all synced games →
             </Typography>
           </NavLink>

@@ -34,9 +34,7 @@ export function useAnalyzeGame() {
   const { white, black } = usePlayersData(gameAtom);
 
   const readyToAnalyse =
-    !!engine?.getIsReady() &&
-    game.history().length > 0 &&
-    !evaluationProgress;
+    !!engine?.getIsReady() && game.history().length > 0 && !evaluationProgress;
 
   const analyzeGame = useCallback(
     async (force = false) => {
@@ -82,10 +80,13 @@ export function useAnalyzeGame() {
           serverGameFromUrl?.serverId
         ).catch((err) => console.warn("Server sync failed:", err));
 
-        const gameSavedEvals: SavedEvals = params.fens.reduce((acc, fen, idx) => {
-          acc[fen] = { ...newGameEval.positions[idx], engine: engineName };
-          return acc;
-        }, {} as SavedEvals);
+        const gameSavedEvals: SavedEvals = params.fens.reduce(
+          (acc, fen, idx) => {
+            acc[fen] = { ...newGameEval.positions[idx], engine: engineName };
+            return acc;
+          },
+          {} as SavedEvals
+        );
         setSavedEvals((prev) => ({
           ...prev,
           ...gameSavedEvals,

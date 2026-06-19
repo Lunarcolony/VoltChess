@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -45,7 +46,7 @@ class SyncOverviewView(APIView):
                     coach=user, student_id=student_id
                 ).exists():
                     return Response(status=status.HTTP_403_FORBIDDEN)
-            student = User.objects.get(pk=student_id)
+            student = get_object_or_404(User, pk=student_id)
         else:
             student = user
 
@@ -93,7 +94,7 @@ class SyncTriggerView(APIView):
                 coach=user, student_id=student_id
             ).exists():
                 return Response(status=status.HTTP_403_FORBIDDEN)
-            target_student = User.objects.get(pk=student_id)
+            target_student = get_object_or_404(User, pk=student_id)
 
         results = sync_all_enabled_links_for_student(target_student)
         return Response({"results": results}, status=status.HTTP_200_OK)
@@ -129,7 +130,7 @@ class ClaimAnalysisView(APIView):
     permission_classes = (permissions.IsAuthenticated, IsGameOwnerOrCoach)
 
     def post(self, request, game_id):
-        game = Game.objects.get(pk=game_id)
+        game = get_object_or_404(Game, pk=game_id)
         self.check_object_permissions(request, game)
         if request.user.pk != game.owner_id:
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -145,7 +146,7 @@ class CompleteAnalysisView(APIView):
     permission_classes = (permissions.IsAuthenticated, IsGameOwnerOrCoach)
 
     def post(self, request, game_id):
-        game = Game.objects.get(pk=game_id)
+        game = get_object_or_404(Game, pk=game_id)
         self.check_object_permissions(request, game)
         if request.user.pk != game.owner_id:
             return Response(status=status.HTTP_403_FORBIDDEN)

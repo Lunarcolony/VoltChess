@@ -44,7 +44,11 @@ export default function AuthLayout({
           <VoltChessLogo size={40} />
           <Typography
             variant="h5"
-            sx={{ fontWeight: 700, color: palette.text, letterSpacing: "-0.02em" }}
+            sx={{
+              fontWeight: 700,
+              color: palette.text,
+              letterSpacing: "-0.02em",
+            }}
           >
             VoltChess Academy
           </Typography>

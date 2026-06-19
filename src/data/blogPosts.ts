@@ -201,8 +201,7 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "lichess-game-review-free",
     title: "Free Lichess Game Review & Analysis",
-    metaTitle:
-      "Free Lichess Game Review | VoltChess — Analyze Lichess Games",
+    metaTitle: "Free Lichess Game Review | VoltChess — Analyze Lichess Games",
     metaDescription:
       "Analyze Lichess games for free with Stockfish on VoltChess. Paste a Lichess game URL or PGN export for full game review and accuracy scores.",
     keywords:
@@ -222,8 +221,7 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "chess-move-accuracy-scores",
     title: "Chess Move Accuracy — What Your Score Really Means",
-    metaTitle:
-      "Chess Move Accuracy Explained | VoltChess Game Analysis Guide",
+    metaTitle: "Chess Move Accuracy Explained | VoltChess Game Analysis Guide",
     metaDescription:
       "Understand chess move accuracy scores from engine analysis. Learn how VoltChess calculates accuracy and how to use it to improve your play.",
     keywords:
@@ -243,8 +241,7 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "chess-game-analysis-for-beginners",
     title: "Chess Game Analysis for Beginners",
-    metaTitle:
-      "Chess Game Analysis for Beginners | Free Guide | VoltChess",
+    metaTitle: "Chess Game Analysis for Beginners | Free Guide | VoltChess",
     metaDescription:
       "New to chess game review? Learn how beginners can use free Stockfish analysis to find mistakes, understand evaluations, and improve faster.",
     keywords:
@@ -264,8 +261,7 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "unlimited-free-chess-game-analysis",
     title: "Unlimited Free Chess Game Analysis — No Daily Caps",
-    metaTitle:
-      "Unlimited Free Chess Game Analysis | VoltChess — No Limits",
+    metaTitle: "Unlimited Free Chess Game Analysis | VoltChess — No Limits",
     metaDescription:
       "Analyze unlimited chess games for free with no daily caps. VoltChess offers full Stockfish game review, PGN import, and blunder detection without a paywall.",
     keywords:

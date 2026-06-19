@@ -27,7 +27,11 @@ export default function ClassroomPanel() {
   const [copied, setCopied] = useState(false);
   const [nameEdit, setNameEdit] = useState<string | null>(null);
 
-  const { data: classroom, isLoading, error } = useQuery({
+  const {
+    data: classroom,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["my-classroom"],
     queryFn: fetchMyClassroom,
   });
@@ -102,8 +106,9 @@ export default function ClassroomPanel() {
             Your classroom
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Share this code with students — they join from <strong>My Academy</strong> after
-            verifying your name. No more typing usernames.
+            Share this code with students — they join from{" "}
+            <strong>My Academy</strong> after verifying your name. No more
+            typing usernames.
           </Typography>
         </Box>
         <Chip
@@ -113,7 +118,15 @@ export default function ClassroomPanel() {
         />
       </Box>
 
-      <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center", mb: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 1,
+          flexWrap: "wrap",
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
         <TextField
           size="small"
           label="Classroom name"
@@ -154,7 +167,11 @@ export default function ClassroomPanel() {
           {classroom.join_code}
         </Typography>
         <Tooltip title={copied ? "Copied!" : "Copy code"}>
-          <IconButton onClick={copyCode} size="small" aria-label="Copy classroom code">
+          <IconButton
+            onClick={copyCode}
+            size="small"
+            aria-label="Copy classroom code"
+          >
             <Icon icon={copied ? "mdi:check" : "mdi:content-copy"} width={20} />
           </IconButton>
         </Tooltip>
@@ -168,7 +185,8 @@ export default function ClassroomPanel() {
           New code
         </Button>
         <Typography variant="body2" color="text.secondary" sx={{ ml: "auto" }}>
-          {classroom.student_count} student{classroom.student_count === 1 ? "" : "s"} joined
+          {classroom.student_count} student
+          {classroom.student_count === 1 ? "" : "s"} joined
         </Typography>
       </Box>
 

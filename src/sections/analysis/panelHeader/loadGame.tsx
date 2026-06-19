@@ -2,11 +2,7 @@ import { Stack, Button } from "@mui/material";
 import LoadGameButton from "../../loadGame/loadGameButton";
 import { useCallback } from "react";
 import { useChessActions } from "@/hooks/useChessActions";
-import {
-  boardAtom,
-  gameAtom,
-  gameEvalAtom,
-} from "../states";
+import { boardAtom, gameAtom, gameEvalAtom } from "../states";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Chess } from "chess.js";
 import { useRouter } from "@/hooks/useRouter";
@@ -38,7 +34,13 @@ export default function LoadGame() {
   const needsReanalysis = isGameLoaded && !gameEval && !evaluationProgress;
 
   return (
-    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 1 }}>
+    <Stack
+      direction="row"
+      spacing={1}
+      flexWrap="wrap"
+      useFlexGap
+      sx={{ mb: 1 }}
+    >
       <LoadGameButton
         label={isGameLoaded ? "Load new game" : "Load game"}
         size="small"

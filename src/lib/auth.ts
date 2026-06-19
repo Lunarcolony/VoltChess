@@ -33,7 +33,6 @@ export const getAuthStatus = (): string => {
     return "Authentication disabled - all routes accessible";
   }
 
-  const hasToken =
-    typeof window !== "undefined" ? hasStoredSession() : false;
+  const hasToken = typeof window !== "undefined" ? hasStoredSession() : false;
   return hasToken ? "User authenticated" : "User not authenticated";
 };

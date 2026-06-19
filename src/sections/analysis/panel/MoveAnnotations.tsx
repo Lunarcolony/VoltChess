@@ -1,11 +1,5 @@
 import { useState } from "react";
-import {
-  Box,
-  Button,
-  IconButton,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
@@ -121,7 +115,9 @@ export default function MoveAnnotations({ serverGameId }: Props) {
             border: `1px solid ${palette.borderSubtle}`,
           }}
         >
-          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
+          <Box
+            sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}
+          >
             <Typography variant="caption" color="text.secondary">
               {a.author.username}
             </Typography>
@@ -150,7 +146,9 @@ export default function MoveAnnotations({ serverGameId }: Props) {
       <Button
         size="small"
         variant="outlined"
-        disabled={!draft.trim() || createMut.isPending || (!activeGameId && !gameEval)}
+        disabled={
+          !draft.trim() || createMut.isPending || (!activeGameId && !gameEval)
+        }
         onClick={() => createMut.mutate(draft.trim())}
       >
         Add note

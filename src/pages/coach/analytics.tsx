@@ -82,11 +82,21 @@ export default function CoachAnalyticsPage() {
               </Typography>
               <ResponsiveContainer width="100%" height="85%">
                 <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={palette.borderSubtle} />
-                  <XAxis dataKey="name" tick={{ fill: palette.textMuted, fontSize: 11 }} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={palette.borderSubtle}
+                  />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fill: palette.textMuted, fontSize: 11 }}
+                  />
                   <YAxis tick={{ fill: palette.textMuted, fontSize: 11 }} />
                   <Tooltip />
-                  <Bar dataKey="accuracy" fill={palette.accent} radius={[4, 4, 0, 0]} />
+                  <Bar
+                    dataKey="accuracy"
+                    fill={palette.accent}
+                    radius={[4, 4, 0, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </Box>
@@ -106,8 +116,14 @@ export default function CoachAnalyticsPage() {
               </Typography>
               <ResponsiveContainer width="100%" height="80%">
                 <BarChart data={mistakeData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={palette.borderSubtle} />
-                  <XAxis dataKey="name" tick={{ fill: palette.textMuted, fontSize: 11 }} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={palette.borderSubtle}
+                  />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fill: palette.textMuted, fontSize: 11 }}
+                  />
                   <YAxis tick={{ fill: palette.textMuted, fontSize: 11 }} />
                   <Tooltip />
                   <Bar dataKey="value" fill="#ef4444" radius={[4, 4, 0, 0]} />

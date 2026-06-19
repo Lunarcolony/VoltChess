@@ -2,9 +2,8 @@ import { useEffect } from "react";
 import { useAnalyzeGame } from "@/hooks/useAnalyzeGame";
 import { useCurrentPosition } from "../hooks/useCurrentPosition";
 import { useEngine } from "@/hooks/useEngine";
-import { engineNameAtom } from "../states";
+import { engineNameAtom, evaluationProgressAtom } from "../states";
 import { useAtomValue, useSetAtom } from "jotai";
-import { evaluationProgressAtom } from "../states";
 
 export default function AnalyzeButton() {
   const engineName = useAtomValue(engineNameAtom);

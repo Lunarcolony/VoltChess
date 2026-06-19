@@ -16,10 +16,7 @@ function playerWinPct(whiteWinPct: number, isWhite: boolean): number {
   return isWhite ? whiteWinPct : 100 - whiteWinPct;
 }
 
-function longestRunAbove(
-  series: number[],
-  threshold: number
-): number {
+function longestRunAbove(series: number[], threshold: number): number {
   let best = 0;
   let current = 0;
   for (const value of series) {

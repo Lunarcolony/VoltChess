@@ -81,10 +81,7 @@ const openingsDatabase: OpeningData[] = [
     difficulty: "intermediate",
     popularity: 80,
     themes: ["central control", "piece activity", "positional advantage"],
-    famousGames: [
-      "Alekhine vs. Capablanca (1927)",
-      "Kramnik vs. Leko (2004)",
-    ],
+    famousGames: ["Alekhine vs. Capablanca (1927)", "Kramnik vs. Leko (2004)"],
   },
   {
     name: "King's Indian Defense",
@@ -95,10 +92,7 @@ const openingsDatabase: OpeningData[] = [
     difficulty: "advanced",
     popularity: 75,
     themes: ["hypermodern", "kingside attack", "central counterplay"],
-    famousGames: [
-      "Fischer vs. Petrosian (1971)",
-      "Kasparov vs. Karpov (1986)",
-    ],
+    famousGames: ["Fischer vs. Petrosian (1971)", "Kasparov vs. Karpov (1986)"],
   },
   {
     name: "French Defense",
@@ -216,7 +210,14 @@ function OpeningsDatabase() {
             </Grid>
 
             <Grid size={{ xs: 12, md: 6 }}>
-              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 1,
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                }}
+              >
                 <Typography variant="body2" color="text.secondary">
                   Difficulty:
                 </Typography>
@@ -272,11 +273,7 @@ function OpeningsDatabase() {
                     }}
                   >
                     <Typography variant="h3">{opening.name}</Typography>
-                    <Chip
-                      label={opening.eco}
-                      size="small"
-                      variant="outlined"
-                    />
+                    <Chip label={opening.eco} size="small" variant="outlined" />
                   </Box>
 
                   <Typography
@@ -315,7 +312,9 @@ function OpeningsDatabase() {
                       color={getDifficultyColor(opening.difficulty)}
                       sx={{ textTransform: "capitalize" }}
                     />
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                    >
                       <Icon icon="mdi:star" color={palette.accent} width={14} />
                       <Typography variant="caption" color="text.secondary">
                         {opening.popularity}%
@@ -323,7 +322,9 @@ function OpeningsDatabase() {
                     </Box>
                   </Box>
 
-                  <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mb: 1 }}>
+                  <Box
+                    sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mb: 1 }}
+                  >
                     {opening.themes.map((theme) => (
                       <Chip
                         key={theme}

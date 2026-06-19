@@ -136,7 +136,10 @@ function RegisterForm() {
           label={
             <Typography variant="body2" color="text.secondary">
               I accept the{" "}
-              <Link href="/terms-and-conditions" style={{ color: palette.accent }}>
+              <Link
+                href="/terms-and-conditions"
+                style={{ color: palette.accent }}
+              >
                 Terms and Conditions
               </Link>
             </Typography>
@@ -185,7 +188,10 @@ function RegisterForm() {
           sx={{ mt: 2.5, textAlign: "center" }}
         >
           Already have an account?{" "}
-          <Link href="/login" style={{ color: palette.accent, fontWeight: 600 }}>
+          <Link
+            href="/login"
+            style={{ color: palette.accent, fontWeight: 600 }}
+          >
             Sign in
           </Link>
         </Typography>

@@ -25,7 +25,7 @@ function Play() {
           <Box
             sx={{
               bgcolor: "rgba(232,185,35,0.04)",
-              border: `1px solid rgba(232,185,35,0.08)`,
+              border: "1px solid rgba(232,185,35,0.08)",
               color: "rgba(232,185,35,1)",
               px: 2,
               py: 1,

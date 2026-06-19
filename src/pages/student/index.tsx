@@ -36,8 +36,13 @@ export default function StudentHome() {
   });
 
   const statusMut = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: "in_progress" | "completed" }) =>
-      updateAssignment(id, { status }),
+    mutationFn: ({
+      id,
+      status,
+    }: {
+      id: string;
+      status: "in_progress" | "completed";
+    }) => updateAssignment(id, { status }),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["assignments"] }),
   });
@@ -84,7 +89,9 @@ export default function StudentHome() {
                   borderBottom: `1px solid ${palette.borderSubtle}`,
                 }}
               >
-                <Box sx={{ display: "flex", gap: 1, mb: 0.5, flexWrap: "wrap" }}>
+                <Box
+                  sx={{ display: "flex", gap: 1, mb: 0.5, flexWrap: "wrap" }}
+                >
                   <Typography fontWeight={600}>
                     From {a.coach.username}
                   </Typography>
@@ -99,7 +106,11 @@ export default function StudentHome() {
                     }}
                   />
                 </Box>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 1 }}
+                >
                   {a.instructions}
                 </Typography>
                 <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
@@ -192,10 +203,18 @@ export default function StudentHome() {
                     <Chip label="Analyzing soon" size="small" color="warning" />
                   )}
                   {g.has_eval && (
-                    <Chip label="Report ready" size="small" color="success" variant="outlined" />
+                    <Chip
+                      label="Report ready"
+                      size="small"
+                      color="success"
+                      variant="outlined"
+                    />
                   )}
                   <NavLink href={`/analysis?gameId=${g.id}`}>
-                    <Typography fontSize="0.8rem" sx={{ color: palette.accent }}>
+                    <Typography
+                      fontSize="0.8rem"
+                      sx={{ color: palette.accent }}
+                    >
                       Open
                     </Typography>
                   </NavLink>
@@ -205,7 +224,12 @@ export default function StudentHome() {
           )}
           <NavLink href="/reanalysis">
             <Typography
-              sx={{ mt: 2, color: palette.accent, fontWeight: 600, fontSize: "0.9rem" }}
+              sx={{
+                mt: 2,
+                color: palette.accent,
+                fontWeight: 600,
+                fontSize: "0.9rem",
+              }}
             >
               Analyze a new game →
             </Typography>

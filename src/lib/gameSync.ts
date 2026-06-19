@@ -117,7 +117,8 @@ export async function syncAnalysisResult(
 ): Promise<string | undefined> {
   if (!ENABLE_AUTHENTICATION) return undefined;
 
-  let id = serverId ?? (localId != null ? getServerIdForLocal(localId) : undefined);
+  let id =
+    serverId ?? (localId != null ? getServerIdForLocal(localId) : undefined);
   if (!id) {
     id = await ensureGameOnServer(chess, localId);
   }

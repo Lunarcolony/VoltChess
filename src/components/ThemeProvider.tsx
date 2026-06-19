@@ -35,7 +35,10 @@ const createVoltChessTheme = (mode: ThemeMode) =>
       },
       background: {
         default: mode === "dark" ? "#232526" : "#f8f9fa",
-        paper: mode === "dark" ? "rgba(40, 44, 52, 0.85)" : "rgba(255, 255, 255, 0.9)",
+        paper:
+          mode === "dark"
+            ? "rgba(40, 44, 52, 0.85)"
+            : "rgba(255, 255, 255, 0.9)",
       },
       text: {
         primary: mode === "dark" ? "#ffffff" : "#000000",
@@ -71,7 +74,8 @@ const createVoltChessTheme = (mode: ThemeMode) =>
         styleOverrides: {
           root: {
             backdropFilter: "blur(8px)",
-            border: mode === "dark" ? "1.5px solid #3a3f4b" : "1px solid #e0e0e0",
+            border:
+              mode === "dark" ? "1.5px solid #3a3f4b" : "1px solid #e0e0e0",
           },
         },
       },
@@ -82,7 +86,9 @@ interface VoltChessThemeProviderProps {
   children: ReactNode;
 }
 
-export function VoltChessThemeProvider({ children }: VoltChessThemeProviderProps) {
+export function VoltChessThemeProvider({
+  children,
+}: VoltChessThemeProviderProps) {
   const [mode, setMode] = useState<ThemeMode>("dark");
 
   const toggleTheme = () => {

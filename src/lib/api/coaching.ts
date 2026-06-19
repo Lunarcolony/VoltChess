@@ -129,7 +129,10 @@ export async function updateLessonTemplate(
   id: string,
   data: Partial<LessonTemplate>
 ): Promise<LessonTemplate> {
-  const res = await api.patch<LessonTemplate>(`/api/lesson-templates/${id}/`, data);
+  const res = await api.patch<LessonTemplate>(
+    `/api/lesson-templates/${id}/`,
+    data
+  );
   return res.data;
 }
 

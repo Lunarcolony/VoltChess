@@ -10,6 +10,7 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  Link as MuiLink,
 } from "@mui/material";
 import { useState, useMemo } from "react";
 import NavLink from "@/components/NavLink";
@@ -17,7 +18,6 @@ import VoltChessLogo from "@/components/VoltChessLogo";
 import { useRouter } from "@/hooks/useRouter";
 import { usePalette } from "@/hooks/usePalette";
 import { alpha } from "@mui/material/styles";
-import { Link as MuiLink } from "@mui/material";
 import { SidebarAccount, MobileHeaderAccount } from "./SidebarAccount";
 import { UserRole } from "@/types/user";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,11 +27,18 @@ type NavItem = { label: string; icon: string; href: string };
 const BASE_NAV: NavItem[] = [
   { label: "Home", icon: "mdi:home-outline", href: "/" },
   { label: "Analysis", icon: "mdi:magnify", href: "/reanalysis" },
-  { label: "Guides", icon: "mdi:book-open-page-variant-outline", href: "/blog" },
+  {
+    label: "Guides",
+    icon: "mdi:book-open-page-variant-outline",
+    href: "/blog",
+  },
   { label: "Database", icon: "mdi:database-outline", href: "/database" },
 ];
 
-function navForRole(role: UserRole | undefined, isAuthenticated: boolean): NavItem[] {
+function navForRole(
+  role: UserRole | undefined,
+  isAuthenticated: boolean
+): NavItem[] {
   if (!isAuthenticated || !role) return BASE_NAV;
 
   const items = [...BASE_NAV];
@@ -74,7 +81,15 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         borderRight: `1px solid ${palette.border}`,
       }}
     >
-      <Box sx={{ px: 2.5, py: 2.5, display: "flex", alignItems: "center", gap: 1.5 }}>
+      <Box
+        sx={{
+          px: 2.5,
+          py: 2.5,
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+        }}
+      >
         <VoltChessLogo size={28} />
         <Typography
           variant="h6"
@@ -83,8 +98,6 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           VoltChess
         </Typography>
       </Box>
-
- 
 
       <List sx={{ flex: 1, px: 1.5, py: 1 }}>
         {navItems.map(({ label, icon, href }) => {
@@ -102,7 +115,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                   mb: 0.5,
                   py: 1,
                   color: isActive ? palette.accent : palette.textMuted,
-                  bgcolor: isActive ? alpha(palette.accent, 0.1) : "transparent",
+                  bgcolor: isActive
+                    ? alpha(palette.accent, 0.1)
+                    : "transparent",
                   "&:hover": {
                     bgcolor: isActive
                       ? alpha(palette.accent, 0.14)
@@ -115,9 +130,11 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 </ListItemIcon>
                 <ListItemText
                   primary={label}
-                  primaryTypographyProps={{
-                    fontSize: "0.9rem",
-                    fontWeight: isActive ? 600 : 500,
+                  slotProps={{
+                    primary: {
+                      fontSize: "0.9rem",
+                      fontWeight: isActive ? 600 : 500,
+                    },
                   }}
                 />
               </ListItemButton>
@@ -136,7 +153,11 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             borderTop: `1px solid ${palette.borderSubtle}`,
           }}
         >
-          <Typography fontSize="0.65rem" lineHeight={1.45} color="text.secondary">
+          <Typography
+            fontSize="0.65rem"
+            lineHeight={1.45}
+            color="text.secondary"
+          >
             Free chess game review · Powered by{" "}
             <MuiLink
               href="https://github.com/GuillaumeSD/Chesskit"
@@ -212,7 +233,7 @@ export default function Sidebar() {
         <Drawer
           open={mobileOpen}
           onClose={() => setMobileOpen(false)}
-          PaperProps={{ sx: { bgcolor: palette.bg } }}
+          slotProps={{ paper: { sx: { bgcolor: palette.bg } } }}
         >
           <SidebarContent onNavigate={() => setMobileOpen(false)} />
         </Drawer>
