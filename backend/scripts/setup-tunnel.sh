@@ -45,7 +45,7 @@ Group=$PI_USER
 WorkingDirectory=$BACKEND_DIR
 ExecStart=$BACKEND_DIR/scripts/start-tunnel.sh
 Restart=always
-RestartSec=15
+RestartSec=60
 
 [Install]
 WantedBy=multi-user.target voltchess.target

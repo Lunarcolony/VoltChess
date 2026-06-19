@@ -1,6 +1,11 @@
 import axios from "axios";
-import { ACCESS_TOKEN, REFRESH_TOKEN } from "@/constants";
 import { getApiBaseUrl, resolveApiBaseUrl } from "@/config/apiUrl";
+import {
+  clearAuthStorage,
+  getAccessToken,
+  getRefreshToken,
+  setTokens,
+} from "@/lib/authStorage";
 
 const api = axios.create({
   baseURL: resolveApiBaseUrl(),
@@ -10,7 +15,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     config.baseURL = getApiBaseUrl();
-    const token = localStorage.getItem(ACCESS_TOKEN);
+    const token = getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -34,7 +39,7 @@ api.interceptors.response.use(
     }
 
     original._retry = true;
-    const refresh = localStorage.getItem(REFRESH_TOKEN);
+    const refresh = getRefreshToken();
     if (!refresh) {
       return Promise.reject(error);
     }
@@ -44,15 +49,12 @@ api.interceptors.response.use(
         .post("/api/token/refresh/", { refresh })
         .then((res) => {
           const access = res.data.access as string;
-          localStorage.setItem(ACCESS_TOKEN, access);
-          if (res.data.refresh) {
-            localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
-          }
+          const nextRefresh = (res.data.refresh as string | undefined) ?? refresh;
+          setTokens(access, nextRefresh);
           return access;
         })
         .catch(() => {
-          localStorage.removeItem(ACCESS_TOKEN);
-          localStorage.removeItem(REFRESH_TOKEN);
+          clearAuthStorage();
           return null;
         })
         .finally(() => {

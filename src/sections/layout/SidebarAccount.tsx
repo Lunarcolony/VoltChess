@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Icon } from "@iconify/react";
 import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import NavLink from "@/components/NavLink";
+import ConfirmLogoutDialog from "@/components/ConfirmLogoutDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePalette } from "@/hooks/usePalette";
 import { useRouter } from "@/hooks/useRouter";
@@ -22,9 +24,11 @@ export function SidebarAccount({ onNavigate }: { onNavigate?: () => void }) {
   const palette = usePalette();
   const router = useRouter();
   const { user, logout, isAuthenticated, loading } = useAuth();
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const handleSignOut = () => {
     logout();
+    setLogoutOpen(false);
     onNavigate?.();
     router.push("/login");
   };
@@ -133,7 +137,7 @@ export function SidebarAccount({ onNavigate }: { onNavigate?: () => void }) {
 
         <Tooltip title="Sign out" placement="top">
           <IconButton
-            onClick={handleSignOut}
+            onClick={() => setLogoutOpen(true)}
             size="small"
             aria-label="Sign out"
             sx={{
@@ -151,6 +155,12 @@ export function SidebarAccount({ onNavigate }: { onNavigate?: () => void }) {
           </IconButton>
         </Tooltip>
       </Box>
+      <ConfirmLogoutDialog
+        open={logoutOpen}
+        username={user.username}
+        onCancel={() => setLogoutOpen(false)}
+        onConfirm={handleSignOut}
+      />
     </Box>
   );
 }
@@ -191,6 +201,7 @@ export function MobileHeaderAccount() {
   const palette = usePalette();
   const router = useRouter();
   const { user, logout, isAuthenticated, loading } = useAuth();
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   if (loading) {
     return <Box sx={{ width: 36, flexShrink: 0 }} />;
@@ -205,10 +216,12 @@ export function MobileHeaderAccount() {
 
   const handleSignOut = () => {
     logout();
+    setLogoutOpen(false);
     router.push("/login");
   };
 
   return (
+    <>
     <Box
       sx={{
         display: "flex",
@@ -270,7 +283,7 @@ export function MobileHeaderAccount() {
       </Box>
       <Tooltip title="Sign out">
         <IconButton
-          onClick={handleSignOut}
+          onClick={() => setLogoutOpen(true)}
           size="small"
           aria-label="Sign out"
           sx={{
@@ -288,5 +301,12 @@ export function MobileHeaderAccount() {
         </IconButton>
       </Tooltip>
     </Box>
+    <ConfirmLogoutDialog
+      open={logoutOpen}
+      username={user.username}
+      onCancel={() => setLogoutOpen(false)}
+      onConfirm={handleSignOut}
+    />
+    </>
   );
 }
