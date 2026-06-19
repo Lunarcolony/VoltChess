@@ -15,6 +15,7 @@ from .services import (
     claim_game_for_browser,
     games_pending_browser_analysis,
     mark_analysis_complete,
+    release_game_for_retry,
     student_sync_overview,
     sync_all_enabled_links_for_student,
     sync_coach_student_link,
@@ -134,10 +135,30 @@ class ClaimAnalysisView(APIView):
         self.check_object_permissions(request, game)
         if request.user.pk != game.owner_id:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        if hasattr(game, "eval"):
-            return Response({"detail": "Already analyzed."}, status=status.HTTP_400_BAD_REQUEST)
-        claim_game_for_browser(game)
-        return Response(GameDetailSerializer(game).data)
+
+        claimed = claim_game_for_browser(game.id, request.user)
+        if claimed is None:
+            # Already analyzed, or another tab/worker holds a fresh claim.
+            return Response(
+                {"detail": "Game is already analyzed or being analyzed."},
+                status=status.HTTP_409_CONFLICT,
+            )
+        return Response(GameDetailSerializer(claimed).data)
+
+
+class ReleaseAnalysisView(APIView):
+    """Return a claimed-but-unfinished game to the queue (browser gave up)."""
+
+    permission_classes = (permissions.IsAuthenticated, IsGameOwnerOrCoach)
+
+    def post(self, request, game_id):
+        game = get_object_or_404(Game, pk=game_id)
+        self.check_object_permissions(request, game)
+        if request.user.pk != game.owner_id:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        release_game_for_retry(game.id, request.user)
+        return Response({"game_id": str(game.id), "status": "released"})
 
 
 class CompleteAnalysisView(APIView):

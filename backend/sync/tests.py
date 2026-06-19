@@ -13,7 +13,7 @@ from academies.models import (
     PlatformChoice,
     SyncStatus,
 )
-from games.models import AnalysisStatus, Game
+from games.models import AnalysisStatus, Game, GameEval
 from sync.platform_fetch import FetchedGame
 from sync.services import (
     StudentPresence,
@@ -178,6 +178,54 @@ class ClaimCompleteTests(SyncFixtureMixin, APITestCase):
         game = self._make_pending_game(owner=self.other)
         self.client.force_authenticate(self.student)
         res = self.client.post(f"/api/sync/games/{game.id}/claim/")
+        self.assertEqual(res.status_code, 403)
+
+    def test_double_claim_returns_conflict(self):
+        game = self._make_pending_game()
+        self.client.force_authenticate(self.student)
+
+        first = self.client.post(f"/api/sync/games/{game.id}/claim/")
+        self.assertEqual(first.status_code, 200)
+
+        # A second claim while the first is still fresh must be rejected so two
+        # tabs don't analyze the same game.
+        second = self.client.post(f"/api/sync/games/{game.id}/claim/")
+        self.assertEqual(second.status_code, 409)
+
+    def test_claim_already_analyzed_returns_conflict(self):
+        game = self._make_pending_game()
+        GameEval.objects.create(
+            game=game,
+            positions=[{"lines": [{"cp": 0, "depth": 1, "multiPv": 1, "pv": []}]}],
+            accuracy={"white": 90, "black": 90},
+            settings={},
+        )
+        self.client.force_authenticate(self.student)
+        res = self.client.post(f"/api/sync/games/{game.id}/claim/")
+        self.assertEqual(res.status_code, 409)
+
+    def test_release_returns_game_to_pending(self):
+        game = self._make_pending_game()
+        self.client.force_authenticate(self.student)
+
+        self.client.post(f"/api/sync/games/{game.id}/claim/")
+        game.refresh_from_db()
+        self.assertEqual(game.analysis_status, AnalysisStatus.IN_PROGRESS)
+
+        res = self.client.post(f"/api/sync/games/{game.id}/release/")
+        self.assertEqual(res.status_code, 200)
+        game.refresh_from_db()
+        self.assertEqual(game.analysis_status, AnalysisStatus.PENDING)
+        self.assertIsNone(game.analysis_claimed_at)
+
+        # After release it can be claimed again (e.g. retried).
+        again = self.client.post(f"/api/sync/games/{game.id}/claim/")
+        self.assertEqual(again.status_code, 200)
+
+    def test_release_other_users_game_forbidden(self):
+        game = self._make_pending_game(owner=self.other)
+        self.client.force_authenticate(self.student)
+        res = self.client.post(f"/api/sync/games/{game.id}/release/")
         self.assertEqual(res.status_code, 403)
 
     def test_pending_analysis_lists_synced_games(self):
