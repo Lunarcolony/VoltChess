@@ -26,7 +26,7 @@ type NavItem = { label: string; icon: string; href: string };
 
 const BASE_NAV: NavItem[] = [
   { label: "Home", icon: "mdi:home-outline", href: "/" },
-  { label: "Analysis", icon: "mdi:magnify", href: "/reanalysis" },
+  { label: "Analysis", icon: "mdi:magnify", href: "/analysis" },
   {
     label: "Guides",
     icon: "mdi:book-open-page-variant-outline",

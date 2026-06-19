@@ -2,11 +2,21 @@ import { EngineWorker } from "@/types/engine";
 import { isIosDevice, isMobileDevice } from "./shared";
 
 export const getEngineWorker = (enginePath: string): EngineWorker => {
+  // Resolve against the site root, NOT the current route. A relative path like
+  // "engines/…/x.js" resolves against the page URL, so on a nested route
+  // (e.g. /coach/students) it would request "/coach/engines/…/x.js", which the
+  // SPA fallback serves as index.html — the worker then dies with
+  // "Unexpected token '<'". An absolute "/engines/…" path always loads the real
+  // engine file (and the engine's own .wasm imports resolve correctly).
+  const absolutePath = enginePath.startsWith("/")
+    ? enginePath
+    : `/${enginePath}`;
+
   if (import.meta.env.DEV) {
-    console.log(`Creating worker from ${enginePath}`);
+    console.log(`Creating worker from ${absolutePath}`);
   }
 
-  const worker = new window.Worker(enginePath);
+  const worker = new window.Worker(absolutePath);
 
   const engineWorker: EngineWorker = {
     isReady: false,
