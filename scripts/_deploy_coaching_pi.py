@@ -42,11 +42,18 @@ sftp.close()
 print("Uploaded backend tarball")
 
 cmd = (
-    f"cd {REMOTE} && rm -rf backend && tar xzf backend.tar.gz && rm backend.tar.gz "
-    "&& find backend -name '*.sh' -exec sed -i 's/\\r$//' {} + "
+    f"cd {REMOTE} && "
+    "test -f backend/.env && cp backend/.env /tmp/voltchess.env.bak || true && "
+    "test -f backend/db.sqlite3 && cp backend/db.sqlite3 /tmp/voltchess.db.bak || true && "
+    "rm -rf backend && tar xzf backend.tar.gz && rm backend.tar.gz && "
+    "test -f /tmp/voltchess.env.bak && cp /tmp/voltchess.env.bak backend/.env || true && "
+    "test -f /tmp/voltchess.db.bak && cp /tmp/voltchess.db.bak backend/db.sqlite3 || true && "
+    "find backend -name '*.sh' -exec sed -i 's/\\r$//' {} + "
     "&& sed -i 's/\\r$//' backend/.env.example "
     "&& bash backend/scripts/setup-pi.sh "
-    "&& bash backend/scripts/ensure-autostart.sh"
+    "&& bash backend/scripts/ensure-autostart.sh "
+    "&& sudo systemctl restart voltchess-api voltchess-tunnel "
+    "&& sleep 6"
 )
 _, stdout, _ = client.exec_command(cmd, get_pty=True, timeout=600)
 for line in stdout:
@@ -70,5 +77,9 @@ if tunnel and tunnel != "NONE":
         f'curl -s -o /dev/null -w "%{{http_code}}" {tunnel}/api/coach/dashboard/'
     )
     print("Coach dashboard (expect 401 without token):", stdout.read().decode())
+    _, stdout, _ = client.exec_command(
+        f'curl -s -o /dev/null -w "%{{http_code}}" {tunnel}/api/classroom/mine/'
+    )
+    print("Classroom mine (expect 401 without token):", stdout.read().decode())
 
 client.close()
