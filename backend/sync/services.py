@@ -367,18 +367,28 @@ def student_sync_overview(student) -> dict:
             }
         )
 
-    games = Game.objects.filter(owner=student)
+    # Whether a saved eval (report) exists is the source of truth for
+    # "analyzed" — not analysis_status, which can drift (e.g. a tab closed
+    # mid-flight). This keeps a game that already has a report from being shown
+    # as perpetually "analyzing".
+    games = list(Game.objects.filter(owner=student).select_related("eval"))
+    analyzed = sum(1 for g in games if hasattr(g, "eval"))
+    not_analyzed = [g for g in games if not hasattr(g, "eval")]
+    in_progress = sum(
+        1 for g in not_analyzed if g.analysis_status == AnalysisStatus.IN_PROGRESS
+    )
+    failed = sum(
+        1 for g in not_analyzed if g.analysis_status == AnalysisStatus.FAILED
+    )
+    pending = len(not_analyzed) - in_progress - failed
+
     return {
         "platform_links": platform_links,
-        "games_total": games.count(),
-        "games_analyzed": games.filter(analysis_status=AnalysisStatus.COMPLETE).count(),
-        "games_pending": games.filter(analysis_status=AnalysisStatus.PENDING).count(),
-        "games_in_progress": games.filter(
-            analysis_status=AnalysisStatus.IN_PROGRESS
-        ).count(),
-        "games_failed": games.filter(
-            analysis_status=AnalysisStatus.FAILED
-        ).count(),
+        "games_total": len(games),
+        "games_analyzed": analyzed,
+        "games_pending": pending,
+        "games_in_progress": in_progress,
+        "games_failed": failed,
         "last_sync_at": max(
             (l.last_sync_at for l in links if l.last_sync_at),
             default=None,

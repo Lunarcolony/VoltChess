@@ -94,6 +94,31 @@ class OverviewTests(SyncFixtureMixin, APITestCase):
         self.assertEqual(len(res.data["platform_links"]), 1)
         self.assertEqual(res.data["games_total"], 0)
 
+    def test_overview_counts_eval_as_analyzed_despite_status(self):
+        # A game that has a saved report must count as analyzed even if its
+        # analysis_status drifted (e.g. left as pending), so it isn't shown as
+        # perpetually "analyzing".
+        game = Game.objects.create(
+            owner=self.student,
+            pgn=DEMO_PGN,
+            source="lichess",
+            external_id="drift-1",
+            analysis_status=AnalysisStatus.PENDING,
+        )
+        GameEval.objects.create(
+            game=game,
+            positions=[{"lines": [{"cp": 0, "depth": 1, "multiPv": 1, "pv": []}]}],
+            accuracy={"white": 88, "black": 90},
+            settings={},
+        )
+        self.client.force_authenticate(self.student)
+        res = self.client.get("/api/sync/overview/")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.data["games_total"], 1)
+        self.assertEqual(res.data["games_analyzed"], 1)
+        self.assertEqual(res.data["games_pending"], 0)
+        self.assertEqual(res.data["games_in_progress"], 0)
+
     def test_coach_overview_for_linked_student(self):
         self.client.force_authenticate(self.coach)
         res = self.client.get(
