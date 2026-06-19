@@ -222,91 +222,91 @@ export function MobileHeaderAccount() {
 
   return (
     <>
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        gap: 0.75,
-        flexShrink: 0,
-        minWidth: 0,
-        maxWidth: "50%",
-      }}
-    >
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
           gap: 0.75,
+          flexShrink: 0,
           minWidth: 0,
-          px: 0.75,
-          py: 0.35,
-          borderRadius: 1.5,
-          bgcolor: alpha(palette.text, 0.04),
-          border: `1px solid ${palette.borderSubtle}`,
+          maxWidth: "50%",
         }}
       >
         <Box
           sx={{
-            width: 28,
-            height: 28,
-            borderRadius: "50%",
-            flexShrink: 0,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            fontWeight: 700,
-            fontSize: "0.72rem",
-            bgcolor: alpha(palette.accent, 0.15),
-            color: palette.accent,
+            gap: 0.75,
+            minWidth: 0,
+            px: 0.75,
+            py: 0.35,
+            borderRadius: 1.5,
+            bgcolor: alpha(palette.text, 0.04),
+            border: `1px solid ${palette.borderSubtle}`,
           }}
         >
-          {initial}
-        </Box>
-        <Box sx={{ minWidth: 0, display: { xs: "none", sm: "block" } }}>
-          <Typography
-            noWrap
-            sx={{ fontSize: "0.78rem", fontWeight: 600, lineHeight: 1.2 }}
-          >
-            {user.username}
-          </Typography>
-          <Typography
-            noWrap
+          <Box
             sx={{
-              fontSize: "0.65rem",
-              color: palette.textMuted,
-              lineHeight: 1.2,
+              width: 28,
+              height: 28,
+              borderRadius: "50%",
+              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: 700,
+              fontSize: "0.72rem",
+              bgcolor: alpha(palette.accent, 0.15),
+              color: palette.accent,
             }}
           >
-            {roleLabel}
-          </Typography>
+            {initial}
+          </Box>
+          <Box sx={{ minWidth: 0, display: { xs: "none", sm: "block" } }}>
+            <Typography
+              noWrap
+              sx={{ fontSize: "0.78rem", fontWeight: 600, lineHeight: 1.2 }}
+            >
+              {user.username}
+            </Typography>
+            <Typography
+              noWrap
+              sx={{
+                fontSize: "0.65rem",
+                color: palette.textMuted,
+                lineHeight: 1.2,
+              }}
+            >
+              {roleLabel}
+            </Typography>
+          </Box>
         </Box>
+        <Tooltip title="Sign out">
+          <IconButton
+            onClick={() => setLogoutOpen(true)}
+            size="small"
+            aria-label="Sign out"
+            sx={{
+              flexShrink: 0,
+              width: 32,
+              height: 32,
+              color: palette.textMuted,
+              "&:hover": {
+                color: palette.text,
+                bgcolor: alpha(palette.text, 0.06),
+              },
+            }}
+          >
+            <Icon icon="mdi:logout" width={18} />
+          </IconButton>
+        </Tooltip>
       </Box>
-      <Tooltip title="Sign out">
-        <IconButton
-          onClick={() => setLogoutOpen(true)}
-          size="small"
-          aria-label="Sign out"
-          sx={{
-            flexShrink: 0,
-            width: 32,
-            height: 32,
-            color: palette.textMuted,
-            "&:hover": {
-              color: palette.text,
-              bgcolor: alpha(palette.text, 0.06),
-            },
-          }}
-        >
-          <Icon icon="mdi:logout" width={18} />
-        </IconButton>
-      </Tooltip>
-    </Box>
-    <ConfirmLogoutDialog
-      open={logoutOpen}
-      username={user.username}
-      onCancel={() => setLogoutOpen(false)}
-      onConfirm={handleSignOut}
-    />
+      <ConfirmLogoutDialog
+        open={logoutOpen}
+        username={user.username}
+        onCancel={() => setLogoutOpen(false)}
+        onConfirm={handleSignOut}
+      />
     </>
   );
 }

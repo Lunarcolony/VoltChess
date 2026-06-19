@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import axios from "axios";
+import { isAxiosError } from "axios";
 import api from "@/api";
 import { ENABLE_AUTHENTICATION } from "@/constants";
 import {
@@ -31,7 +31,7 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 function isAuthError(err: unknown): boolean {
-  return axios.isAxiosError(err) && err.response?.status === 401;
+  return isAxiosError(err) && err.response?.status === 401;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -86,7 +86,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     };
     window.addEventListener("voltchess:auth-expired", onExpired);
-    return () => window.removeEventListener("voltchess:auth-expired", onExpired);
+    return () =>
+      window.removeEventListener("voltchess:auth-expired", onExpired);
   }, []);
 
   const login = useCallback(async (username: string, password: string) => {

@@ -140,13 +140,18 @@ export default function JoinClassroomCard() {
         </Box>
       ) : (
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Ask your coach for their classroom code (e.g. <strong>VC-ABC123</strong>). We&apos;ll
-          show you their name before you join — so you never connect to the wrong coach.
+          Ask your coach for their classroom code (e.g.{" "}
+          <strong>VC-ABC123</strong>). We&apos;ll show you their name before you
+          join — so you never connect to the wrong coach.
         </Typography>
       )}
 
       {successMsg && (
-        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccessMsg(null)}>
+        <Alert
+          severity="success"
+          sx={{ mb: 2 }}
+          onClose={() => setSuccessMsg(null)}
+        >
           {successMsg}
         </Alert>
       )}
@@ -165,8 +170,10 @@ export default function JoinClassroomCard() {
                 setPreviewError(null);
               }}
               sx={{ minWidth: 200, flex: 1 }}
-              inputProps={{
-                style: { fontFamily: "monospace", letterSpacing: "0.08em" },
+              slotProps={{
+                htmlInput: {
+                  style: { fontFamily: "monospace", letterSpacing: "0.08em" },
+                },
               }}
             />
             <Button

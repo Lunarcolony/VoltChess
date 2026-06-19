@@ -49,7 +49,8 @@ api.interceptors.response.use(
         .post("/api/token/refresh/", { refresh })
         .then((res) => {
           const access = res.data.access as string;
-          const nextRefresh = (res.data.refresh as string | undefined) ?? refresh;
+          const nextRefresh =
+            (res.data.refresh as string | undefined) ?? refresh;
           setTokens(access, nextRefresh);
           return access;
         })
