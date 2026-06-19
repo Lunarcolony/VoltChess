@@ -9,6 +9,7 @@ import { fetchGames } from "@/lib/api/games";
 import { fetchCoachMessages } from "@/lib/api/coaching";
 import NavLink from "@/components/NavLink";
 import JoinClassroomCard from "@/sections/coach/JoinClassroomCard";
+import StudentSyncPanel from "@/sections/student/StudentSyncPanel";
 import { prepareNewAnalysisSession } from "@/hooks/useAnalysisSession";
 import { useRouter } from "@/hooks/useRouter";
 
@@ -63,6 +64,8 @@ export default function StudentHome() {
         </Typography>
 
         <JoinClassroomCard />
+
+        <StudentSyncPanel />
 
         <Box sx={{ ...cardSx, mb: 3 }}>
           <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
@@ -159,7 +162,7 @@ export default function StudentHome() {
           </Box>
         )}
 
-        <Box sx={cardSx}>
+        <Box sx={cardSx} id="synced-games">
           <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
             My synced games ({gamesLoading ? "…" : games.length})
           </Typography>
@@ -184,11 +187,19 @@ export default function StudentHome() {
                 <Typography variant="body2">
                   {g.white.name} vs {g.black.name} ({g.result ?? "—"})
                 </Typography>
-                <NavLink href={`/analysis?gameId=${g.id}`}>
-                  <Typography fontSize="0.8rem" sx={{ color: palette.accent }}>
-                    Open
-                  </Typography>
-                </NavLink>
+                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                  {g.analysis_status === "pending" && (
+                    <Chip label="Analyzing soon" size="small" color="warning" />
+                  )}
+                  {g.has_eval && (
+                    <Chip label="Report ready" size="small" color="success" variant="outlined" />
+                  )}
+                  <NavLink href={`/analysis?gameId=${g.id}`}>
+                    <Typography fontSize="0.8rem" sx={{ color: palette.accent }}>
+                      Open
+                    </Typography>
+                  </NavLink>
+                </Box>
               </Box>
             ))
           )}

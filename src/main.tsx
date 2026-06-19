@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
 import { AuthProvider } from "./contexts/AuthContext";
 import LocalGameMigrationPrompt from "./components/LocalGameMigrationPrompt";
+import PlatformSyncOrchestrator from "./components/PlatformSyncOrchestrator";
 import { loadApiConfig } from "./config/apiUrl";
 import { syncEngineSettingsDefaults } from "./lib/syncEngineSettingsDefaults";
 
@@ -25,6 +26,7 @@ async function bootstrap() {
         <BrowserRouter>
           <AuthProvider>
             <LocalGameMigrationPrompt />
+            <PlatformSyncOrchestrator />
             <App />
           </AuthProvider>
         </BrowserRouter>

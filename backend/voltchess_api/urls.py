@@ -12,4 +12,5 @@ urlpatterns = [
     path("api/", include("assignments.urls")),
     path("api/", include("annotations.urls")),
     path("api/", include("coaching.urls")),
+    path("api/", include("sync.urls")),
 ]

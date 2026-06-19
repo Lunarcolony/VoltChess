@@ -13,6 +13,12 @@ export type CoachStudentLink = {
   weekly_game_goal: number | null;
   pinned: boolean;
   last_reviewed_at: string | null;
+  platform: "" | "chesscom" | "lichess";
+  platform_username: string;
+  sync_enabled: boolean;
+  last_sync_at: string | null;
+  sync_status: "idle" | "syncing" | "error";
+  sync_error: string;
   created_at: string;
 };
 
@@ -61,6 +67,9 @@ export async function updateCoachLink(
       | "weekly_game_goal"
       | "pinned"
       | "last_reviewed_at"
+      | "platform"
+      | "platform_username"
+      | "sync_enabled"
     >
   >
 ): Promise<CoachStudentLink> {

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "assignments",
     "annotations",
     "coaching",
+    "sync",
 ]
 
 MIDDLEWARE = [
