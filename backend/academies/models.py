@@ -48,6 +48,17 @@ class LinkPriority(models.TextChoices):
     HIGH = "high", "High"
 
 
+class PlatformChoice(models.TextChoices):
+    CHESSCOM = "chesscom", "Chess.com"
+    LICHESS = "lichess", "Lichess"
+
+
+class SyncStatus(models.TextChoices):
+    IDLE = "idle", "Idle"
+    SYNCING = "syncing", "Syncing"
+    ERROR = "error", "Error"
+
+
 class CoachStudentLink(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     coach = models.ForeignKey(
@@ -78,6 +89,20 @@ class CoachStudentLink(models.Model):
     weekly_game_goal = models.PositiveSmallIntegerField(null=True, blank=True)
     pinned = models.BooleanField(default=False)
     last_reviewed_at = models.DateTimeField(null=True, blank=True)
+    platform = models.CharField(
+        max_length=20,
+        choices=PlatformChoice.choices,
+        blank=True,
+    )
+    platform_username = models.CharField(max_length=100, blank=True)
+    sync_enabled = models.BooleanField(default=True)
+    last_sync_at = models.DateTimeField(null=True, blank=True)
+    sync_status = models.CharField(
+        max_length=20,
+        choices=SyncStatus.choices,
+        default=SyncStatus.IDLE,
+    )
+    sync_error = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

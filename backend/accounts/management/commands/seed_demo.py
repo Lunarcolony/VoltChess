@@ -48,11 +48,22 @@ class Command(BaseCommand):
             user=student,
             defaults={"role": MembershipRole.STUDENT},
         )
-        CoachStudentLink.objects.get_or_create(
+        link, _ = CoachStudentLink.objects.get_or_create(
             coach=coach,
             student=student,
             defaults={"academy": academy},
         )
+        if not link.platform_username:
+            link.platform = "lichess"
+            link.platform_username = "DrNykterstein"
+            link.sync_enabled = True
+            link.save(
+                update_fields=[
+                    "platform",
+                    "platform_username",
+                    "sync_enabled",
+                ]
+            )
 
         classroom = get_or_create_classroom_for_coach(coach)
         classroom.name = "VoltChess Demo Classroom"

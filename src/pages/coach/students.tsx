@@ -24,6 +24,7 @@ import { usePalette } from "@/hooks/usePalette";
 import { alpha } from "@mui/material/styles";
 import { fetchCoachLinks, updateCoachLink } from "@/lib/api/academies";
 import { fetchCoachDashboard } from "@/lib/api/coaching";
+import { triggerSync } from "@/lib/api/sync";
 import NavLink from "@/components/NavLink";
 
 export default function CoachStudentsPage() {
@@ -37,6 +38,9 @@ export default function CoachStudentsPage() {
   const [priority, setPriority] = useState("normal");
   const [weeklyGoal, setWeeklyGoal] = useState("");
   const [targetAcc, setTargetAcc] = useState("");
+  const [platform, setPlatform] = useState<"" | "chesscom" | "lichess">("");
+  const [platformUsername, setPlatformUsername] = useState("");
+  const [syncEnabled, setSyncEnabled] = useState(true);
 
   const { data: dashboard, isLoading } = useQuery({
     queryKey: ["coach-dashboard"],
@@ -46,9 +50,16 @@ export default function CoachStudentsPage() {
   const updateMut = useMutation({
     mutationFn: (payload: Parameters<typeof updateCoachLink>[1]) =>
       updateCoachLink(editId!, payload),
-    onSuccess: () => {
+    onSuccess: async () => {
       qc.invalidateQueries({ queryKey: ["coach-dashboard"] });
       qc.invalidateQueries({ queryKey: ["coach-links"] });
+      if (platform && platformUsername.trim()) {
+        try {
+          await triggerSync({ link_id: editId! });
+        } catch {
+          /* sync errors surface on link.sync_error */
+        }
+      }
       setEditId(null);
     },
   });
@@ -83,6 +94,9 @@ export default function CoachStudentsPage() {
     setPriority(link.priority);
     setWeeklyGoal(link.weekly_game_goal?.toString() ?? "");
     setTargetAcc(link.target_accuracy?.toString() ?? "");
+    setPlatform(link.platform ?? "");
+    setPlatformUsername(link.platform_username ?? "");
+    setSyncEnabled(link.sync_enabled ?? true);
   };
 
   return (
@@ -253,6 +267,38 @@ export default function CoachStudentsPage() {
               onChange={(e) => setTargetAcc(e.target.value)}
               size="small"
             />
+            <TextField
+              select
+              label="Online platform"
+              value={platform}
+              onChange={(e) =>
+                setPlatform(e.target.value as "" | "chesscom" | "lichess")
+              }
+              size="small"
+              helperText="Which site this student plays on — used for auto-import."
+            >
+              <MenuItem value="">Not set</MenuItem>
+              <MenuItem value="chesscom">Chess.com</MenuItem>
+              <MenuItem value="lichess">Lichess</MenuItem>
+            </TextField>
+            <TextField
+              label="Platform username"
+              value={platformUsername}
+              onChange={(e) => setPlatformUsername(e.target.value)}
+              size="small"
+              disabled={!platform}
+              placeholder={platform === "lichess" ? "lichess_username" : "chesscom_username"}
+            />
+            <TextField
+              select
+              label="Auto-sync games"
+              value={syncEnabled ? "yes" : "no"}
+              onChange={(e) => setSyncEnabled(e.target.value === "yes")}
+              size="small"
+            >
+              <MenuItem value="yes">Enabled (last 30 games)</MenuItem>
+              <MenuItem value="no">Paused</MenuItem>
+            </TextField>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setEditId(null)}>Cancel</Button>
@@ -269,6 +315,9 @@ export default function CoachStudentsPage() {
                   priority: priority as "low" | "normal" | "high",
                   weekly_game_goal: weeklyGoal ? Number(weeklyGoal) : null,
                   target_accuracy: targetAcc ? Number(targetAcc) : null,
+                  platform: platform || undefined,
+                  platform_username: platformUsername.trim(),
+                  sync_enabled: syncEnabled,
                   last_reviewed_at: new Date().toISOString(),
                 })
               }

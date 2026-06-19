@@ -17,7 +17,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { useCardSx, usePalette } from "@/hooks/usePalette";
@@ -31,6 +31,7 @@ import {
 } from "@/lib/api/academies";
 import { fetchGames } from "@/lib/api/games";
 import { fetchStudentTimeline } from "@/lib/api/coaching";
+import { fetchSyncOverview, triggerSync } from "@/lib/api/sync";
 import { CoachStatCard } from "@/sections/coach/CoachUi";
 import NavLink from "@/components/NavLink";
 import CoachShell from "@/sections/coach/CoachShell";
@@ -62,6 +63,7 @@ export default function CoachStudentDetail() {
   const { id } = useParams<{ id: string }>();
   const palette = usePalette();
   const cardSx = useCardSx();
+  const qc = useQueryClient();
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
@@ -87,6 +89,20 @@ export default function CoachStudentDetail() {
     queryKey: ["student-timeline", id],
     queryFn: () => fetchStudentTimeline(id!),
     enabled: !!id,
+  });
+
+  const { data: syncOverview } = useQuery({
+    queryKey: ["sync-overview", id],
+    queryFn: () => fetchSyncOverview(id!),
+    enabled: !!id,
+  });
+
+  const syncMut = useMutation({
+    mutationFn: () => triggerSync({ student_id: id! }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["sync-overview", id] });
+      qc.invalidateQueries({ queryKey: ["student-games", id] });
+    },
   });
 
   const { refetch: loadReport, isFetching: reportLoading } = useQuery({
@@ -147,6 +163,59 @@ export default function CoachStudentDetail() {
             </Button>
           </Box>
         </Box>
+
+        {syncOverview && (
+          <Box sx={{ ...cardSx, mb: 3 }}>
+            <Typography variant="h6" fontWeight={600} sx={{ mb: 1.5 }}>
+              Platform sync
+            </Typography>
+            {link?.platform && link.platform_username ? (
+              <>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  {link.platform === "lichess" ? "Lichess" : "Chess.com"}:{" "}
+                  <strong>{link.platform_username}</strong>
+                </Typography>
+                <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 1.5 }}>
+                  <Chip
+                    size="small"
+                    label={`${syncOverview.games_analyzed} analyzed`}
+                    color="success"
+                    variant="outlined"
+                  />
+                  <Chip
+                    size="small"
+                    label={`${syncOverview.games_pending} pending`}
+                    color={syncOverview.games_pending ? "warning" : "default"}
+                    variant="outlined"
+                  />
+                  <Chip
+                    size="small"
+                    label={`${syncOverview.games_total} synced`}
+                    variant="outlined"
+                  />
+                </Box>
+                {link.sync_error && (
+                  <Typography variant="body2" color="error" sx={{ mb: 1 }}>
+                    {link.sync_error}
+                  </Typography>
+                )}
+                <Button
+                  size="small"
+                  variant="outlined"
+                  disabled={syncMut.isPending}
+                  onClick={() => syncMut.mutate()}
+                >
+                  {syncMut.isPending ? "Syncing…" : "Sync last 30 games"}
+                </Button>
+              </>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                Set this student&apos;s Chess.com or Lichess username on the roster
+                (Edit profile) to enable automatic import and reports.
+              </Typography>
+            )}
+          </Box>
+        )}
 
         {statsLoading ? (
           <CircularProgress />

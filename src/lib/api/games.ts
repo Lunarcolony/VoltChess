@@ -14,6 +14,9 @@ export type ServerGame = {
   has_eval: boolean;
   accuracy?: { white?: number; black?: number };
   source?: string;
+  analysis_status?: "pending" | "in_progress" | "complete" | "failed";
+  analysis_source?: "browser" | "server" | "";
+  external_url?: string;
   created_at: string;
 };
 

@@ -46,6 +46,12 @@ class CoachStudentLinkSerializer(serializers.ModelSerializer):
             "weekly_game_goal",
             "pinned",
             "last_reviewed_at",
+            "platform",
+            "platform_username",
+            "sync_enabled",
+            "last_sync_at",
+            "sync_status",
+            "sync_error",
             "created_at",
         )
         read_only_fields = ("id", "coach", "student", "created_at")
@@ -56,4 +62,17 @@ class CoachStudentLinkSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     "Provide student_id or student_username."
                 )
+        platform = attrs.get("platform", getattr(self.instance, "platform", ""))
+        username = attrs.get(
+            "platform_username",
+            getattr(self.instance, "platform_username", ""),
+        )
+        if platform and not str(username).strip():
+            raise serializers.ValidationError(
+                {"platform_username": "Username is required when platform is set."}
+            )
+        if username and not platform:
+            raise serializers.ValidationError(
+                {"platform": "Select chesscom or lichess when setting a username."}
+            )
         return attrs

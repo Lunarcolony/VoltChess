@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Game, GameEval
+from .models import AnalysisStatus, Game, GameEval
 
 
 class GameEvalSerializer(serializers.ModelSerializer):
@@ -37,6 +37,11 @@ class GameListSerializer(serializers.ModelSerializer):
             "termination",
             "time_control",
             "source",
+            "external_id",
+            "external_url",
+            "analysis_status",
+            "analysis_source",
+            "platform_played_at",
             "created_at",
             "has_eval",
             "accuracy",
@@ -69,6 +74,11 @@ class GameDetailSerializer(serializers.ModelSerializer):
             "termination",
             "time_control",
             "source",
+            "external_id",
+            "external_url",
+            "analysis_status",
+            "analysis_source",
+            "platform_played_at",
             "created_at",
             "updated_at",
             "eval",
@@ -117,4 +127,7 @@ class GameEvalUploadSerializer(serializers.Serializer):
             game=game,
             defaults=eval_data,
         )
+        if game.analysis_status != AnalysisStatus.COMPLETE:
+            game.analysis_status = AnalysisStatus.COMPLETE
+            game.save(update_fields=["analysis_status", "updated_at"])
         return eval_obj
