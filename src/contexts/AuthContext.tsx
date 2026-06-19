@@ -7,7 +7,6 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { isAxiosError } from "axios";
 import api, { refreshAccessToken } from "@/api";
 import { ENABLE_AUTHENTICATION } from "@/constants";
 import {
@@ -29,10 +28,6 @@ type AuthContextValue = {
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-
-function isAuthError(err: unknown): boolean {
-  return isAxiosError(err) && err.response?.status === 401;
-}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() =>
@@ -60,15 +55,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(cached);
     }
 
+    // Renew the access token up front when a refresh token is available. This
+    // keeps a reload from depending on a 401 → retry round-trip and, crucially,
+    // `refreshAccessToken` only clears the session when the refresh token
+    // itself is rejected (a real, permanent auth failure) — transient
+    // network/CORS errors leave the session intact.
+    await refreshAccessToken().catch(() => null);
+    if (!hasStoredSession()) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await api.get<User>("/api/me/");
       setUser(res.data);
       writeCachedUser(res.data);
-    } catch (err) {
-      if (isAuthError(err)) {
-        clearAuthStorage();
-        setUser(null);
-      } else if (!cached) {
+    } catch {
+      // We get here when `/api/me/` (and the interceptor's refresh retry) could
+      // not complete. Only sign the user out if the session was actually
+      // invalidated — i.e. the refresh token was rejected, which clears
+      // storage. Otherwise this is a transient failure (flaky backend/tunnel,
+      // offline, CORS hiccup); keep the cached session so a reload does not
+      // bounce an otherwise-valid user back to the login page.
+      if (!hasStoredSession() || !cached) {
         setUser(null);
       }
     } finally {
