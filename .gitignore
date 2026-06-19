@@ -8,7 +8,6 @@ node_modules
 sync-pi-tunnel-url.bat
 scripts/sync_pi_tunnel_url.py
 deploy-pi.bat
-deploy.bat
 scripts/deploy_all.py
 scripts/_deploy_pi_once.py
 scripts/_deploy_coaching_pi.py
