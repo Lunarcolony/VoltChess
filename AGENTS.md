@@ -18,4 +18,8 @@ VoltChess is a Vite + React/TypeScript chess analysis SPA (repo root) with an op
 - After installing/refreshing backend deps, you may need to apply migrations: `backend/.venv/bin/python backend/manage.py migrate`. Migrations and seeding are intentionally NOT in the startup update script.
 - Seed demo accounts with `backend/.venv/bin/python backend/manage.py seed_demo` → logins `coach` / `demo1234` and `student` / `demo1234`.
 - To run the frontend without the backend, set `VITE_ENABLE_AUTHENTICATION=false` in a root `.env`.
-- `npm run lint` currently fails on the committed codebase (the eslint `import` plugin has no `@/` path-alias resolver configured, and several source files have prettier violations). This is a pre-existing repo condition, not an environment problem. `npx tsc --noEmit` passes cleanly and is the reliable type check.
+
+### Lint, typecheck & tests
+
+- Frontend lint/typecheck: `npm run lint` (runs `eslint . --max-warnings 0` then `tsc --noEmit`). It is green; keep it that way. Note `import/no-unresolved` is intentionally disabled in `.eslintrc.json` because `tsc` already validates the `@/` path alias and module resolution (the eslint `import` plugin has no TS resolver wired up, and adding `eslint-import-resolver-typescript` conflicts with this repo's pinned `@typescript-eslint` version).
+- Backend tests: `backend/.venv/bin/python backend/manage.py test` (or `... test sync`). Tests use an in-memory SQLite DB and mock the Chess.com/Lichess fetch, so they need no network. The `sync` app has coverage for the platform-import → browser/server analysis flow.
