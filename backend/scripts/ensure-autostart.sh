@@ -29,9 +29,13 @@ chmod +x "$SCRIPT_DIR/start-tunnel.sh" "$SCRIPT_DIR/start-tunnel-cloudflare.sh" 
 
 GUNICORN_BIND="0.0.0.0:8000"
 GUNICORN_WORKERS="2"
+USE_SQLITE="false"
 if [[ -f "$ENV_FILE" ]]; then
   # shellcheck disable=SC1090
-  source <(grep -E '^GUNICORN_' "$ENV_FILE" | sed 's/\r$//') || true
+  source <(grep -E '^(GUNICORN_|USE_SQLITE=)' "$ENV_FILE" | sed 's/\r$//') || true
+fi
+if [[ "${USE_SQLITE}" == "true" ]]; then
+  GUNICORN_WORKERS=1
 fi
 
 echo "==> Installing boot services (no login required after reboot)"

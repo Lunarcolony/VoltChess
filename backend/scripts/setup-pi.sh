@@ -61,6 +61,9 @@ set -a
 # shellcheck source=/dev/null
 source "$ENV_FILE"
 set +a
+# .env may have Windows CRLF line endings after deploy from a PC
+USE_SQLITE="${USE_SQLITE//$'\r'/}"
+GUNICORN_WORKERS="${GUNICORN_WORKERS//$'\r'/}"
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput 2>/dev/null || true
 
