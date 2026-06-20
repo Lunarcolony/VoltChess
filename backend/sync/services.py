@@ -19,8 +19,8 @@ PRESENCE_ONLINE_SECONDS = 120
 # How long a browser "claim" is trusted before another worker may take the game
 # over. Kept short so a tab that is closed mid-analysis doesn't leave a game
 # stuck for a long time.
-BROWSER_CLAIM_TIMEOUT = timedelta(minutes=4)
-SERVER_PENDING_TIMEOUT = timedelta(seconds=45)
+BROWSER_CLAIM_TIMEOUT = timedelta(minutes=2)
+SERVER_PENDING_TIMEOUT = timedelta(seconds=30)
 
 
 class StudentPresence:

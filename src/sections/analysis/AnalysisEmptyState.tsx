@@ -34,8 +34,8 @@ export default function AnalysisEmptyState() {
         Not analyzed
       </Typography>
       <Typography variant="body2" color="text.secondary">
-        Stockfish will evaluate this game automatically. Results appear here
-        when analysis finishes.
+        Click <strong>Analyze game</strong> below to run Stockfish on this game.
+        Results appear here when analysis finishes.
       </Typography>
     </Box>
   );
