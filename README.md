@@ -38,6 +38,11 @@ VoltChess is based on [Chesskit](https://github.com/GuillaumeSD/Chesskit) and is
 
 If you run a modified version as a network service, AGPL requires you to offer corresponding source to users interacting with it over the network.
 
+## Documentation
+
+- [`ARCHITECTURE.md`](ARCHITECTURE.md) — high-level architecture and a condensed per-file map.
+- [`docs/`](docs/README.md) — the **complete code guide**: a plain-English, ~1-page-per-file reference covering every file in the project (start at [`docs/README.md`](docs/README.md)).
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
