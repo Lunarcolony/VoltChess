@@ -27,8 +27,7 @@ function AnalysisPage() {
   const gameLoaded =
     (!!game.getHeaders().White && game.getHeaders().White !== "?") ||
     game.history().length > 0;
-  const reportTabScrollable =
-    !!gameEval || progress > 0 || gameLoaded;
+  const reportTabScrollable = !!gameEval || progress > 0 || gameLoaded;
 
   const handleTourTabChange = useCallback((tab: "report") => {
     setActiveTab(tab);

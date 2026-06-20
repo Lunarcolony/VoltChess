@@ -113,11 +113,7 @@ export default function AnalysisPanelTabs({
               role="tabpanel"
               hidden={!isActive}
               sx={{
-                display: isActive
-                  ? isScrollable
-                    ? "block"
-                    : "flex"
-                  : "none",
+                display: isActive ? (isScrollable ? "block" : "flex") : "none",
                 flexDirection: isScrollable ? undefined : "column",
                 flex: isScrollable ? undefined : 1,
                 minHeight: isScrollable ? undefined : 0,

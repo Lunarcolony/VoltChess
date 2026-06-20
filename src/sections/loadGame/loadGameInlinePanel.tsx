@@ -111,10 +111,18 @@ export default function LoadGameInlinePanel({
         }}
       >
         {gameOrigin === GameOrigin.ChessCom && (
-          <ChessComInput fullWidth fillHeight={fillHeight} onSelect={handlePgn} />
+          <ChessComInput
+            fullWidth
+            fillHeight={fillHeight}
+            onSelect={handlePgn}
+          />
         )}
         {gameOrigin === GameOrigin.Lichess && (
-          <LichessInput fullWidth fillHeight={fillHeight} onSelect={handlePgn} />
+          <LichessInput
+            fullWidth
+            fillHeight={fillHeight}
+            onSelect={handlePgn}
+          />
         )}
         {gameOrigin === GameOrigin.Pgn && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
