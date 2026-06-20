@@ -66,9 +66,14 @@ export function setApiBaseUrl(url: string): void {
   runtimeApiUrl = normalizeUrl(url);
 }
 
-/** Load /api-config.json for HTTPS URL overrides without a full frontend redeploy. */
+/** Load /api-config.json for HTTPS URL overrides (production only). */
 export async function loadApiConfig(): Promise<string> {
   const base = resolveApiBaseUrl();
+
+  if (import.meta.env.DEV) {
+    return base;
+  }
+
   try {
     const res = await fetch("/api-config.json", { cache: "no-store" });
     if (!res.ok) return base;

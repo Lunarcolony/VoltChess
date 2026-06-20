@@ -23,6 +23,7 @@ import StudentPlatformCard from "@/sections/student/StudentPlatformCard";
 import { prepareNewAnalysisSession } from "@/hooks/useAnalysisSession";
 import { useRouter } from "@/hooks/useRouter";
 import { gameAnalysisChipColor, gameAnalysisLabel } from "@/lib/analysisStatus";
+import { useAnalysisQueue } from "@/contexts/AnalysisQueueContext";
 
 function gameAccuracy(g: ServerGame): number | null {
   const vals = [g.accuracy?.white, g.accuracy?.black].filter(
@@ -77,6 +78,7 @@ export default function StudentHome() {
   const { user } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { state: queueState, startAnalysis } = useAnalysisQueue();
 
   const { data: assignments = [] } = useQuery({
     queryKey: ["assignments"],
@@ -294,6 +296,31 @@ export default function StudentHome() {
                               label={gameAnalysisLabel(g)}
                               sx={{ height: 20, fontSize: "0.65rem" }}
                             />
+                            {!g.has_eval && (
+                              <Typography
+                                component="button"
+                                type="button"
+                                fontSize="0.8rem"
+                                fontWeight={600}
+                                disabled={queueState.running}
+                                onClick={() => void startAnalysis(g.id)}
+                                sx={{
+                                  border: "none",
+                                  bgcolor: "transparent",
+                                  color: palette.accent,
+                                  cursor: queueState.running
+                                    ? "default"
+                                    : "pointer",
+                                  p: 0,
+                                  opacity: queueState.running ? 0.5 : 1,
+                                }}
+                              >
+                                {g.analysis_status === "in_progress" ||
+                                queueState.running
+                                  ? "Analyzing…"
+                                  : "Analyze"}
+                              </Typography>
+                            )}
                             <NavLink
                               href={
                                 g.has_eval

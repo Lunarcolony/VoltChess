@@ -2,40 +2,69 @@ import { useEffect, useRef } from "react";
 import { useAnalyzeGame } from "@/hooks/useAnalyzeGame";
 import { useCurrentPosition } from "../hooks/useCurrentPosition";
 import { useEngine } from "@/hooks/useEngine";
-import { engineNameAtom, evaluationProgressAtom, gameAtom } from "../states";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useGameDatabase } from "@/hooks/useGameDatabase";
+import { useAnalysisQueue } from "@/contexts/AnalysisQueueContext";
+import { engineNameAtom, gameAtom } from "../states";
+import { useAtomValue } from "jotai";
 
+/** Auto-starts analysis when a game loads without a report. */
 export default function AnalyzeButton() {
   const engineName = useAtomValue(engineNameAtom);
   const engine = useEngine(engineName);
   useCurrentPosition(engine);
-  const setEvaluationProgress = useSetAtom(evaluationProgressAtom);
   const game = useAtomValue(gameAtom);
   const { analyzeGame, readyToAnalyse, gameEval } = useAnalyzeGame();
+  const { serverGameFromUrl } = useGameDatabase();
+  const { startAnalysis, state: queueState } = useAnalysisQueue();
 
-  // Track which game we already kicked off analysis for, so a failed/aborted
-  // run does NOT re-trigger on the next render. Previously any failure left
-  // `gameEval` empty, which immediately satisfied the auto-analyze condition
-  // again — spawning Stockfish workers in an infinite loop.
-  const autoAnalyzedPgnRef = useRef<string | null>(null);
+  const autoStartedKeyRef = useRef<string | null>(null);
+
+  const gameKey =
+    serverGameFromUrl?.serverId ??
+    (game.history().length > 0 ? game.pgn() : "");
+
+  const isServerPending =
+    !!serverGameFromUrl?.serverId && !serverGameFromUrl.eval;
 
   useEffect(() => {
-    setEvaluationProgress(0);
-  }, [engine, setEvaluationProgress]);
+    autoStartedKeyRef.current = null;
+  }, [gameKey]);
 
   useEffect(() => {
     if (gameEval) return;
+    if (!gameKey) return;
+    if (autoStartedKeyRef.current === gameKey) return;
+
+    if (isServerPending && serverGameFromUrl?.serverId) {
+      if (queueState.running) return;
+      autoStartedKeyRef.current = gameKey;
+      console.log("[voltchess] queueing server game for analysis");
+      void startAnalysis(serverGameFromUrl.serverId);
+      return;
+    }
+
     if (!readyToAnalyse) return;
 
-    const pgn = game.pgn();
-    if (!pgn || autoAnalyzedPgnRef.current === pgn) return;
-    autoAnalyzedPgnRef.current = pgn;
+    autoStartedKeyRef.current = gameKey;
     console.log("[voltchess] starting browser analysis for loaded game");
     void analyzeGame().then((ok) => {
-      if (ok) console.log("[voltchess] browser analysis complete");
-      else console.warn("[voltchess] browser analysis did not start or failed");
+      if (ok) {
+        console.log("[voltchess] browser analysis complete");
+      } else {
+        console.warn("[voltchess] browser analysis did not start or failed");
+        autoStartedKeyRef.current = null;
+      }
     });
-  }, [gameEval, readyToAnalyse, analyzeGame, game]);
+  }, [
+    gameEval,
+    readyToAnalyse,
+    analyzeGame,
+    gameKey,
+    isServerPending,
+    serverGameFromUrl?.serverId,
+    startAnalysis,
+    queueState.running,
+  ]);
 
   return null;
 }

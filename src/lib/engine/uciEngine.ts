@@ -83,8 +83,9 @@ export class UciEngine {
   private async setMultiPv(multiPv: number) {
     if (multiPv === this.multiPv) return;
 
-    if (multiPv < 2 || multiPv > 6) {
-      throw new Error(`Invalid MultiPV value : ${multiPv}`);
+    const clamped = multiPv < 2 ? 2 : multiPv > 6 ? 6 : multiPv;
+    if (clamped !== multiPv) {
+      multiPv = clamped;
     }
 
     await this.sendCommandsToEachWorker(

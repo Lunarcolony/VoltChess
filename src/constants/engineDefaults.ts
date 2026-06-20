@@ -9,11 +9,11 @@ export const ENGINE_DEFAULTS = {
   boardHue: 0,
 } as const;
 
-/** Background sync queue: fastest / weakest settings (intelligence not important). */
+/** Background sync queue: fast settings; multiPv must be >= 2 (engine validation). */
 export const SYNC_ANALYSIS_DEFAULTS = {
   engine: EngineName.Stockfish17Lite,
-  depth: 4,
-  multiPv: 1,
+  depth: 8,
+  multiPv: 2,
   workers: 1,
 } as const;
 

@@ -12,6 +12,7 @@ from django.conf import settings
 
 from games.models import AnalysisSource, Game, GameEval
 
+from .eval_pipeline import classify_moves, compute_accuracy
 from .services import mark_analysis_complete, mark_analysis_failed
 
 
@@ -27,60 +28,113 @@ def _stockfish_path() -> str | None:
     return None
 
 
-def _fens_from_pgn(pgn_text: str) -> list[str]:
+def _fens_and_moves_from_pgn(pgn_text: str) -> tuple[list[str], list[str]]:
     game = chess.pgn.read_game(io.StringIO(pgn_text))
     if game is None:
-        return []
+        return [], []
     board = game.board()
     fens = [board.fen()]
+    uci_moves: list[str] = []
     for move in game.mainline_moves():
+        uci_moves.append(move.uci())
         board.push(move)
         fens.append(board.fen())
-    return fens
+    return fens, uci_moves
 
 
-def _eval_fen(process: subprocess.Popen, fen: str, depth: int, movetime_ms: int) -> dict:
+def _wait_for(process: subprocess.Popen, token: str, limit: int = 80) -> None:
+    for _ in range(limit):
+        line = process.stdout.readline()
+        if token in line:
+            return
+
+
+def _eval_fen(
+    process: subprocess.Popen,
+    fen: str,
+    depth: int,
+    movetime_ms: int,
+    multipv: int = 2,
+) -> dict:
     process.stdin.write(f"position fen {fen}\n")
     process.stdin.write(f"go depth {depth} movetime {movetime_ms}\n")
     process.stdin.flush()
 
-    cp = 0
-    pv: list[str] = []
-    depth_found = depth
-    for _ in range(500):
+    lines_by_pv: dict[int, dict] = {}
+    best_move = ""
+    for _ in range(800):
         line = process.stdout.readline()
         if not line:
             break
         line = line.strip()
-        if line.startswith("info ") and " score cp " in line:
+        if line.startswith("bestmove"):
             parts = line.split()
+            if len(parts) > 1:
+                best_move = parts[1]
+            break
+        if not line.startswith("info "):
+            continue
+        parts = line.split()
+        try:
+            depth_idx = parts.index("depth")
+            depth_found = int(parts[depth_idx + 1])
+        except (ValueError, IndexError):
+            continue
+        multipv_idx = parts.index("multipv") if "multipv" in parts else -1
+        if multipv_idx == -1:
+            continue
+        try:
+            pv_index = int(parts[multipv_idx + 1])
+        except (ValueError, IndexError):
+            continue
+        if pv_index < 1 or pv_index > multipv:
+            continue
+
+        existing = lines_by_pv.get(pv_index)
+        if existing and depth_found < existing.get("depth", 0):
+            continue
+
+        cp = None
+        mate = None
+        if " cp " in f" {line} ":
             try:
                 cp = int(parts[parts.index("cp") + 1])
             except (ValueError, IndexError):
                 pass
-            if " pv " in line:
-                pv = line.split(" pv ", 1)[1].split()
-            if " depth " in line:
-                try:
-                    depth_found = int(parts[parts.index("depth") + 1])
-                except (ValueError, IndexError):
-                    pass
-        if line.startswith("bestmove"):
-            break
+        if " mate " in f" {line} ":
+            try:
+                mate = int(parts[parts.index("mate") + 1])
+            except (ValueError, IndexError):
+                pass
+        pv: list[str] = []
+        if " pv " in line:
+            pv = line.split(" pv ", 1)[1].split()
 
-    return {
-        "bestMove": pv[0] if pv else "",
-        "lines": [{"pv": pv[:10], "cp": cp, "depth": depth_found, "multiPv": 1}],
-    }
+        lines_by_pv[pv_index] = {
+            "pv": pv[:10],
+            "cp": cp,
+            "mate": mate,
+            "depth": depth_found,
+            "multiPv": pv_index,
+        }
+
+    ordered = [lines_by_pv[i] for i in sorted(lines_by_pv) if i in lines_by_pv]
+    if not ordered:
+        ordered = [{"pv": [], "cp": 0, "depth": depth, "multiPv": 1}]
+
+    pos: dict = {"lines": ordered}
+    if best_move and best_move != "(none)":
+        pos["bestMove"] = best_move
+    return pos
 
 
-def analyze_game_on_server(game: Game, depth: int = 4, movetime_ms: int = 80) -> bool:
+def analyze_game_on_server(game: Game, depth: int = 8, movetime_ms: int = 120) -> bool:
     path = _stockfish_path()
     if not path:
         print("[voltchess-pi] server analysis skipped: STOCKFISH_PATH not set")
         return False
 
-    fens = _fens_from_pgn(game.pgn)
+    fens, uci_moves = _fens_and_moves_from_pgn(game.pgn)
     if len(fens) < 2:
         return False
 
@@ -99,18 +153,19 @@ def analyze_game_on_server(game: Game, depth: int = 4, movetime_ms: int = 80) ->
     )
 
     try:
-        for _ in range(50):
-            line = process.stdout.readline()
-            if "uciok" in line:
-                break
+        process.stdin.write("uci\n")
+        process.stdin.flush()
+        _wait_for(process, "uciok")
+        process.stdin.write("setoption name MultiPV value 2\n")
         process.stdin.write("isready\n")
         process.stdin.flush()
-        for _ in range(50):
-            line = process.stdout.readline()
-            if "readyok" in line:
-                break
+        _wait_for(process, "readyok")
 
-        positions = [_eval_fen(process, fen, depth, movetime_ms) for fen in fens]
+        raw_positions = [
+            _eval_fen(process, fen, depth, movetime_ms, multipv=2) for fen in fens
+        ]
+        positions = classify_moves(raw_positions, uci_moves, fens)
+        accuracy = compute_accuracy(positions)
         white_rating = (game.white or {}).get("rating") or 1500
         black_rating = (game.black or {}).get("rating") or 1500
 
@@ -118,12 +173,12 @@ def analyze_game_on_server(game: Game, depth: int = 4, movetime_ms: int = 80) ->
             game=game,
             defaults={
                 "positions": positions,
-                "accuracy": {"white": 0, "black": 0},
+                "accuracy": accuracy,
                 "estimated_elo": {"white": white_rating, "black": black_rating},
                 "settings": {
                     "engine": "stockfish-server",
                     "depth": depth,
-                    "multiPv": 1,
+                    "multiPv": 2,
                     "date": datetime.now(timezone.utc).isoformat(),
                 },
             },
@@ -150,7 +205,7 @@ def process_server_queue(max_games: int = 3) -> dict:
 
     pending = games_pending_server_analysis(limit=max_games)
     if pending:
-        print(f"[voltchess-pi] server queue: {len(pending)} game(s) (manual/cron only)")
+        print(f"[voltchess-pi] server queue: {len(pending)} game(s)")
     done = 0
     failed = 0
     for game in pending:

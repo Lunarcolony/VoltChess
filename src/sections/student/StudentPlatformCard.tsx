@@ -14,6 +14,7 @@ import {
 import { Icon } from "@iconify/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePalette } from "@/hooks/usePalette";
+import { useAnalysisQueue } from "@/contexts/AnalysisQueueContext";
 import { fetchSyncOverview, triggerSync } from "@/lib/api/sync";
 import { updateCoachLink } from "@/lib/api/academies";
 import { getApiErrorMessage } from "@/lib/apiErrors";
@@ -32,6 +33,7 @@ function platformLabel(p: string): string {
 export default function StudentPlatformCard() {
   const palette = usePalette();
   const qc = useQueryClient();
+  const { state: queueState, startAnalysis } = useAnalysisQueue();
   const [editing, setEditing] = useState(false);
   const [platform, setPlatform] = useState<Platform>("chesscom");
   const [username, setUsername] = useState("");
@@ -43,7 +45,9 @@ export default function StudentPlatformCard() {
     // progress bar advances without a manual refresh.
     refetchInterval: (query) => {
       const d = query.state.data;
-      const busy = d && (d.games_pending > 0 || d.games_in_progress > 0);
+      const busy =
+        queueState.running ||
+        (d && (d.games_pending > 0 || d.games_in_progress > 0));
       return busy ? 8_000 : 60_000;
     },
   });
@@ -95,8 +99,9 @@ export default function StudentPlatformCard() {
   const inProgress = data?.games_in_progress ?? 0;
   const failed = data?.games_failed ?? 0;
   const importing = saveMut.isPending || syncMut.isPending;
-  const queueActive = pending > 0 || inProgress > 0;
+  const queueActive = pending > 0 || inProgress > 0 || queueState.running;
   const progress = total > 0 ? Math.round((analyzed / total) * 100) : 0;
+  const canAnalyze = !queueState.running && !importing;
 
   const cardSx = useMemo(
     () => ({
@@ -254,12 +259,12 @@ export default function StudentPlatformCard() {
                 label={`${pending} not analyzed`}
               />
             )}
-            {inProgress > 0 && (
+            {(inProgress > 0 || queueState.running) && (
               <Chip
                 size="small"
                 color="warning"
                 variant="outlined"
-                label={`${inProgress} analyzing`}
+                label={`${inProgress + (queueState.running ? 1 : 0)} analyzing`}
               />
             )}
             {failed > 0 && (
@@ -285,9 +290,9 @@ export default function StudentPlatformCard() {
                 <Typography variant="caption" color="text.secondary">
                   {importing
                     ? "Importing your last 30 games…"
-                    : inProgress > 0
-                      ? `Analyzing — keep a VoltChess tab open (${analyzed}/${total})`
-                      : `Waiting to analyze — open VoltChess to start (${analyzed}/${total})`}
+                    : queueState.running
+                      ? queueState.message || `Analyzing (${analyzed}/${total})`
+                      : `Click Analyze now (${analyzed}/${total})`}
                 </Typography>
                 {!importing && total > 0 && (
                   <Typography variant="caption" color="text.secondary">
@@ -296,20 +301,58 @@ export default function StudentPlatformCard() {
                 )}
               </Box>
               <LinearProgress
-                variant={importing ? "indeterminate" : "determinate"}
+                variant={
+                  importing || queueState.running
+                    ? "indeterminate"
+                    : "determinate"
+                }
                 value={progress}
                 sx={{ height: 6, borderRadius: 3 }}
               />
             </Box>
           )}
 
+          {queueState.error && (
+            <Alert severity="error" sx={{ mt: 1.5 }}>
+              {queueState.error}
+            </Alert>
+          )}
+
           <Box
-            sx={{ display: "flex", alignItems: "center", gap: 1.5, mt: 1.5 }}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              flexWrap: "wrap",
+              mt: 1.5,
+            }}
           >
             <Button
               size="small"
+              variant="contained"
+              disabled={!canAnalyze}
+              onClick={() => void startAnalysis()}
+              startIcon={
+                queueState.running ? (
+                  <CircularProgress size={14} color="inherit" />
+                ) : (
+                  <Icon icon="mdi:chart-timeline-variant" width={16} />
+                )
+              }
+              sx={{
+                bgcolor: palette.accent,
+                color: palette.onAccent,
+                "&:disabled": { opacity: 0.6 },
+              }}
+            >
+              {queueState.running ? "Analyzing…" : "Analyze now"}
+            </Button>
+            <Button
+              size="small"
               variant="outlined"
-              disabled={syncMut.isPending || saveMut.isPending}
+              disabled={
+                syncMut.isPending || saveMut.isPending || queueState.running
+              }
               onClick={() => syncMut.mutate()}
               startIcon={<Icon icon="mdi:refresh" width={16} />}
             >
@@ -321,6 +364,14 @@ export default function StudentPlatformCard() {
               </Typography>
             )}
           </Box>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ mt: 0.75, display: "block" }}
+          >
+            Analysis runs in this browser tab when open. Minimize or close the
+            tab and the Pi server finishes remaining games in the background.
+          </Typography>
           {syncMut.isError && (
             <Alert severity="error" sx={{ mt: 1.5 }}>
               {getApiErrorMessage(syncMut.error)}

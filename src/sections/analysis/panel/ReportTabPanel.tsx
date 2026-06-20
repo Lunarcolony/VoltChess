@@ -1,4 +1,5 @@
-import { Box, Button } from "@mui/material";
+import { Box, Button, CircularProgress } from "@mui/material";
+import { Icon } from "@iconify/react";
 import { useCallback } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Chess } from "chess.js";
@@ -23,6 +24,9 @@ import {
   gameEvalAtom,
 } from "../states";
 import { useAnalyzeGame } from "@/hooks/useAnalyzeGame";
+import { useGameDatabase } from "@/hooks/useGameDatabase";
+import { useAnalysisQueue } from "@/contexts/AnalysisQueueContext";
+import { usePalette } from "@/hooks/usePalette";
 import MoveAnnotations from "./MoveAnnotations";
 
 function isGameLoaded(game: Chess) {
@@ -34,10 +38,13 @@ function isGameLoaded(game: Chess) {
 
 export default function ReportTabPanel() {
   const router = useRouter();
+  const palette = usePalette();
   const game = useAtomValue(gameAtom);
   const gameEval = useAtomValue(gameEvalAtom);
   const progress = useAtomValue(evaluationProgressAtom);
-  const { reanalyzeGame, engineReady, isServerGame } = useAnalyzeGame();
+  const { analyzeGame, reanalyzeGame, engineReady } = useAnalyzeGame();
+  const { serverGameFromUrl } = useGameDatabase();
+  const { state: queueState, startAnalysis } = useAnalysisQueue();
   const { setPgn: setGamePgn } = useChessActions(gameAtom);
   const { resetToStartingPosition: resetBoard } = useChessActions(boardAtom);
   const setEval = useSetAtom(gameEvalAtom);
@@ -64,13 +71,39 @@ export default function ReportTabPanel() {
     [resetAndSetGamePgn, router]
   );
 
-  const hasMoves = game.history().length > 0;
   const gameLoaded = isGameLoaded(game);
-  const isAnalyzing = progress > 0;
-  const needsReanalysis =
-    hasMoves && !gameEval && !isAnalyzing && !isServerGame;
+  const isServerPending =
+    !!serverGameFromUrl?.serverId && !serverGameFromUrl.eval;
+  const queueBusy = queueState.running;
+  const isAnalyzing = progress > 0 || (isServerPending && queueBusy);
   const showInlineLoader = !gameEval && !isAnalyzing;
   const fillPanel = showInlineLoader && !gameLoaded;
+
+  const handleAnalyze = useCallback(() => {
+    if (isServerPending && serverGameFromUrl?.serverId) {
+      void startAnalysis(serverGameFromUrl.serverId);
+      return;
+    }
+    void analyzeGame(true);
+  }, [
+    analyzeGame,
+    isServerPending,
+    serverGameFromUrl?.serverId,
+    startAnalysis,
+  ]);
+
+  const analyzeDisabled =
+    isAnalyzing || (isServerPending ? queueBusy : !engineReady);
+
+  const analyzeLabel = isAnalyzing
+    ? queueBusy || (isServerPending && !progress)
+      ? queueState.message || "Analyzing…"
+      : `Analyzing… ${progress}%`
+    : isServerPending
+      ? "Analyze game"
+      : engineReady
+        ? "Analyze game"
+        : "Loading engine…";
 
   return (
     <Box
@@ -89,7 +122,45 @@ export default function ReportTabPanel() {
         <LoadGameInlinePanel fillHeight onLoadGame={loadGame} />
       )}
 
-      {showInlineLoader && gameLoaded && <AnalysisEmptyState />}
+      {showInlineLoader && gameLoaded && (
+        <>
+          <AnalysisEmptyState />
+          <Button
+            variant="contained"
+            fullWidth
+            disabled={analyzeDisabled}
+            onClick={handleAnalyze}
+            startIcon={
+              isAnalyzing ? (
+                <CircularProgress size={18} color="inherit" />
+              ) : (
+                <Icon icon="mdi:chart-timeline-variant" width={20} />
+              )
+            }
+            sx={{
+              mb: 2,
+              bgcolor: palette.accent,
+              color: palette.onAccent,
+            }}
+          >
+            {analyzeLabel}
+          </Button>
+          {queueState.error && (
+            <Box
+              sx={{
+                mb: 2,
+                p: 1.5,
+                borderRadius: 1,
+                bgcolor: "error.dark",
+                color: "error.contrastText",
+                fontSize: "0.85rem",
+              }}
+            >
+              {queueState.error}
+            </Box>
+          )}
+        </>
+      )}
 
       {gameEval && (
         <>
@@ -116,6 +187,16 @@ export default function ReportTabPanel() {
               <MoveAnnotations />
             </ReportSection>
           )}
+
+          <Button
+            variant="outlined"
+            fullWidth
+            disabled={isAnalyzing || !engineReady}
+            onClick={() => reanalyzeGame()}
+            sx={{ mb: 1.5 }}
+          >
+            Re-analyze this game
+          </Button>
         </>
       )}
 
@@ -126,18 +207,6 @@ export default function ReportTabPanel() {
             containerSx={{ mb: 0, p: 1.25 }}
           />
         </ReportSection>
-      )}
-
-      {needsReanalysis && (
-        <Button
-          variant="outlined"
-          fullWidth
-          disabled={!engineReady}
-          onClick={() => reanalyzeGame()}
-          sx={{ mb: 1.5 }}
-        >
-          {engineReady ? "Re-analyze this game" : "Loading engine…"}
-        </Button>
       )}
     </Box>
   );
