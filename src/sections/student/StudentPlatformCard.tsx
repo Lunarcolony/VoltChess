@@ -91,10 +91,11 @@ export default function StudentPlatformCard() {
 
   const total = data?.games_total ?? 0;
   const analyzed = data?.games_analyzed ?? 0;
-  const remaining = (data?.games_pending ?? 0) + (data?.games_in_progress ?? 0);
+  const pending = data?.games_pending ?? 0;
+  const inProgress = data?.games_in_progress ?? 0;
   const failed = data?.games_failed ?? 0;
   const importing = saveMut.isPending || syncMut.isPending;
-  const analyzing = remaining > 0;
+  const queueActive = pending > 0 || inProgress > 0;
   const progress = total > 0 ? Math.round((analyzed / total) * 100) : 0;
 
   const cardSx = useMemo(
@@ -245,12 +246,20 @@ export default function StudentPlatformCard() {
               variant="outlined"
               label={`${analyzed} report${analyzed === 1 ? "" : "s"} ready`}
             />
-            {remaining > 0 && (
+            {pending > 0 && (
+              <Chip
+                size="small"
+                color="default"
+                variant="outlined"
+                label={`${pending} not analyzed`}
+              />
+            )}
+            {inProgress > 0 && (
               <Chip
                 size="small"
                 color="warning"
                 variant="outlined"
-                label={`${remaining} analyzing`}
+                label={`${inProgress} analyzing`}
               />
             )}
             {failed > 0 && (
@@ -264,7 +273,7 @@ export default function StudentPlatformCard() {
             <Chip size="small" variant="outlined" label={`${total} synced`} />
           </Stack>
 
-          {(importing || analyzing) && (
+          {(importing || queueActive) && (
             <Box sx={{ mt: 1.5 }}>
               <Box
                 sx={{
@@ -276,7 +285,9 @@ export default function StudentPlatformCard() {
                 <Typography variant="caption" color="text.secondary">
                   {importing
                     ? "Importing your last 30 games…"
-                    : `Analyzing games — keep this tab open (${analyzed}/${total})`}
+                    : inProgress > 0
+                      ? `Analyzing — keep a VoltChess tab open (${analyzed}/${total})`
+                      : `Waiting to analyze — open VoltChess to start (${analyzed}/${total})`}
                 </Typography>
                 {!importing && total > 0 && (
                   <Typography variant="caption" color="text.secondary">

@@ -20,6 +20,12 @@ if ! command -v python3 >/dev/null 2>&1; then
   sudo apt-get install -y python3 python3-venv python3-pip
 fi
 
+if ! command -v stockfish >/dev/null 2>&1; then
+  echo "==> Installing Stockfish (server-side analysis fallback)..."
+  sudo apt-get install -y stockfish 2>/dev/null || true
+fi
+STOCKFISH_BIN="$(command -v stockfish 2>/dev/null || true)"
+
 if [[ ! -f "$ENV_FILE" ]]; then
   echo "==> Creating $ENV_FILE from .env.example"
   cp "$BACKEND_DIR/.env.example" "$ENV_FILE"
@@ -58,11 +64,40 @@ set +a
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput 2>/dev/null || true
 
+if [[ "${USE_SQLITE:-false}" == "true" ]]; then
+  python - <<'PY'
+import sqlite3
+from pathlib import Path
+
+db = Path("db.sqlite3")
+if db.is_file():
+    con = sqlite3.connect(db, timeout=30)
+    con.execute("pragma journal_mode=WAL")
+    con.execute("pragma synchronous=NORMAL")
+    con.close()
+    print("    SQLite WAL mode enabled")
+PY
+fi
+
+if [[ -n "$STOCKFISH_BIN" ]]; then
+  if grep -q '^STOCKFISH_PATH=' "$ENV_FILE" 2>/dev/null; then
+    sed -i "s|^STOCKFISH_PATH=.*|STOCKFISH_PATH=${STOCKFISH_BIN}|" "$ENV_FILE"
+  else
+    echo "STOCKFISH_PATH=${STOCKFISH_BIN}" >>"$ENV_FILE"
+  fi
+  echo "    Stockfish: $STOCKFISH_BIN"
+fi
+
 echo "==> Demo users (coach / student, password demo1234)"
 python manage.py seed_demo || true
 
 GUNICORN_BIND="${GUNICORN_BIND:-0.0.0.0:8000}"
-GUNICORN_WORKERS="${GUNICORN_WORKERS:-2}"
+if [[ "${USE_SQLITE:-false}" == "true" ]]; then
+  GUNICORN_WORKERS=1
+  echo "    SQLite mode: gunicorn workers=1 (avoids DB lock contention)"
+else
+  GUNICORN_WORKERS="${GUNICORN_WORKERS:-2}"
+fi
 
 sudo tee /etc/systemd/system/voltchess.target >/dev/null <<'EOF'
 [Unit]

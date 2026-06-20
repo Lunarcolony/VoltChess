@@ -30,7 +30,7 @@ export default function EvaluationProgress() {
     ? "Loading Stockfish engine…"
     : isFinishing
       ? "Finishing analysis…"
-      : "Analyzing your game…";
+      : `Analyzing… ${Math.round(progress)}%`;
 
   const helper = engineLoading
     ? "Downloading and initializing the chess engine. This only happens once per session."

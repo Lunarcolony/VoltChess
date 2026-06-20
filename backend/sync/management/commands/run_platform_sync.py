@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from sync.server_analysis import process_server_queue
-from sync.services import sync_coach_student_link
+from sync.services import release_stale_analysis_claims, sync_coach_student_link
 
 from academies.models import CoachStudentLink
 
@@ -40,6 +40,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         run_analysis = options["analyze"] or options["analyze_only"]
+        released = release_stale_analysis_claims()
+        if released:
+            self.stdout.write(f"Released {released} stale analysis claim(s)")
 
         if not options["analyze_only"]:
             links = (

@@ -180,13 +180,15 @@ class CompleteAnalysisView(APIView):
 
 
 class ProcessServerQueueView(APIView):
-    """Pi/cron endpoint: analyze pending games with server Stockfish."""
+    """Run server Stockfish on pending games (Pi timer or student fallback)."""
 
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
-        if request.user.role not in (User.UserRole.ADMIN, User.UserRole.COACH):
+        max_games = min(int(request.data.get("max_games", 1)), 10)
+        if request.user.role == User.UserRole.STUDENT:
+            max_games = min(max_games, 1)
+        elif request.user.role not in (User.UserRole.ADMIN, User.UserRole.COACH):
             return Response(status=status.HTTP_403_FORBIDDEN)
-        max_games = min(int(request.data.get("max_games", 3)), 10)
         result = process_server_queue(max_games=max_games)
         return Response(result)

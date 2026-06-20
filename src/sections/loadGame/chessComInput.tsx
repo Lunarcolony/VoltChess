@@ -1,12 +1,13 @@
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { getChessComUserRecentGames } from "@/lib/chessCom";
 import {
+  Box,
   CircularProgress,
   FormControl,
-  Grid2 as Grid,
   TextField,
   List,
   Autocomplete,
+  Typography,
 } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -17,9 +18,16 @@ import { GameItem } from "./gameItem";
 interface Props {
   onSelect: (pgn: string, boardOrientation?: boolean) => void;
   presetUsername?: string;
+  fullWidth?: boolean;
+  fillHeight?: boolean;
 }
 
-export default function ChessComInput({ onSelect, presetUsername }: Props) {
+export default function ChessComInput({
+  onSelect,
+  presetUsername,
+  fullWidth,
+  fillHeight,
+}: Props) {
   const [rawStoredValue, setStoredValues] = useLocalStorage<string>(
     "chesscom-username",
     ""
@@ -94,8 +102,23 @@ export default function ChessComInput({ onSelect, presetUsername }: Props) {
   });
 
   return (
-    <>
-      <FormControl sx={{ my: 1, width: 300 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        flex: fillHeight ? 1 : undefined,
+        minHeight: fillHeight ? 0 : undefined,
+        width: "100%",
+      }}
+    >
+      <FormControl
+        sx={{
+          my: fillHeight ? 0 : 1,
+          mb: 1,
+          width: fullWidth ? "100%" : 300,
+          flexShrink: 0,
+        }}
+      >
         <Autocomplete
           freeSolo
           options={storedValues}
@@ -138,26 +161,39 @@ export default function ChessComInput({ onSelect, presetUsername }: Props) {
       </FormControl>
 
       {debouncedUsername && (
-        <Grid
-          container
-          gap={2}
-          justifyContent="center"
-          alignContent="center"
-          minHeight={100}
-          size={12}
+        <Box
+          sx={{
+            flex: fillHeight ? 1 : undefined,
+            minHeight: fillHeight ? 0 : 100,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: fillHeight ? "stretch" : "center",
+            alignItems: fillHeight ? "stretch" : "center",
+            overflow: fillHeight ? "hidden" : "visible",
+          }}
         >
           {isFetching ? (
-            <CircularProgress />
+            <CircularProgress sx={{ alignSelf: "center", my: 2 }} />
           ) : isError ? (
-            <span style={{ color: "salmon" }}>
+            <Typography color="error" variant="body2" sx={{ py: 1 }}>
               User not found. Please check your username.
-            </span>
+            </Typography>
           ) : !games?.length ? (
-            <span style={{ color: "salmon" }}>
+            <Typography color="error" variant="body2" sx={{ py: 1 }}>
               No games found. Please check your username.
-            </span>
+            </Typography>
           ) : (
-            <List sx={{ width: "100%" }}>
+            <List
+              sx={{
+                width: "100%",
+                flex: fillHeight ? 1 : undefined,
+                minHeight: 0,
+                overflow: "auto",
+                pr: 0.5,
+                m: 0,
+                py: 0,
+              }}
+            >
               {games.map((game) => {
                 const perspectiveUserColor =
                   game.white.name.toLowerCase() ===
@@ -182,8 +218,8 @@ export default function ChessComInput({ onSelect, presetUsername }: Props) {
               })}
             </List>
           )}
-        </Grid>
+        </Box>
       )}
-    </>
+    </Box>
   );
 }

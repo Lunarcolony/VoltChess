@@ -90,6 +90,11 @@ if os.environ.get("USE_SQLITE", "false").lower() == "true":
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "db.sqlite3",
+            "OPTIONS": {
+                # Pi runs gunicorn + sync timer against the same file; WAL + timeout
+                # avoids "attempt to write a readonly database" under contention.
+                "timeout": 30,
+            },
         }
     }
 

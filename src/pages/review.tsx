@@ -5,19 +5,35 @@ import ReportViewerPanel from "@/sections/analysis/panel/ReportViewerPanel";
 import { PageTitle } from "@/components/pageTitle";
 import { useAnalysisSession } from "@/hooks/useAnalysisSession";
 import { useCurrentPosition } from "@/sections/analysis/hooks/useCurrentPosition";
+import { useGameDatabase } from "@/hooks/useGameDatabase";
+import { useRouter } from "@/hooks/useRouter";
+import { useAtomValue } from "jotai";
+import { gameEvalAtom } from "@/sections/analysis/states";
+import { useEffect } from "react";
+import { isServerGameId } from "@/lib/gameSync";
 
 /**
- * Read-only game report viewer. Same UI as the analysis page, but it only
- * displays a synced game's saved report and per-move classifications — there is
- * no Stockfish engine, no analysis, and no re-analysis. Stepping through the
- * moves shows each move's saved classification.
+ * Read-only report viewer for games that already have a saved eval.
+ * Unanalyzed synced games redirect to /analysis so Stockfish runs in-browser.
  */
 function ReviewPage() {
-  // Loads the game (and its saved eval) from ?gameId=.
   useAnalysisSession();
-  // Populates the current position (incl. saved move classification) as the
-  // user navigates — passing `null` guarantees no engine is ever created.
   useCurrentPosition(null);
+  const router = useRouter();
+  const gameEval = useAtomValue(gameEvalAtom);
+  const { serverGameFromUrl } = useGameDatabase();
+  const gameId = router.query.gameId;
+
+  useEffect(() => {
+    if (typeof gameId !== "string" || !isServerGameId(gameId)) return;
+    if (gameEval || serverGameFromUrl?.eval) return;
+    if (!serverGameFromUrl) return;
+
+    console.log(
+      "[voltchess] unanalyzed game opened on /review — redirecting to /analysis"
+    );
+    void router.replace(`/analysis?gameId=${gameId}`);
+  }, [gameId, gameEval, serverGameFromUrl, router]);
 
   return (
     <>

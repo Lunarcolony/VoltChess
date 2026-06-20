@@ -9,6 +9,14 @@ export const ENGINE_DEFAULTS = {
   boardHue: 0,
 } as const;
 
+/** Background sync queue: fastest / weakest settings (intelligence not important). */
+export const SYNC_ANALYSIS_DEFAULTS = {
+  engine: EngineName.Stockfish17Lite,
+  depth: 4,
+  multiPv: 1,
+  workers: 1,
+} as const;
+
 // bump version so existing users receive the new default engine on next load
 export const ENGINE_SETTINGS_VERSION = 2;
 export const ENGINE_SETTINGS_VERSION_KEY = "voltchess-engine-settings-v";

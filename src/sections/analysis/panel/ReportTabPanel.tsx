@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Typography } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { useCallback } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Chess } from "chess.js";
@@ -10,7 +10,7 @@ import EvalLeadPanel from "./EvalLeadPanel";
 import CriticalAnalysis from "./CriticalAnalysis";
 import ReportSection from "./ReportSection";
 import AnalysisEmptyState from "../AnalysisEmptyState";
-import LoadGameButton from "@/sections/loadGame/loadGameButton";
+import LoadGameInlinePanel from "@/sections/loadGame/loadGameInlinePanel";
 import { useChessActions } from "@/hooks/useChessActions";
 import { useRouter } from "@/hooks/useRouter";
 import { prepareNewAnalysisSession } from "@/hooks/useAnalysisSession";
@@ -24,6 +24,13 @@ import {
 } from "../states";
 import { useAnalyzeGame } from "@/hooks/useAnalyzeGame";
 import MoveAnnotations from "./MoveAnnotations";
+
+function isGameLoaded(game: Chess) {
+  return (
+    (!!game.getHeaders().White && game.getHeaders().White !== "?") ||
+    game.history().length > 0
+  );
+}
 
 export default function ReportTabPanel() {
   const router = useRouter();
@@ -47,48 +54,42 @@ export default function ReportTabPanel() {
     [resetBoard, setGamePgn, setEval]
   );
 
+  const loadGame = useCallback(
+    async (loadedGame: Chess) => {
+      const pgn = loadedGame.pgn();
+      resetAndSetGamePgn(pgn);
+      prepareNewAnalysisSession(pgn);
+      await router.push("/analysis");
+    },
+    [resetAndSetGamePgn, router]
+  );
+
   const hasMoves = game.history().length > 0;
+  const gameLoaded = isGameLoaded(game);
   const isAnalyzing = progress > 0;
-  // A synced game whose report hasn't been saved yet: it's being generated in
-  // the background, so show a "preparing" notice (the page polls the server and
-  // fills in automatically) rather than the generic "load a game" empty state.
-  const serverReportPending = isServerGame && hasMoves && !gameEval;
   const needsReanalysis =
     hasMoves && !gameEval && !isAnalyzing && !isServerGame;
+  const showInlineLoader = !gameEval && !isAnalyzing;
+  const fillPanel = showInlineLoader && !gameLoaded;
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        ...(fillPanel
+          ? { flex: 1, minHeight: 0, height: "100%" }
+          : { flex: "none", minHeight: "min-content" }),
+      }}
+    >
       <EvaluationProgress />
 
-      {serverReportPending && !isAnalyzing && (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1.5,
-            p: 2,
-            mb: 1.5,
-            borderRadius: 1.5,
-            border: (t) => `1px dashed ${t.palette.divider}`,
-          }}
-        >
-          <CircularProgress size={22} />
-          <Box>
-            <Typography variant="body2" fontWeight={600}>
-              Preparing your report…
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              This game is being analyzed in the background. The report and move
-              classifications will appear here automatically — no need to
-              re-analyze.
-            </Typography>
-          </Box>
-        </Box>
+      {showInlineLoader && !gameLoaded && (
+        <LoadGameInlinePanel fillHeight onLoadGame={loadGame} />
       )}
 
-      {!gameEval && !isAnalyzing && !serverReportPending && (
-        <AnalysisEmptyState />
-      )}
+      {showInlineLoader && gameLoaded && <AnalysisEmptyState />}
 
       {gameEval && (
         <>
@@ -118,7 +119,7 @@ export default function ReportTabPanel() {
         </>
       )}
 
-      {!gameEval && !isAnalyzing && !serverReportPending && (
+      {!gameEval && !isAnalyzing && gameLoaded && (
         <ReportSection title="Evaluation graph" tourId="eval-graph" noPadding>
           <EvaluationGraphSection
             sticky={false}
@@ -138,23 +139,6 @@ export default function ReportTabPanel() {
           {engineReady ? "Re-analyze this game" : "Loading engine…"}
         </Button>
       )}
-
-      <LoadGameButton
-        label={isAnalyzing ? "Analyzing…" : "Load new game"}
-        setGame={async (loadedGame: Chess) => {
-          const pgn = loadedGame.pgn();
-          resetAndSetGamePgn(pgn);
-          prepareNewAnalysisSession(pgn);
-          await router.push("/analysis");
-        }}
-        sx={{
-          width: "100%",
-          py: 1.1,
-          mb: 1,
-          pointerEvents: isAnalyzing ? "none" : undefined,
-          opacity: isAnalyzing ? 0.6 : 1,
-        }}
-      />
     </Box>
   );
 }

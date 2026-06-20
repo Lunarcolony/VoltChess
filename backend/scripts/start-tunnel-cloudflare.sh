@@ -15,11 +15,13 @@ capture_url() {
 }
 
 url_watcher() {
-  for _ in $(seq 1 180); do
+  local last=""
+  for _ in $(seq 1 3600); do
     url="$(capture_url)"
-    if [[ -n "$url" ]]; then
+    if [[ -n "$url" && "$url" != "$last" ]]; then
       echo "$url" >"$URL_FILE"
-      return 0
+      echo "Updated PUBLIC_API_URL.txt: $url" >>"$LOG_FILE"
+      last="$url"
     fi
     sleep 2
   done

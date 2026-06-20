@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { useAtomValue } from "jotai";
 import EvaluationGraphSection from "../EvaluationGraphSection";
 import PlayerStatsPanel from "./PlayerStatsPanel";
@@ -10,21 +10,20 @@ import MoveAnnotations from "./MoveAnnotations";
 import { gameAtom, gameEvalAtom } from "../states";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserRole } from "@/types/user";
+import { useRouter } from "@/hooks/useRouter";
 
 /**
- * Read-only report panel for the Review page. It renders the exact same report
- * sections as the analysis page but purely from the saved evaluation — there is
- * no Stockfish engine, no "analyze"/"re-analyze" actions, and no live position
- * evaluation. Used to display a synced game's stored report + per-move
- * classifications.
+ * Read-only report panel for the Review page (saved eval only).
  */
 export default function ReportViewerPanel() {
   const game = useAtomValue(gameAtom);
   const gameEval = useAtomValue(gameEvalAtom);
+  const router = useRouter();
   const { user } = useAuth();
   const showCoachNotes =
     user?.role === UserRole.Coach || user?.role === UserRole.Admin;
   const hasMoves = game.history().length > 0;
+  const gameId = router.query.gameId;
 
   if (!gameEval) {
     return (
@@ -39,15 +38,25 @@ export default function ReportViewerPanel() {
         }}
       >
         <CircularProgress size={22} />
-        <Box>
+        <Box sx={{ flex: 1 }}>
           <Typography variant="body2" fontWeight={600}>
-            Preparing your report…
+            {hasMoves ? "Loading report…" : "Loading game…"}
           </Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" color="text.secondary" display="block">
             {hasMoves
-              ? "This game is being analyzed in the background. The report and move classifications appear here automatically once it's ready."
-              : "Loading game…"}
+              ? "Fetching the saved analysis from the server."
+              : "Please wait."}
           </Typography>
+          {typeof gameId === "string" && hasMoves && (
+            <Button
+              size="small"
+              variant="outlined"
+              sx={{ mt: 1 }}
+              onClick={() => router.push(`/analysis?gameId=${gameId}`)}
+            >
+              Analyze in browser instead
+            </Button>
+          )}
         </Box>
       </Box>
     );

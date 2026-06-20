@@ -39,9 +39,9 @@ def _fens_from_pgn(pgn_text: str) -> list[str]:
     return fens
 
 
-def _eval_fen(process: subprocess.Popen, fen: str, depth: int) -> dict:
+def _eval_fen(process: subprocess.Popen, fen: str, depth: int, movetime_ms: int) -> dict:
     process.stdin.write(f"position fen {fen}\n")
-    process.stdin.write(f"go depth {depth}\n")
+    process.stdin.write(f"go depth {depth} movetime {movetime_ms}\n")
     process.stdin.flush()
 
     cp = 0
@@ -74,14 +74,20 @@ def _eval_fen(process: subprocess.Popen, fen: str, depth: int) -> dict:
     }
 
 
-def analyze_game_on_server(game: Game, depth: int = 12) -> bool:
+def analyze_game_on_server(game: Game, depth: int = 4, movetime_ms: int = 80) -> bool:
     path = _stockfish_path()
     if not path:
+        print("[voltchess-pi] server analysis skipped: STOCKFISH_PATH not set")
         return False
 
     fens = _fens_from_pgn(game.pgn)
     if len(fens) < 2:
         return False
+
+    print(
+        f"[voltchess-pi] analyzing game {game.id} "
+        f"({len(fens)} positions, depth={depth}, movetime={movetime_ms}ms)"
+    )
 
     process = subprocess.Popen(
         [path],
@@ -104,7 +110,7 @@ def analyze_game_on_server(game: Game, depth: int = 12) -> bool:
             if "readyok" in line:
                 break
 
-        positions = [_eval_fen(process, fen, depth) for fen in fens]
+        positions = [_eval_fen(process, fen, depth, movetime_ms) for fen in fens]
         white_rating = (game.white or {}).get("rating") or 1500
         black_rating = (game.black or {}).get("rating") or 1500
 
@@ -123,8 +129,10 @@ def analyze_game_on_server(game: Game, depth: int = 12) -> bool:
             },
         )
         mark_analysis_complete(game, AnalysisSource.SERVER)
+        print(f"[voltchess-pi] finished game {game.id}")
         return True
-    except Exception:
+    except Exception as exc:
+        print(f"[voltchess-pi] failed game {game.id}: {exc}")
         mark_analysis_failed(game)
         return False
     finally:
@@ -141,6 +149,8 @@ def process_server_queue(max_games: int = 3) -> dict:
         return {"processed": 0, "reason": "STOCKFISH_PATH not configured"}
 
     pending = games_pending_server_analysis(limit=max_games)
+    if pending:
+        print(f"[voltchess-pi] server queue: {len(pending)} game(s) (manual/cron only)")
     done = 0
     failed = 0
     for game in pending:

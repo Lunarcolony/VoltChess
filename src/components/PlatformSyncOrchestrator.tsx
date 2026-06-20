@@ -1,15 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Chess } from "chess.js";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { ENABLE_AUTHENTICATION } from "@/constants";
-import { ENGINE_DEFAULTS } from "@/constants/engineDefaults";
+import { SYNC_ANALYSIS_DEFAULTS } from "@/constants/engineDefaults";
 import { useEngine } from "@/hooks/useEngine";
 import { getEvaluateGameParams } from "@/lib/chess";
 import {
   claimGameAnalysis,
   completeGameAnalysis,
   fetchPendingAnalysis,
+  fetchSyncOverview,
   releaseGameAnalysis,
   sendSyncPresence,
   triggerSync,
@@ -18,49 +19,84 @@ import { UserRole } from "@/types/user";
 import { evaluationProgressAtom } from "@/sections/analysis/states";
 import { useAtomValue } from "jotai";
 
+const LOG = "[voltchess-sync]";
 const PRESENCE_MS = 45_000;
-// Check for newly played games often so a student's latest games show up without
-// waiting hours. We only actually hit the API when enough time has passed since
-// the last successful sync, and also whenever the tab regains focus.
 const SYNC_CHECK_MS = 5 * 60 * 1000;
 const SYNC_MIN_INTERVAL_MS = 15 * 60 * 1000;
-const ANALYSIS_POLL_MS = 20_000;
+const ANALYSIS_POLL_MS = 4_000;
 const LAST_SYNC_KEY_PREFIX = "voltchess-last-platform-sync";
-// Safety cap so a persistent claim conflict can't spin the drain loop forever.
-const MAX_DRAIN_GAMES = 60;
 
 /**
- * Background worker for students: presence heartbeat, prompt game import, and
- * browser-side analysis (the authoritative source of full reports) whenever the
- * tab is open and Stockfish is idle.
+ * Browser background analysis for synced games — one game at a time,
+ * lowest Stockfish settings. Keep any VoltChess tab open while games import.
  */
 export default function PlatformSyncOrchestrator() {
   const { user, isAuthenticated } = useAuth();
-  const engine = useEngine(ENGINE_DEFAULTS.engine);
+  const engine = useEngine(SYNC_ANALYSIS_DEFAULTS.engine);
   const evaluationProgress = useAtomValue(evaluationProgressAtom);
   const analyzingRef = useRef(false);
   const qc = useQueryClient();
+  const [engineReady, setEngineReady] = useState(false);
 
   const isStudent =
     isAuthenticated && user?.role === UserRole.Student && ENABLE_AUTHENTICATION;
   const userId = user?.id;
 
+  const { data: overview } = useQuery({
+    queryKey: ["sync-overview"],
+    queryFn: () => fetchSyncOverview(),
+    enabled: isStudent,
+    refetchInterval: 10_000,
+  });
+
+  const hasPending =
+    (overview?.games_pending ?? 0) + (overview?.games_in_progress ?? 0) > 0;
+
+  const postPresence = useCallback((busy: boolean) => {
+    void sendSyncPresence(busy).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!engine) {
+      setEngineReady(false);
+      return;
+    }
+    const id = window.setInterval(() => {
+      setEngineReady(engine.getIsReady());
+    }, 1500);
+    setEngineReady(engine.getIsReady());
+    return () => window.clearInterval(id);
+  }, [engine]);
+
+  useEffect(() => {
+    if (!isStudent || !overview) return;
+    const piBusy =
+      (overview.games_in_progress ?? 0) > 0 && !analyzingRef.current;
+    if (piBusy && hasPending) {
+      console.warn(
+        `${LOG} ${overview.games_in_progress} game(s) marked in progress ` +
+          `but this tab is idle — stale claim or Pi fallback may be running.`
+      );
+    }
+  }, [isStudent, overview?.games_in_progress, hasPending]);
+
   useEffect(() => {
     if (!isStudent) return;
 
-    const tickPresence = () => {
-      void sendSyncPresence(analyzingRef.current || !!evaluationProgress);
-    };
+    const busy = () => analyzingRef.current || !!evaluationProgress;
+
+    const tickPresence = () => postPresence(busy());
 
     tickPresence();
     const presenceId = window.setInterval(tickPresence, PRESENCE_MS);
     return () => window.clearInterval(presenceId);
-  }, [isStudent, evaluationProgress]);
+  }, [isStudent, evaluationProgress, postPresence]);
 
-  // Prompt import of newly played games: on mount, whenever the tab becomes
-  // visible/focused, and on a short timer (rate-limited to once per
-  // SYNC_MIN_INTERVAL). Keyed per-user so multiple accounts on one browser
-  // don't suppress each other's syncs.
+  useEffect(() => {
+    if (!isStudent) return;
+    postPresence(analyzingRef.current || !!evaluationProgress);
+  }, [isStudent, evaluationProgress, postPresence]);
+
   useEffect(() => {
     if (!isStudent) return;
 
@@ -75,9 +111,7 @@ export default function PlatformSyncOrchestrator() {
           qc.invalidateQueries({ queryKey: ["sync-overview"] });
           qc.invalidateQueries({ queryKey: ["my-games"] });
         })
-        .catch(() => {
-          /* platform/username may not be set yet */
-        });
+        .catch(() => {});
     };
 
     const onVisible = () => {
@@ -97,23 +131,32 @@ export default function PlatformSyncOrchestrator() {
   }, [isStudent, userId, qc]);
 
   useEffect(() => {
-    if (!isStudent || !engine?.getIsReady()) return;
-    if (evaluationProgress || analyzingRef.current) return;
+    if (!isStudent) return;
 
     let cancelled = false;
 
-    const analyzeOne = async (): Promise<"done" | "empty" | "stop"> => {
+    const analyzeGame = async (): Promise<"done" | "empty" | "stop"> => {
       const pending = await fetchPendingAnalysis(1);
       const game = pending[0];
       if (!game?.pgn) return "empty";
 
-      // Atomically claim the game; if another tab/worker beat us to it, the
-      // server responds 409 and we just move on.
       try {
         await claimGameAnalysis(game.id);
       } catch {
+        console.debug(`${LOG} could not claim game ${game.id} (another worker?)`);
         return "stop";
       }
+
+      const label = `${(game.white as { username?: string })?.username ?? game.white?.name ?? "?"} vs ${
+        (game.black as { username?: string })?.username ?? game.black?.name ?? "?"
+      }`;
+
+      analyzingRef.current = true;
+      postPresence(true);
+
+      console.log(
+        `${LOG} analyzing (depth ${SYNC_ANALYSIS_DEFAULTS.depth}): ${label}`
+      );
 
       try {
         const chess = new Chess();
@@ -122,9 +165,9 @@ export default function PlatformSyncOrchestrator() {
 
         const evalResult = await engine!.evaluateGame({
           ...params,
-          depth: ENGINE_DEFAULTS.depth,
-          multiPv: ENGINE_DEFAULTS.multiPv,
-          workersNb: ENGINE_DEFAULTS.workers,
+          depth: SYNC_ANALYSIS_DEFAULTS.depth,
+          multiPv: SYNC_ANALYSIS_DEFAULTS.multiPv,
+          workersNb: SYNC_ANALYSIS_DEFAULTS.workers,
           playersRatings: {
             white: game.white?.rating,
             black: game.black?.rating,
@@ -138,43 +181,55 @@ export default function PlatformSyncOrchestrator() {
           settings: evalResult.settings as unknown as Record<string, unknown>,
         });
 
+        console.log(`${LOG} finished: ${label}`);
         qc.invalidateQueries({ queryKey: ["sync-overview"] });
         qc.invalidateQueries({ queryKey: ["my-games"] });
         return "done";
-      } catch {
-        // Hand the game back so it's retried promptly instead of being stuck
-        // as "in progress" until the claim times out.
+      } catch (err) {
+        console.warn(`${LOG} analysis failed for ${game.id}`, err);
         await releaseGameAnalysis(game.id).catch(() => {});
         return "stop";
-      }
-    };
-
-    // Drain the queue: analyze pending games back-to-back while the tab is open
-    // and the engine is idle, yielding immediately if the user starts a
-    // foreground analysis.
-    const runQueue = async () => {
-      if (cancelled || analyzingRef.current || evaluationProgress) return;
-      if (!engine?.getIsReady()) return;
-
-      analyzingRef.current = true;
-      try {
-        for (let i = 0; i < MAX_DRAIN_GAMES; i++) {
-          if (cancelled || evaluationProgress || !engine?.getIsReady()) break;
-          const result = await analyzeOne();
-          if (result !== "done") break;
-        }
       } finally {
         analyzingRef.current = false;
+        postPresence(!!evaluationProgress);
       }
     };
 
-    const id = window.setInterval(runQueue, ANALYSIS_POLL_MS);
-    void runQueue();
+    const runWorker = async () => {
+      if (cancelled || analyzingRef.current || evaluationProgress) return;
+
+      if (!engineReady || !engine) {
+        if (hasPending) {
+          console.debug(`${LOG} waiting for Stockfish (lite) engine…`);
+        }
+        return;
+      }
+
+      let safety = 0;
+      while (!cancelled && !evaluationProgress && safety < 5) {
+        safety += 1;
+        const result = await analyzeGame();
+        if (result === "empty" || result === "stop") break;
+      }
+    };
+
+    const pollMs = hasPending ? ANALYSIS_POLL_MS : ANALYSIS_POLL_MS * 3;
+    const id = window.setInterval(() => void runWorker(), pollMs);
+    void runWorker();
+
     return () => {
       cancelled = true;
       window.clearInterval(id);
     };
-  }, [isStudent, engine, evaluationProgress, qc]);
+  }, [
+    isStudent,
+    engine,
+    engineReady,
+    evaluationProgress,
+    hasPending,
+    qc,
+    postPresence,
+  ]);
 
   return null;
 }

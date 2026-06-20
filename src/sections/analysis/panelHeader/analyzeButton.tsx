@@ -11,8 +11,7 @@ export default function AnalyzeButton() {
   useCurrentPosition(engine);
   const setEvaluationProgress = useSetAtom(evaluationProgressAtom);
   const game = useAtomValue(gameAtom);
-  const { analyzeGame, readyToAnalyse, gameEval, isServerGame } =
-    useAnalyzeGame();
+  const { analyzeGame, readyToAnalyse, gameEval } = useAnalyzeGame();
 
   // Track which game we already kicked off analysis for, so a failed/aborted
   // run does NOT re-trigger on the next render. Previously any failure left
@@ -26,16 +25,17 @@ export default function AnalyzeButton() {
 
   useEffect(() => {
     if (gameEval) return;
-    // Synced game reports are produced in the background and saved on the
-    // server; opening one must never start a foreground re-analysis.
-    if (isServerGame) return;
     if (!readyToAnalyse) return;
 
     const pgn = game.pgn();
     if (!pgn || autoAnalyzedPgnRef.current === pgn) return;
     autoAnalyzedPgnRef.current = pgn;
-    void analyzeGame();
-  }, [gameEval, isServerGame, readyToAnalyse, analyzeGame, game]);
+    console.log("[voltchess] starting browser analysis for loaded game");
+    void analyzeGame().then((ok) => {
+      if (ok) console.log("[voltchess] browser analysis complete");
+      else console.warn("[voltchess] browser analysis did not start or failed");
+    });
+  }, [gameEval, readyToAnalyse, analyzeGame, game]);
 
   return null;
 }

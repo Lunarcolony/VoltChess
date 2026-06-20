@@ -22,6 +22,10 @@ import JoinClassroomCard from "@/sections/coach/JoinClassroomCard";
 import StudentPlatformCard from "@/sections/student/StudentPlatformCard";
 import { prepareNewAnalysisSession } from "@/hooks/useAnalysisSession";
 import { useRouter } from "@/hooks/useRouter";
+import {
+  gameAnalysisChipColor,
+  gameAnalysisLabel,
+} from "@/lib/analysisStatus";
 
 function gameAccuracy(g: ServerGame): number | null {
   const vals = [g.accuracy?.white, g.accuracy?.black].filter(
@@ -286,32 +290,20 @@ export default function StudentHome() {
                               mt: "auto",
                             }}
                           >
-                            {g.has_eval ? (
-                              <Chip
-                                size="small"
-                                color="success"
-                                variant="outlined"
-                                label="Report ready"
-                                sx={{ height: 20, fontSize: "0.65rem" }}
-                              />
-                            ) : g.analysis_status === "failed" ? (
-                              <Chip
-                                size="small"
-                                color="error"
-                                variant="outlined"
-                                label="Retry queued"
-                                sx={{ height: 20, fontSize: "0.65rem" }}
-                              />
-                            ) : (
-                              <Chip
-                                size="small"
-                                color="warning"
-                                variant="outlined"
-                                label="Analyzing…"
-                                sx={{ height: 20, fontSize: "0.65rem" }}
-                              />
-                            )}
-                            <NavLink href={`/review?gameId=${g.id}`}>
+                            <Chip
+                              size="small"
+                              color={gameAnalysisChipColor(g)}
+                              variant="outlined"
+                              label={gameAnalysisLabel(g)}
+                              sx={{ height: 20, fontSize: "0.65rem" }}
+                            />
+                            <NavLink
+                              href={
+                                g.has_eval
+                                  ? `/review?gameId=${g.id}`
+                                  : `/analysis?gameId=${g.id}`
+                              }
+                            >
                               <Typography
                                 fontSize="0.8rem"
                                 fontWeight={600}

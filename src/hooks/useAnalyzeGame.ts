@@ -44,6 +44,9 @@ export function useAnalyzeGame() {
         params.fens.length === 0 ||
         evaluationProgress
       ) {
+        if (!engine?.getIsReady()) {
+          console.debug("[voltchess] analysis waiting for Stockfish engine…");
+        }
         return false;
       }
 
@@ -138,9 +141,8 @@ export function useAnalyzeGame() {
     gameEval,
     evaluationProgress,
     engineReady: !!engine?.getIsReady(),
-    // Synced games are analyzed once in the background and their report is
-    // saved on the server, so opening one should never kick off a fresh
-    // foreground analysis.
-    isServerGame: !!serverGameFromUrl,
+    // True when viewing a synced server game that already has a saved report.
+    isServerGame: !!serverGameFromUrl?.eval,
+    serverGameId: serverGameFromUrl?.serverId,
   };
 }

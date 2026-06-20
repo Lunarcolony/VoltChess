@@ -459,17 +459,40 @@ export default function CoachStudentDetail() {
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                  {g.has_eval && (
-                    <Chip
-                      label="Analyzed"
-                      size="small"
-                      sx={{
-                        bgcolor: alpha(palette.accent, 0.12),
-                        color: palette.accent,
-                      }}
-                    />
-                  )}
-                  <NavLink href={`/review?gameId=${g.id}`}>
+                  <Chip
+                    label={
+                      g.has_eval
+                        ? "Analyzed"
+                        : g.analysis_status === "in_progress"
+                          ? "Analyzing"
+                          : "Not analyzed"
+                    }
+                    size="small"
+                    color={
+                      g.has_eval
+                        ? "success"
+                        : g.analysis_status === "in_progress"
+                          ? "warning"
+                          : "default"
+                    }
+                    variant="outlined"
+                    sx={
+                      g.has_eval
+                        ? {
+                            bgcolor: alpha(palette.accent, 0.12),
+                            color: palette.accent,
+                            border: "none",
+                          }
+                        : undefined
+                    }
+                  />
+                  <NavLink
+                    href={
+                      g.has_eval
+                        ? `/review?gameId=${g.id}`
+                        : `/analysis?gameId=${g.id}`
+                    }
+                  >
                     <Typography
                       fontSize="0.85rem"
                       sx={{ color: palette.accent, fontWeight: 600 }}

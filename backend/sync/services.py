@@ -20,7 +20,7 @@ PRESENCE_ONLINE_SECONDS = 120
 # over. Kept short so a tab that is closed mid-analysis doesn't leave a game
 # stuck for a long time.
 BROWSER_CLAIM_TIMEOUT = timedelta(minutes=4)
-SERVER_PENDING_TIMEOUT = timedelta(minutes=3)
+SERVER_PENDING_TIMEOUT = timedelta(seconds=45)
 
 
 class StudentPresence:
@@ -179,10 +179,12 @@ def sync_all_enabled_links_for_student(student) -> list[dict]:
 
 
 def games_pending_browser_analysis(student, limit: int = 5) -> list[Game]:
-    """Games the student's browser should analyze when online and idle."""
-    if StudentPresence.is_browser_busy(student):
-        return []
+    """Games the student's browser should analyze.
 
+    The browser worker self-throttles to one game at a time; do not gate on
+    ``browser_busy`` here — a stale busy flag was blocking the queue for up to
+    45s between games. Claim locking prevents two workers on the same game.
+    """
     now = timezone.now()
     stale_claim = now - BROWSER_CLAIM_TIMEOUT
 
@@ -249,10 +251,16 @@ def games_pending_server_analysis(limit: int = 3) -> list[Game]:
         )
 
         if online and not busy and claimed_recently:
-            continue
+            if game.analysis_source == "browser":
+                continue
 
-        if online and not busy and game.created_at > server_after:
-            # Give the student's browser a few minutes first
+        if (
+            online
+            and not busy
+            and game.analysis_claimed_at is None
+            and game.created_at > server_after
+        ):
+            # Brief window for the student's browser to claim first.
             continue
 
         eligible.append(game)
@@ -346,6 +354,25 @@ def mark_analysis_failed(game: Game) -> None:
     game.save(
         update_fields=["analysis_status", "analysis_claimed_at", "updated_at"]
     )
+
+
+def release_stale_analysis_claims() -> int:
+    """Reset games stuck IN_PROGRESS after a worker/tab died."""
+    now = timezone.now()
+    stale = now - BROWSER_CLAIM_TIMEOUT
+    qs = Game.objects.filter(
+        analysis_status=AnalysisStatus.IN_PROGRESS,
+        analysis_claimed_at__lt=stale,
+    ).exclude(eval__isnull=False)
+    count = 0
+    for game in qs.iterator():
+        game.analysis_status = AnalysisStatus.PENDING
+        game.analysis_claimed_at = None
+        game.save(
+            update_fields=["analysis_status", "analysis_claimed_at", "updated_at"]
+        )
+        count += 1
+    return count
 
 
 def student_sync_overview(student) -> dict:
