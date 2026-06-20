@@ -17,6 +17,8 @@ export type ServerGame = {
   analysis_status?: "pending" | "in_progress" | "complete" | "failed";
   analysis_source?: "browser" | "server" | "";
   external_url?: string;
+  /** When the game was actually played (set for platform-synced games). */
+  platform_played_at?: string | null;
   created_at: string;
 };
 
