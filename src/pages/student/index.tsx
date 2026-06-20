@@ -42,6 +42,25 @@ function gameDate(g: ServerGame): string {
   return isNaN(d.getTime()) ? "" : d.toLocaleDateString();
 }
 
+/**
+ * Best available "when was this game played" moment, as a sortable number (ms).
+ * Prefers the platform play time, then the PGN date, then the import time — so
+ * games order by recency of the actual game, not by when it was synced.
+ */
+function gamePlayedAt(g: ServerGame): number {
+  const candidates = [
+    g.platform_played_at,
+    g.date && g.date !== "????.??.??" ? g.date.replace(/\./g, "-") : null,
+    g.created_at,
+  ];
+  for (const c of candidates) {
+    if (!c) continue;
+    const t = new Date(c).getTime();
+    if (!isNaN(t)) return t;
+  }
+  return 0;
+}
+
 function StatTile({
   label,
   value,
@@ -117,24 +136,35 @@ export default function StudentHome() {
   const myAssignments = assignments.filter((a) => a.student.id === user?.id);
   const openAssignments = myAssignments.filter((a) => a.status !== "completed");
 
-  // Analyzed reports first, then the rest, newest first within each group.
+  // Newest game first, regardless of whether it has been analyzed yet.
   const sortedGames = useMemo(() => {
-    return [...games].sort((a, b) => {
-      if (a.has_eval !== b.has_eval) return a.has_eval ? -1 : 1;
-      return (b.created_at ?? "").localeCompare(a.created_at ?? "");
-    });
+    return [...games].sort((a, b) => gamePlayedAt(b) - gamePlayedAt(a));
   }, [games]);
 
-  const avgAcc =
-    stats &&
-    (stats.avg_accuracy_white != null || stats.avg_accuracy_black != null)
-      ? Math.round(
-          ((stats.avg_accuracy_white ?? 0) + (stats.avg_accuracy_black ?? 0)) /
-            ([stats.avg_accuracy_white, stats.avg_accuracy_black].filter(
-              (v) => v != null
-            ).length || 1)
-        )
-      : null;
+  // Average accuracy across the user's games. Prefer the backend summary; if it
+  // isn't available (stats still loading, or it returned no average), fall back
+  // to averaging the per-game accuracy already loaded with the games so the tile
+  // still shows a number whenever any analyzed game exists.
+  const avgAcc = useMemo(() => {
+    const fromStats =
+      stats &&
+      (stats.avg_accuracy_white != null || stats.avg_accuracy_black != null)
+        ? Math.round(
+            ((stats.avg_accuracy_white ?? 0) +
+              (stats.avg_accuracy_black ?? 0)) /
+              ([stats.avg_accuracy_white, stats.avg_accuracy_black].filter(
+                (v) => v != null
+              ).length || 1)
+          )
+        : null;
+    if (fromStats != null) return fromStats;
+
+    const perGame = games
+      .map((g) => gameAccuracy(g))
+      .filter((v): v is number => v != null);
+    if (!perGame.length) return null;
+    return Math.round(perGame.reduce((a, b) => a + b, 0) / perGame.length);
+  }, [stats, games]);
 
   const openAssignmentPgn = async (pgn: string) => {
     if (!pgn) return;
