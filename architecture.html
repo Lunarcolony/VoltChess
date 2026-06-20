@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VoltChess — Architecture &amp; File Reference</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #161b22;
+      --surface2: #1c2333;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-dim: #1f3a5f;
+      --green: #3fb950;
+      --orange: #d29922;
+      --purple: #bc8cff;
+      --radius: 8px;
+      --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+      --mono: "Cascadia Code", "Consolas", "Monaco", monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+
+    nav.sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 1.5rem 1rem;
+    }
+
+    nav.sidebar h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    nav.sidebar ul { list-style: none; }
+
+    nav.sidebar li { margin-bottom: 0.15rem; }
+
+    nav.sidebar a {
+      display: block;
+      padding: 0.35rem 0.6rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      border-radius: 6px;
+      border-left: 2px solid transparent;
+    }
+
+    nav.sidebar a:hover {
+      color: var(--text);
+      background: var(--surface2);
+    }
+
+    nav.sidebar a.sub { padding-left: 1.2rem; font-size: 0.8rem; }
+
+    main {
+      max-width: 920px;
+      padding: 2.5rem 3rem 4rem;
+    }
+
+    header.hero {
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    header.hero h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+
+    header.hero p { color: var(--muted); max-width: 680px; }
+
+    .note {
+      background: var(--accent-dim);
+      border: 1px solid #264a73;
+      border-radius: var(--radius);
+      padding: 0.85rem 1rem;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+      color: #c9d9f0;
+    }
+
+    section {
+      margin-bottom: 3rem;
+      scroll-margin-top: 1.5rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin: 1.75rem 0 0.75rem;
+      color: var(--accent);
+    }
+
+    h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 1.25rem 0 0.5rem;
+      color: var(--purple);
+    }
+
+    p { margin-bottom: 0.85rem; }
+
+    ul, ol {
+      margin: 0 0 1rem 1.25rem;
+    }
+
+    li { margin-bottom: 0.35rem; }
+
+    strong { color: #fff; font-weight: 600; }
+
+    a { color: var(--accent); }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.25rem;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.55rem 0.75rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--surface2);
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+    pre, code {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+    }
+
+    pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.1rem;
+      overflow-x: auto;
+      margin: 1rem 0 1.25rem;
+      line-height: 1.5;
+      color: #c9d1d9;
+    }
+
+    code {
+      background: var(--surface2);
+      padding: 0.15em 0.4em;
+      border-radius: 4px;
+      color: var(--orange);
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+
+    .pill {
+      display: inline-block;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.15rem 0.55rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-right: 0.35rem;
+    }
+
+    .file-ref {
+      background: var(--surface);
+      border-left: 3px solid var(--green);
+      padding: 0.75rem 1rem;
+      margin: 0.75rem 0;
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+
+    .file-ref strong {
+      display: block;
+      color: var(--green);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      nav.sidebar {
+        position: relative;
+        height: auto;
+        max-height: 40vh;
+      }
+      main { padding: 1.5rem; }
+      .two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <nav class="sidebar">
+      <h2>Contents</h2>
+      <ul>
+        <li><a href="#intro">Introduction</a></li>
+        <li><a href="#what-is">1. What VoltChess is</a></li>
+        <li><a href="#layout">2. Repository layout</a></li>
+        <li><a href="#running">3. Running it</a></li>
+        <li><a href="#backend">4. Backend architecture</a></li>
+        <li><a href="#auth">4.1 Authentication</a></li>
+        <li><a href="#data-model">4.2 Data model</a></li>
+        <li><a href="#classroom">4.3 Classroom join</a></li>
+        <li><a href="#sync">4.4 Platform sync &amp; analysis</a></li>
+        <li><a href="#url-map">4.5 Full URL map</a></li>
+        <li><a href="#backend-files">4.6 Backend file reference</a></li>
+        <li><a href="#frontend">5. Frontend architecture</a></li>
+        <li><a href="#bootstrap">5.1 Bootstrap &amp; providers</a></li>
+        <li><a href="#routing">5.2 Routing &amp; guards</a></li>
+        <li><a href="#frontend-auth">5.3 Auth &amp; session</a></li>
+        <li><a href="#theming">5.4 Theming</a></li>
+        <li><a href="#engine">5.5 Engine &amp; sync</a></li>
+        <li><a href="#frontend-files">5.6 Frontend file reference</a></li>
+        <li><a href="#cross-cutting">6. Cross-cutting reference</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <header class="hero" id="intro">
+        <h1>VoltChess — Architecture &amp; File Reference</h1>
+        <p>
+          This document explains how the VoltChess codebase is organized, how the
+          backend and frontend work, and what every meaningful source file does. It is
+          meant to be the single onboarding reference for new contributors and agents.
+        </p>
+      </header>
+
+      <div class="note">
+        <strong>Scope note:</strong> this file describes the <strong>current</strong> state of
+        <code>main</code> after the authentication rework and the dead-code cleanup. Generated
+        artifacts (<code>node_modules</code>, <code>backend/.venv</code>, <code>dist</code>,
+        migrations) are not documented file-by-file.
+      </div>
+
+      <!-- §1 -->
+      <section id="what-is">
+        <h2>1. What VoltChess is</h2>
+        <p>VoltChess is two products sharing one repository:</p>
+        <ol>
+          <li>
+            <strong>A free, client-side chess analysis app</strong> (the "core product"). Anyone can
+            load a PGN or import games from Chess.com/Lichess and get Stockfish analysis — move
+            classifications, accuracy, estimated Elo, evaluation graphs — all computed
+            <strong>in the browser</strong> via Stockfish compiled to WebAssembly. No account
+            is required for this.
+          </li>
+          <li>
+            <strong>VoltChess Academy</strong> — a coaching platform layered on top. Coaches create a
+            classroom, students join with a code, and the backend stores the
+            relationships, synced games, assignments, messages, training plans, and
+            analytics. This requires authentication against the Django REST backend.
+          </li>
+        </ol>
+
+        <h3>Tech stack</h3>
+        <table>
+          <thead>
+            <tr><th>Layer</th><th>Technology</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Frontend</td><td>React 18, TypeScript, Vite 7, MUI 6, Jotai (state), TanStack Query (server cache), React Router 7</td></tr>
+            <tr><td>Chess engine</td><td>Stockfish (11/16/16.1/17, full + lite) compiled to WASM, run in Web Workers</td></tr>
+            <tr><td>Backend</td><td>Django 5 + Django REST Framework, SimpleJWT auth</td></tr>
+            <tr><td>Database</td><td>PostgreSQL (prod) / SQLite (local dev)</td></tr>
+            <tr><td>Game import</td><td>Chess.com &amp; Lichess public APIs (server-side fetch + browser import)</td></tr>
+            <tr><td>Hosting</td><td>Frontend on Vercel (single-file build); backend typically on a Raspberry Pi exposed via Cloudflare tunnel</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- §2 -->
+      <section id="layout">
+        <h2>2. Repository layout</h2>
+        <pre><code>/                     repo root (frontend lives here)
+├── src/              React/TypeScript frontend
+│   ├── pages/        route-level page components
+│   ├── sections/     feature UI grouped by domain (analysis, coach, play, …)
+│   ├── components/   shared, generic UI components
+│   ├── hooks/        reusable React hooks
+│   ├── lib/          framework-agnostic logic (engine, chess, API clients, auth)
+│   ├── contexts/     React context providers (AuthContext, AnalysisQueueContext)
+│   ├── services/     singleton services (analysisQueue)
+│   ├── theme/        color palettes + MUI theme construction
+│   ├── types/        shared TypeScript types
+│   ├── data/         static datasets (openings, blog posts, SEO)
+│   ├── config/       runtime configuration (API base URL resolution)
+│   └── constants/    engine defaults + app constants
+├── backend/          Django REST API (the "Academy" backend)
+│   ├── voltchess_api/ project settings, root URLconf, WSGI, health check
+│   ├── accounts/     custom User model + JWT auth + registration
+│   ├── academies/    academies, memberships, coach↔student links, classrooms
+│   ├── games/        stored games + evaluations + per-student stats
+│   ├── assignments/  coach→student assignments
+│   ├── annotations/  per-move comments on games
+│   ├── coaching/     dashboards, analytics, lesson templates, messages, plans
+│   └── sync/         Chess.com/Lichess import + hybrid (browser/server) analysis
+├── public/           static assets incl. Stockfish WASM engines (public/engines)
+├── scripts/          build + Raspberry Pi deploy helpers
+└── *.md, config      docs and build/deploy configuration</code></pre>
+        <p>
+          The naming convention worth internalizing: <strong><code>pages/</code></strong> are routed screens,
+          <strong><code>sections/</code></strong> are larger feature-specific building blocks used by pages, and
+          <strong><code>components/</code></strong> are small generic widgets reusable anywhere. Pure logic with
+          no JSX lives in <strong><code>lib/</code></strong>, <strong><code>hooks/</code></strong>, and
+          <strong><code>services/</code></strong>.
+        </p>
+      </section>
+
+      <!-- §3 -->
+      <section id="running">
+        <h2>3. Running it (quick reference)</h2>
+        <p>Standard commands live in <code>README.md</code>, <code>package.json</code>, and <code>AGENTS.md</code>; this is the short version.</p>
+        <ul>
+          <li><strong>Frontend:</strong> <code>npm install</code> then <code>npm run dev</code> → http://localhost:3000. The dev server proxies <code>/api</code> to <code>http://127.0.0.1:8000</code> (see <code>vite.config.ts</code>).</li>
+          <li><strong>Backend:</strong> create <code>backend/.venv</code>, <code>pip install -r backend/requirements.txt</code>, ensure <code>backend/.env</code> has <code>USE_SQLITE=true</code> + <code>DJANGO_DEBUG=true</code>, then <code>backend/.venv/bin/python manage.py migrate</code> and <code>... runserver 0.0.0.0:8000</code>. <code>... seed_demo</code> creates demo accounts.</li>
+          <li><strong>Lint/typecheck:</strong> <code>npm run lint</code> (eslint + <code>tsc --noEmit</code>).</li>
+          <li><strong>Backend tests:</strong> <code>backend/.venv/bin/python manage.py test</code>.</li>
+          <li><strong>Auth off (frontend only):</strong> set <code>VITE_ENABLE_AUTHENTICATION=false</code> in a root <code>.env</code> to use the analysis product without the backend.</li>
+        </ul>
+      </section>
+
+      <!-- §4 -->
+      <section id="backend">
+        <h2>4. Backend architecture</h2>
+
+        <h3 id="auth">4.1 How authentication works</h3>
+        <p>
+          Authentication uses <strong>DRF + <code>djangorestframework-simplejwt</code></strong>. The default DRF
+          permission is <code>IsAuthenticated</code>, so every endpoint requires a valid JWT unless a
+          view explicitly sets <code>AllowAny</code>. The token lifetimes are deliberately long
+          (access 12h, refresh 90d, with refresh-token rotation) so students and coaches
+          are not asked to re-authenticate during normal use; the frontend rotates the
+          access token proactively and on 401.
+        </p>
+        <table>
+          <thead>
+            <tr><th>Endpoint</th><th>Purpose</th><th>Access</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>POST /api/token/</code></td><td>Obtain access + refresh JWT (login)</td><td>public</td></tr>
+            <tr><td><code>POST /api/token/refresh/</code></td><td>Rotate/refresh the access token</td><td>public</td></tr>
+            <tr><td><code>POST /api/register/</code></td><td>Create a coach or student account</td><td>public</td></tr>
+            <tr><td><code>GET /api/me/</code></td><td>Return the current user's profile</td><td>authenticated</td></tr>
+          </tbody>
+        </table>
+        <p>
+          The <strong>role model</strong> is a single <code>role</code> field on the custom <code>User</code>
+          (<code>admin</code> / <code>coach</code> / <code>student</code>). Self-service registration only permits <strong>coach</strong>
+          or <strong>student</strong> (<code>SELF_SIGNUP_ROLES</code> in <code>accounts/serializers.py</code>); <code>admin</code>
+          accounts are provisioned server-side and are rejected by the public endpoint.
+          Authorization throughout the API is enforced by filtering querysets per role and
+          by object-level permission helpers (e.g. <code>IsGameOwnerOrCoach</code>, <code>_coach_has_student</code>,
+          <code>user_is_academy_admin</code>).
+        </p>
+
+        <h3 id="data-model">4.2 Data model</h3>
+        <p>The central identity is <code>accounts.User</code> (UUID primary key, unique email). The Academy domain hangs off of it:</p>
+        <ul>
+          <li><strong><code>Academy</code></strong> — a top-level organization container.</li>
+          <li><strong><code>Membership</code></strong> — bridges a <code>User</code> to an <code>Academy</code> with a per-academy role; unique on <code>(academy, user)</code>.</li>
+          <li><strong><code>CoachStudentLink</code></strong> — the coaching relationship between a coach <code>User</code> and a student <code>User</code> (optional <code>academy</code>). Besides coaching metadata (notes, tags, priority, goals) it carries each student's <strong>platform sync config</strong> (<code>platform</code>, <code>platform_username</code>, <code>sync_enabled</code>, <code>sync_status</code>, …). Unique on <code>(coach, student)</code> — this is the "joined once" guarantee.</li>
+          <li><strong><code>Classroom</code></strong> — one-to-one with a coach, holding the human-friendly <code>join_code</code> (e.g. <code>VC-AB12CD</code>) students use to enroll.</li>
+          <li><strong><code>Game</code></strong> (games app) — owned by a <code>User</code>; stores PGN, headers, players JSON, <code>source</code>/<code>external_id</code> for sync dedup, and analysis-tracking fields. Unique on <code>(owner, source, external_id)</code> when an external id exists.</li>
+          <li><strong><code>GameEval</code></strong> — one-to-one with <code>Game</code>; the JSON analysis payload (positions, accuracy, estimated Elo, settings).</li>
+          <li><strong><code>Assignment</code></strong> — coach→student task, optionally tied to a <code>Game</code>.</li>
+          <li><strong><code>Annotation</code></strong> — a per-move comment on a <code>Game</code> authored by a <code>User</code>.</li>
+          <li><strong>coaching models</strong> — <code>LessonTemplate</code>, <code>CoachMessage</code>, <code>TrainingPlan</code>.</li>
+          <li><strong><code>StudentSyncPresence</code></strong> (sync app) — one-to-one with a <code>User</code>, tracking <code>last_seen_at</code>/<code>browser_busy</code> so the backend can decide whether the student's browser is available to run analysis.</li>
+        </ul>
+
+        <h3 id="classroom">4.3 Classroom join flow ("stored once")</h3>
+        <p>
+          Join codes are generated and normalized in <code>academies/classroom_codes.py</code>
+          (<code>generate_join_code</code>, <code>normalize_join_code</code>, <code>get_or_create_classroom_for_coach</code>).
+          The student flow is two-step and idempotent:
+        </p>
+        <ol>
+          <li><code>POST /api/classroom/preview/</code> (<code>PreviewClassroomJoinView</code>) — looks up the classroom by code and returns the coach/classroom names <strong>without</strong> creating anything, so the student can confirm they're joining the right coach.</li>
+          <li><code>POST /api/classroom/join/</code> (<code>JoinClassroomView</code>) — does <code>CoachStudentLink.objects.get_or_create(coach=…, student=…)</code>. Because of the unique <code>(coach, student)</code> constraint and <code>get_or_create</code>, joining twice is a no-op that returns <code>created: false</code> — the relationship is stored exactly once.</li>
+        </ol>
+        <p>
+          Coaches manage their classroom via <code>GET/PATCH /api/classroom/mine/</code> and
+          <code>POST /api/classroom/regenerate/</code>. Coaches cannot create coach-student links
+          directly (blocked in <code>CoachStudentLinkViewSet.perform_create</code>); enrollment only
+          happens through join codes.
+        </p>
+
+        <h3 id="sync">4.4 Platform sync + hybrid analysis pipeline</h3>
+        <p>
+          The <code>sync</code> app imports a student's online games and gets them analyzed, routing
+          analysis to whichever resource is available:
+        </p>
+        <ul>
+          <li><strong>Import:</strong> <code>sync_coach_student_link()</code> calls <code>fetch_platform_games()</code> (<code>platform_fetch.py</code>) against Chess.com archives or the Lichess NDJSON API, then <code>upsert_fetched_game()</code> de-duplicates into <code>Game</code> rows (new ones marked <code>PENDING</code>).</li>
+          <li><strong>Browser analysis (preferred):</strong> when the student's browser is online (it heartbeats <code>POST /api/sync/presence/</code>), it claims pending games (<code>/api/sync/pending-analysis/</code> → <code>claim/</code> → <code>complete/</code>) and runs Stockfish WASM locally, posting the eval back. This is driven by <code>AnalysisQueueProvider</code> + <code>src/services/analysisQueue.ts</code> on the frontend.</li>
+          <li><strong>Server analysis (fallback):</strong> if the browser is offline/busy or doesn't claim a game within a grace window, <code>server_analysis.py</code> runs a Stockfish subprocess on the Pi (with <code>eval_pipeline.py</code> for accuracy + classifications) so analysis still completes. The <code>run_platform_sync</code> management command drives this on a cron.</li>
+        </ul>
+
+        <h3 id="url-map">4.5 Full URL map</h3>
+        <p>
+          <code>voltchess_api/urls.py</code> mounts a health check, the Django admin, and seven app
+          URLconfs all under <code>/api/</code>. The notable route groups:
+        </p>
+        <ul>
+          <li><strong>Auth:</strong> <code>/api/token/</code>, <code>/api/token/refresh/</code>, <code>/api/register/</code>, <code>/api/me/</code></li>
+          <li><strong>Academies:</strong> <code>/api/academies/…</code>, <code>/api/coach-links/…</code>, <code>/api/classroom/{mine,regenerate,preview,join}/</code>, <code>/api/students/{id}/{stats,report,games}/</code></li>
+          <li><strong>Games:</strong> <code>/api/games/…</code>, <code>/api/games/bulk/</code>, <code>/api/games/{id}/eval/</code></li>
+          <li><strong>Assignments:</strong> <code>/api/assignments/…</code></li>
+          <li><strong>Annotations:</strong> <code>/api/annotations/…</code> (list requires <code>?game_id=</code>)</li>
+          <li><strong>Coaching:</strong> <code>/api/coach/{dashboard,analytics}/</code>, <code>/api/students/{id}/timeline/</code>, <code>/api/assignments/bulk/</code>, <code>/api/{lesson-templates,coach-messages,training-plans}/…</code></li>
+          <li><strong>Sync:</strong> <code>/api/sync/{overview,trigger,presence,pending-analysis,process-server}/</code>, <code>/api/sync/games/{id}/{claim,complete,release}/</code></li>
+        </ul>
+
+        <h3 id="backend-files">4.6 Backend file reference</h3>
+
+        <h4><code>voltchess_api/</code> (project package)</h4>
+        <div class="file-ref"><strong>settings.py</strong> The Django project configuration. Reads <code>backend/.env</code> via <code>python-dotenv</code>, selects PostgreSQL or SQLite (via <code>USE_SQLITE</code>), sets <code>AUTH_USER_MODEL = "accounts.User"</code>, configures CORS, and defines the DRF defaults (JWT authentication, <code>IsAuthenticated</code> default permission). Holds the <code>SIMPLE_JWT</code> block with long access/refresh lifetimes and refresh rotation, plus production guards around the secret key and debug flag.</div>
+        <div class="file-ref"><strong>urls.py</strong> Root URLconf. Mounts <code>/api/health/</code>, Django admin, and <code>include()</code>s the seven app URL modules — all under <code>/api/</code>.</div>
+        <div class="file-ref"><strong>health.py</strong> Public <code>GET</code> view returning <code>{"status": "ok", "service": "voltchess-api"}</code> for uptime checks and deploy tooling.</div>
+        <div class="file-ref"><strong>wsgi.py</strong> Standard WSGI entrypoint. <strong>__init__.py</strong> is empty.</div>
+
+        <h4><code>accounts/</code> (identity &amp; auth)</h4>
+        <div class="file-ref"><strong>models.py</strong> <code>UserRole</code> enum and custom <code>User(AbstractUser)</code> with UUID PK, unique email, and <code>role</code> field defaulting to <code>student</code>.</div>
+        <div class="file-ref"><strong>serializers.py</strong> <code>RegisterSerializer</code> and <code>UserSerializer</code>. Registration restricts role to coach/student (<code>SELF_SIGNUP_ROLES</code>), validates passwords, checks username/email uniqueness.</div>
+        <div class="file-ref"><strong>views.py</strong> <code>RegisterView</code> (AllowAny CreateAPIView) and <code>MeView</code> (authenticated profile).</div>
+        <div class="file-ref"><strong>management/commands/seed_demo.py</strong> Creates demo <code>coach</code>/<code>student</code> accounts (password <code>demo1234</code>), academy, link, classroom, and sample assignment.</div>
+
+        <h4><code>academies/</code> (org, links, classrooms)</h4>
+        <div class="file-ref"><strong>models.py</strong> <code>Academy</code>, <code>Membership</code>, <code>CoachStudentLink</code>, <code>Classroom</code>, plus enums. <code>CoachStudentLink</code> is both the coaching relationship and per-student platform sync config.</div>
+        <div class="file-ref"><strong>classroom_codes.py</strong> Join-code utilities: <code>generate_join_code()</code>, <code>normalize_join_code()</code>, <code>get_or_create_classroom_for_coach()</code>.</div>
+        <div class="file-ref"><strong>views.py</strong> Academy viewset, coach-student links, student stats/report/games, and four classroom views (mine, regenerate, preview, join).</div>
+
+        <h4><code>games/</code> (stored games + evals + stats)</h4>
+        <div class="file-ref"><strong>models.py</strong> <code>Game</code> (owner FK, PGN/metadata, sync dedup, analysis-tracking fields) and <code>GameEval</code> (one-to-one JSON eval payload).</div>
+        <div class="file-ref"><strong>serializers.py</strong> List/detail/create serializers plus <code>GameEvalUploadSerializer</code> (update_or_create eval, flip game to COMPLETE).</div>
+        <div class="file-ref"><strong>stats.py</strong> <code>compute_student_stats</code> and <code>compute_student_report</code> — analytics math reused by academies and coaching apps.</div>
+
+        <h4><code>assignments/</code></h4>
+        <div class="file-ref"><strong>models.py</strong> <code>Assignment</code> (coach, student, optional game, title, PGN, instructions, category, priority, due date, status).</div>
+        <div class="file-ref"><strong>views.py</strong> <code>AssignmentViewSet</code> — role-based queryset filtering and coach-student link verification on create.</div>
+
+        <h4><code>annotations/</code></h4>
+        <div class="file-ref"><strong>models.py</strong> <code>Annotation</code> — FK to game and author, <code>move_index</code>, optional <code>fen</code>, text <code>body</code>.</div>
+        <div class="file-ref"><strong>views.py</strong> <code>AnnotationViewSet</code> — requires <code>?game_id=</code> for listing; uses <code>IsGameOwnerOrCoach</code>.</div>
+
+        <h4><code>coaching/</code> (dashboards &amp; tooling)</h4>
+        <div class="file-ref"><strong>services.py</strong> Analytics engine: <code>compute_coach_dashboard</code>, <code>compute_coach_analytics</code>, <code>compute_student_timeline</code>.</div>
+        <div class="file-ref"><strong>views.py</strong> Dashboard, analytics, timeline, bulk assignments, and template/message/plan viewsets.</div>
+
+        <h4><code>sync/</code> (import + hybrid analysis)</h4>
+        <div class="file-ref"><strong>models.py</strong> <code>StudentSyncPresence</code> — one-to-one with user; <code>last_seen_at</code>, <code>browser_busy</code>.</div>
+        <div class="file-ref"><strong>platform_fetch.py</strong> HTTP clients for Chess.com archives and Lichess NDJSON; <code>FetchedGame</code> dataclass; <code>fetch_platform_games</code> dispatcher.</div>
+        <div class="file-ref"><strong>services.py</strong> Orchestration: <code>StudentPresence</code>, <code>upsert_fetched_game</code>, <code>sync_coach_student_link</code>, browser/server queue selectors, claim/release/complete helpers, <code>student_sync_overview</code>, <code>release_stale_analysis_claims</code>.</div>
+        <div class="file-ref"><strong>eval_pipeline.py</strong> Python port of browser accuracy + move classification post-processing for server-side analysis.</div>
+        <div class="file-ref"><strong>server_analysis.py</strong> Stockfish subprocess (<code>analyze_game_on_server</code>, <code>process_server_queue</code>) as the offline fallback.</div>
+        <div class="file-ref"><strong>views.py</strong> REST surface: overview, trigger, presence, pending-analysis, claim/complete/release, process-server.</div>
+        <div class="file-ref"><strong>management/commands/run_platform_sync.py</strong> Cron entrypoint: syncs enabled links, releases stale claims, optionally runs server analysis queue.</div>
+
+        <h4><code>manage.py</code></h4>
+        <p>Standard Django CLI entrypoint; dispatches <code>runserver</code>, <code>migrate</code>, <code>test</code>, <code>seed_demo</code>, and <code>run_platform_sync</code>.</p>
+      </section>
+
+      <!-- §5 -->
+      <section id="frontend">
+        <h2>5. Frontend architecture</h2>
+
+        <h3 id="bootstrap">5.1 Bootstrap &amp; providers</h3>
+        <p>
+          <code>src/main.tsx</code> is the entry point. It loads fonts, runs a one-time engine-setting
+          defaults migration, <strong>awaits <code>loadApiConfig()</code></strong> (which can fetch a runtime
+          <code>/api-config.json</code> to override the API base URL — skipped in dev), creates the TanStack Query
+          client, and mounts the provider tree:
+        </p>
+        <pre><code>QueryClientProvider → BrowserRouter → AuthProvider → AnalysisQueueProvider
+  → LocalGameMigrationPrompt → App</code></pre>
+        <p><code>src/App.tsx</code> defines the route table.</p>
+
+        <h3 id="routing">5.2 Routing &amp; route guards</h3>
+        <p>Routes live in <code>App.tsx</code> inside <code>ErrorBoundary</code> → <code>Layout</code> → <code>Suspense</code> (pages are lazy-loaded). Three tiers:</p>
+        <ul>
+          <li><strong>Public:</strong> <code>/login</code>, <code>/register</code>, <code>/blog</code>, <code>/blog/:slug</code>, <code>/terms-and-conditions</code>, <code>/thanks</code>.</li>
+          <li><strong>Authenticated</strong> (wrapped by <code>RequireAuth</code>): <code>/</code>, <code>/analysis</code>, <code>/database</code>, <code>/openings</code>, <code>/play</code>, <code>/puzzles</code>, <code>/review</code>.</li>
+          <li><strong>Role-scoped</strong> (inside <code>RequireAuth</code>, additionally wrapped by <code>RoleRoute</code>): <code>/coach/*</code> (Coach/Admin) and <code>/student</code> (Student).</li>
+        </ul>
+        <p>
+          <code>RequireAuth</code> renders the protected <code>&lt;Outlet /&gt;</code> only when authenticated (or when
+          auth is disabled), showing a spinner while the session resolves and redirecting
+          to <code>/login</code> otherwise (preserving <code>state.from</code>). <code>RoleRoute</code> redirects users
+          whose role isn't allowed. <code>GuestRoute</code> wraps login/register and bounces
+          already-authenticated users to their role home via <code>landingForRole()</code>.
+        </p>
+
+        <h3 id="frontend-auth">5.3 Authentication &amp; session (frontend)</h3>
+        <p>
+          <code>src/contexts/AuthContext.tsx</code> owns auth state. It hydrates the user from a
+          localStorage cache, then validates/refreshes against the backend
+          (<code>/api/token/refresh/</code> + <code>/api/me/</code>). It only signs the user out when
+          the <strong>refresh token itself</strong> is rejected — transient network/CORS failures keep
+          the cached session so a reload doesn't bounce a valid user to login. It also
+          proactively rotates the access token on an interval. Tokens and the cached user
+          live in localStorage (<code>src/lib/authStorage.ts</code>), and <code>src/api.tsx</code> is the shared
+          axios instance whose interceptors attach the bearer token and transparently
+          refresh-and-retry on a 401.
+        </p>
+
+        <h3 id="theming">5.4 Theming</h3>
+        <p>
+          Theming is Jotai-driven. <code>theme/colorThemeAtom.ts</code> persists the selected palette
+          id; <code>theme/themes.ts</code> defines the palettes and <code>getPalette()</code>;
+          <code>theme/voltchessTheme.ts</code> (<code>createAppTheme</code>) maps a palette to a full MUI theme;
+          and <code>sections/layout/AppThemeProvider.tsx</code> reads the atom, builds the theme, and
+          wraps the app with MUI's <code>ThemeProvider</code> + <code>CssBaseline</code>. For inline styling
+          outside MUI tokens, <code>hooks/usePalette.ts</code> exposes the active palette (with a
+          contrast-safe <code>onAccent</code>).
+        </p>
+
+        <h3 id="engine">5.5 Engine, storage &amp; sync (frontend)</h3>
+        <p>
+          Stockfish runs as WASM in Web Workers. <code>lib/engine/worker.ts</code> spawns workers with
+          absolute paths (so nested SPA routes don't break WASM loading);
+          <code>lib/engine/uciEngine.ts</code> (<code>UciEngine</code>) is the orchestrator with a worker pool
+          and job queue; the <code>stockfishNN.ts</code> factories pick the right WASM build. Analysis
+          output is parsed (<code>helpers/parseResults.ts</code>) and post-processed into move
+          classifications (<code>helpers/moveClassification.ts</code>), accuracy
+          (<code>helpers/accuracy.ts</code>), and estimated Elo (<code>helpers/estimateElo.ts</code>).
+        </p>
+        <p>
+          Locally, games are stored in IndexedDB (<code>hooks/useGameDatabase.ts</code>); when authenticated,
+          <code>lib/gameSync.ts</code> mirrors them to the backend. For synced platform games,
+          <code>src/services/analysisQueue.ts</code> (via <code>AnalysisQueueContext</code>) claims pending games,
+          runs Stockfish, uploads evals, and falls back to the Pi server queue when the tab is hidden or analysis fails.
+        </p>
+
+        <h3 id="frontend-files">5.6 Frontend file reference</h3>
+
+        <h4><code>src/</code> root</h4>
+        <div class="file-ref"><strong>App.tsx</strong> Route table: lazy page imports wrapped in guard hierarchy, plus Vercel Analytics and RouteAnalytics.</div>
+        <div class="file-ref"><strong>main.tsx</strong> Bootstrap/provider tree (see §5.1).</div>
+        <div class="file-ref"><strong>api.tsx</strong> Shared axios instance and <code>refreshAccessToken()</code>; request/response interceptors attach bearer token and do single-flight 401 refresh-and-retry.</div>
+        <div class="file-ref"><strong>sentry.client.config.ts</strong> Initializes Sentry in production when <code>VITE_SENTRY_DSN</code> is set.</div>
+
+        <h4><code>src/config/</code> and <code>src/constants/</code></h4>
+        <div class="file-ref"><strong>config/apiUrl.ts</strong> Backend base-URL resolution: <code>resolveApiBaseUrl()</code>, <code>getApiBaseUrl()</code>/<code>setApiBaseUrl()</code>, and <code>loadApiConfig()</code> (fetches <code>/api-config.json</code> at boot; skipped in dev).</div>
+        <div class="file-ref"><strong>constants.ts</strong> Token key names, <code>API_URL</code>, <code>ENABLE_AUTHENTICATION</code> flag, classification colors, engine labels.</div>
+        <div class="file-ref"><strong>constants/engineDefaults.ts</strong> <code>ENGINE_DEFAULTS</code> (UI), <code>SYNC_ANALYSIS_DEFAULTS</code> (background queue, depth 8, multiPv 2), and settings-version key for one-time localStorage migration.</div>
+
+        <h4><code>src/contexts/</code></h4>
+        <div class="file-ref"><strong>AuthContext.tsx</strong> <code>AuthProvider</code> and <code>useAuth()</code>: exposes <code>user</code>, <code>loading</code>, <code>isAuthenticated</code>, <code>login</code>, <code>logout</code>, <code>refreshUser</code>.</div>
+        <div class="file-ref"><strong>AnalysisQueueContext.tsx</strong> <code>AnalysisQueueProvider</code> and <code>useAnalysisQueue()</code>: exposes <code>startAnalysis(priorityGameId?)</code>, queue state, auto-start for pending games, presence heartbeats, and Pi fallback when tab is hidden.</div>
+
+        <h4><code>src/services/</code></h4>
+        <div class="file-ref"><strong>analysisQueue.ts</strong> Singleton analysis queue: load Stockfish lite engine, claim → evaluate → <code>completeGameAnalysis</code>, one game at a time, visible progress/errors, server fallback on failure.</div>
+
+        <h4><code>src/types/</code></h4>
+        <div class="file-ref"><strong>user.ts</strong> <code>UserRole</code> enum, <code>User</code> type, <code>USER_ROLE_LABELS</code>.</div>
+        <div class="file-ref"><strong>enums.ts</strong> <code>GameOrigin</code>, <code>EngineName</code>, <code>MoveClassification</code>, <code>Color</code>.</div>
+        <div class="file-ref"><strong>eval.ts</strong> Analysis types: <code>PositionEval</code>, <code>LineEval</code>, <code>Accuracy</code>, <code>EstimatedElo</code>, <code>EngineSettings</code>, <code>GameEval</code>, etc.</div>
+        <div class="file-ref"><strong>game.ts</strong> Persisted <code>Game</code>/<code>Player</code> and lightweight <code>LoadedGame</code>.</div>
+
+        <h4><code>src/lib/</code> (framework-agnostic logic)</h4>
+        <div class="file-ref"><strong>auth.ts</strong> <code>landingForRole(role)</code> — canonical post-login destination.</div>
+        <div class="file-ref"><strong>authStorage.ts</strong> localStorage session layer (tokens, cached user, <code>clearAuthStorage</code>).</div>
+        <div class="file-ref"><strong>apiErrors.ts</strong> <code>getApiErrorMessage()</code> — normalizes axios/DRF errors into user-facing strings.</div>
+        <div class="file-ref"><strong>chess.ts</strong> Large chess.js utility module (<code>getEvaluateGameParams</code>, PGN helpers, UCI/SAN, classification helpers).</div>
+        <div class="file-ref"><strong>gameSync.ts</strong> Bridges local IndexedDB games to the server (<code>ensureGameOnServer</code>, <code>syncAnalysisResult</code>, migration).</div>
+        <div class="file-ref"><strong>analysisStatus.ts</strong> Maps synced game status to label/chip color for the UI.</div>
+
+        <h4><code>src/lib/api/</code> (backend client modules)</h4>
+        <p>Each file wraps the shared axios instance for one backend domain:</p>
+        <ul>
+          <li><code>academies.ts</code> — coach links + student stats/report</li>
+          <li><code>classrooms.ts</code> — preview/join flow + classroom management</li>
+          <li><code>assignments.ts</code>, <code>annotations.ts</code></li>
+          <li><code>coaching.ts</code> — dashboard, analytics, templates, messages, plans, timeline</li>
+          <li><code>games.ts</code> — server game persistence + bulk upload + eval upload</li>
+          <li><code>sync.ts</code> — platform sync trigger/overview, presence, pending/claim/complete/release, process-server</li>
+        </ul>
+
+        <h4><code>src/lib/engine/</code></h4>
+        <div class="file-ref"><strong>uciEngine.ts</strong> <code>UciEngine</code> class: worker pool, <code>evaluateGame()</code> (parallel per-position analysis + classifications/accuracy/Elo), live eval, bot moves.</div>
+        <div class="file-ref"><strong>helpers/parseResults.ts</strong> Parses UCI info/bestmove lines into <code>PositionEval</code>/<code>LineEval</code>.</div>
+        <div class="file-ref"><strong>helpers/winPercentage.ts</strong> Converts cp/mate to 0–100 win %.</div>
+        <div class="file-ref"><strong>helpers/moveClassification.ts</strong> <code>getMovesClassification()</code> — Opening/Forced/Best/Splendid/Perfect/…/Blunder tiers.</div>
+        <div class="file-ref"><strong>helpers/accuracy.ts</strong> Lichess-style accuracy formula.</div>
+        <div class="file-ref"><strong>helpers/estimateElo.ts</strong> Average centipawn loss → estimated Elo.</div>
+
+        <h4><code>src/hooks/</code></h4>
+        <div class="file-ref"><strong>useAnalysisSession.ts</strong> Restores/persists analysis state from sessionStorage + URL params.</div>
+        <div class="file-ref"><strong>useAnalyzeGame.ts</strong> Runs full-game Stockfish analysis; writes to eval atom, IndexedDB, server sync.</div>
+        <div class="file-ref"><strong>useEngine.ts</strong> Instantiates the right Stockfish factory.</div>
+        <div class="file-ref"><strong>useGameDatabase.ts</strong> IndexedDB layer (CRUD + URL game loading, server UUID with eval polling).</div>
+        <div class="file-ref"><strong>usePalette.ts</strong> Active theme palette + <code>useCardSx()</code>.</div>
+
+        <h4><code>src/components/</code> (generic UI)</h4>
+        <p><span class="pill">Route guards</span> <code>RequireAuth.tsx</code>, <code>RoleRoute.tsx</code>, <code>GuestRoute.tsx</code></p>
+        <p><span class="pill">App shell</span> <code>ErrorBoundary.tsx</code>, <code>Loading.tsx</code>, <code>PageContainer.tsx</code>, <code>NavLink.tsx</code></p>
+        <p><span class="pill">Background</span> <code>RouteAnalytics.tsx</code>, <code>LocalGameMigrationPrompt.tsx</code></p>
+        <p><span class="pill">Board</span> <code>components/board/</code> — interactive react-chessboard wrapper, eval bar, player headers, classification icons</p>
+
+        <h4><code>src/pages/</code> (routed screens)</h4>
+        <ul>
+          <li><strong>Auth:</strong> <code>login.tsx</code>, <code>register.tsx</code> (with RoleSelector, auto-login after signup)</li>
+          <li><strong>Core product:</strong> <code>index.tsx</code>, <code>analysis.tsx</code>, <code>review.tsx</code>, <code>database.tsx</code>, <code>play.tsx</code>, <code>puzzles.tsx</code>, <code>openings.tsx</code></li>
+          <li><strong>Marketing:</strong> <code>thanks.tsx</code>, <code>terms-and-conditions.tsx</code>, <code>blog/</code></li>
+          <li><strong>Coach:</strong> <code>pages/coach/*</code> — dashboard, students, assignments, templates, messages, plans, analytics</li>
+          <li><strong>Student:</strong> <code>pages/student/index.tsx</code> — My Hub (synced reports, assignments, <code>StudentPlatformCard</code>, <code>JoinClassroomCard</code>)</li>
+        </ul>
+
+        <h4><code>src/sections/</code> (feature building blocks)</h4>
+        <ul>
+          <li><strong><code>auth/</code></strong> — <code>AuthLayout.tsx</code>, <code>RoleSelector.tsx</code></li>
+          <li><strong><code>layout/</code></strong> — <code>Layout</code>, <code>Sidebar</code>, <code>SidebarAccount</code>, <code>AppThemeProvider</code></li>
+          <li><strong><code>analysis/</code></strong> — full analysis workspace: board, panel tabs, report sections, engine tab, settings, states (Jotai atoms)</li>
+          <li><strong><code>coach/</code></strong> — <code>CoachShell</code>, <code>ClassroomPanel</code>, <code>JoinClassroomCard</code></li>
+          <li><strong><code>student/</code></strong> — <code>StudentPlatformCard.tsx</code> (connect Chess.com/Lichess, Analyze now button, sync progress)</li>
+          <li><strong><code>loadGame/</code></strong> — load-game modal, inline panel, platform inputs</li>
+          <li><strong><code>onboarding/</code></strong> — welcome modal, spotlight tour, first-run experience</li>
+        </ul>
+
+        <h4><code>src/theme/</code> and <code>src/data/</code></h4>
+        <div class="file-ref"><strong>theme/</strong> <code>colorThemeAtom.ts</code>, <code>themes.ts</code>, <code>voltchessTheme.ts</code>, <code>buttonStyles.ts</code></div>
+        <div class="file-ref"><strong>data/</strong> <code>openings.ts</code> (opening detection), <code>blogPosts.ts</code>, <code>seo.ts</code></div>
+      </section>
+
+      <!-- §6 -->
+      <section id="cross-cutting">
+        <h2>6. Cross-cutting reference</h2>
+        <ul>
+          <li><strong>Auth tokens:</strong> localStorage keys <code>access</code> / <code>refresh</code>; cached profile under <code>voltchess_user</code>. Cleared together by <code>clearAuthStorage()</code>.</li>
+          <li><strong>Key env vars:</strong>
+            <ul>
+              <li>Frontend: <code>VITE_API_URL</code>, <code>VITE_ENABLE_AUTHENTICATION</code>, <code>API_PROXY_TARGET</code>, <code>VITE_SENTRY_DSN</code>, <code>VITE_FIREBASE_*</code></li>
+              <li>Backend: <code>USE_SQLITE</code>, <code>DJANGO_DEBUG</code>, <code>DJANGO_SECRET_KEY</code>, <code>DJANGO_ALLOWED_HOSTS</code>, <code>CORS_ALLOWED_ORIGINS</code></li>
+            </ul>
+          </li>
+          <li><strong>Adding a backend endpoint:</strong> add to the app's <code>views.py</code> + <code>urls.py</code>, then a typed client in <code>src/lib/api/&lt;domain&gt;.ts</code> (re-exported by <code>src/lib/api/index.ts</code>).</li>
+          <li><strong>Adding a page:</strong> create it under <code>src/pages/</code>, lazy-import it in <code>App.tsx</code>, and place it in the correct guard tier (<code>RequireAuth</code> and/or <code>RoleRoute</code>).</li>
+        </ul>
+      </section>
+
+      <hr />
+      <p style="color: var(--muted); font-size: 0.85rem;">
+        Generated from <code>ARCHITECTURE.md</code> · VoltChess
+      </p>
+    </main>
+  </div>
+</body>
+</html>
