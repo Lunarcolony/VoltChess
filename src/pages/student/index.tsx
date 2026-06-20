@@ -22,10 +22,7 @@ import JoinClassroomCard from "@/sections/coach/JoinClassroomCard";
 import StudentPlatformCard from "@/sections/student/StudentPlatformCard";
 import { prepareNewAnalysisSession } from "@/hooks/useAnalysisSession";
 import { useRouter } from "@/hooks/useRouter";
-import {
-  gameAnalysisChipColor,
-  gameAnalysisLabel,
-} from "@/lib/analysisStatus";
+import { gameAnalysisChipColor, gameAnalysisLabel } from "@/lib/analysisStatus";
 
 function gameAccuracy(g: ServerGame): number | null {
   const vals = [g.accuracy?.white, g.accuracy?.black].filter(

@@ -75,9 +75,12 @@ export default function PlatformSyncOrchestrator() {
     if (piBusy && hasPending) {
       console.warn(
         `${LOG} ${overview.games_in_progress} game(s) marked in progress ` +
-          `but this tab is idle — stale claim or Pi fallback may be running.`
+          "but this tab is idle — stale claim or Pi fallback may be running."
       );
     }
+    // Intentionally depends only on games_in_progress (not the whole `overview`
+    // object) so this diagnostic effect re-runs on the count, not every refetch.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isStudent, overview?.games_in_progress, hasPending]);
 
   useEffect(() => {
@@ -143,12 +146,16 @@ export default function PlatformSyncOrchestrator() {
       try {
         await claimGameAnalysis(game.id);
       } catch {
-        console.debug(`${LOG} could not claim game ${game.id} (another worker?)`);
+        console.debug(
+          `${LOG} could not claim game ${game.id} (another worker?)`
+        );
         return "stop";
       }
 
       const label = `${(game.white as { username?: string })?.username ?? game.white?.name ?? "?"} vs ${
-        (game.black as { username?: string })?.username ?? game.black?.name ?? "?"
+        (game.black as { username?: string })?.username ??
+        game.black?.name ??
+        "?"
       }`;
 
       analyzingRef.current = true;

@@ -21,7 +21,11 @@ interface Props {
   fillHeight?: boolean;
 }
 
-export default function LichessInput({ onSelect, fullWidth, fillHeight }: Props) {
+export default function LichessInput({
+  onSelect,
+  fullWidth,
+  fillHeight,
+}: Props) {
   const [rawStoredValue, setStoredValues] = useLocalStorage<string>(
     "lichess-username",
     ""

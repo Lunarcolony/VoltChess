@@ -4,6 +4,8 @@
 
 VoltChess is a Vite + React/TypeScript chess analysis SPA (repo root) with an optional Django REST backend (`backend/`) that powers the "Academy" coaching product (login, classrooms, games DB, assignments, sync). Stockfish runs client-side via WASM (`public/engines/`), so analysis works without the backend.
 
+For a detailed structural map (how auth/data model/sync work and a per-file reference for `src/` and `backend/`), see `ARCHITECTURE.md` at the repo root.
+
 ### Services
 
 | Service | Dir | Start command | Port | Notes |

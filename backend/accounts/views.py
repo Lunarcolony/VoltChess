@@ -16,9 +16,13 @@ class RegisterView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+        user = serializer.save()
         return Response(
-            {"detail": "Registration successful"},
+            {
+                "detail": "Registration successful",
+                "username": user.username,
+                "role": user.role,
+            },
             status=status.HTTP_201_CREATED,
         )
 
