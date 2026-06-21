@@ -1,6 +1,7 @@
 import { formatGameToDatabase } from "@/lib/chess";
 import { fetchGame } from "@/lib/api/games";
 import { isServerGameId } from "@/lib/gameSync";
+import { isAxiosError } from "axios";
 import { GameEval } from "@/types/eval";
 import { Game } from "@/types/game";
 import { Chess } from "chess.js";
@@ -130,10 +131,10 @@ export const useGameDatabase = (shouldFetchGames?: boolean) => {
       let cancelled = false;
       let pollId: ReturnType<typeof setInterval> | undefined;
 
-      const load = async () => {
+      const load = async (): Promise<"ok" | "pending" | "gone"> => {
         try {
           const serverGame = await fetchGame(gameId);
-          if (cancelled) return false;
+          if (cancelled) return "pending";
           setServerGameFromUrl({
             serverId: serverGame.id,
             pgn: serverGame.pgn,
@@ -148,21 +149,24 @@ export const useGameDatabase = (shouldFetchGames?: boolean) => {
                 }
               : undefined,
           });
-          // The report is generated in the background; keep polling until the
-          // saved eval shows up so an opened "still analyzing" game fills in on
-          // its own (no manual reload, no foreground re-analysis).
-          return !!serverGame.eval;
-        } catch {
+          return serverGame.eval ? "ok" : "pending";
+        } catch (err) {
           if (!cancelled) setServerGameFromUrl(undefined);
-          return false;
+          if (isAxiosError(err) && err.response?.status === 404) {
+            return "gone";
+          }
+          return "pending";
         }
       };
 
-      void load().then((hasEval) => {
-        if (cancelled || hasEval) return;
+      void load().then((state) => {
+        if (cancelled || state === "ok") return;
+        if (state === "gone") return;
         pollId = setInterval(async () => {
-          const done = await load();
-          if (done && pollId) clearInterval(pollId);
+          const next = await load();
+          if (next === "ok" || next === "gone") {
+            if (pollId) clearInterval(pollId);
+          }
         }, 5000);
       });
 

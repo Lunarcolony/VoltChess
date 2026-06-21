@@ -51,6 +51,17 @@ class GameViewSet(viewsets.ModelViewSet):
             return Game.objects.all().select_related("eval")
         return Game.objects.filter(owner=user).select_related("eval")
 
+    def get_object(self):
+        """Retrieve by pk + object permission (coaches can open linked students' games)."""
+        if self.action == "retrieve":
+            queryset = Game.objects.select_related("eval")
+            lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+            filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
+            obj = get_object_or_404(queryset, **filter_kwargs)
+            self.check_object_permissions(self.request, obj)
+            return obj
+        return super().get_object()
+
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 

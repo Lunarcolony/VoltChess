@@ -32,7 +32,6 @@ const BASE_NAV: NavItem[] = [
     icon: "mdi:book-open-page-variant-outline",
     href: "/blog",
   },
-  { label: "Database", icon: "mdi:database-outline", href: "/database" },
 ];
 
 function navForRole(

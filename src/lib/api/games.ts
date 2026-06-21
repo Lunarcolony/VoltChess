@@ -73,10 +73,6 @@ export async function createGame(
   return res.data;
 }
 
-export async function deleteServerGame(gameId: string): Promise<void> {
-  await api.delete(`/api/games/${gameId}/`);
-}
-
 export async function bulkUploadGames(
   games: Array<Record<string, unknown>>
 ): Promise<{ created: string[] }> {

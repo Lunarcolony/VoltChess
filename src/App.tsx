@@ -11,7 +11,6 @@ import { UserRole } from "@/types/user";
 
 const Home = lazy(() => import("@/pages/index"));
 const Analysis = lazy(() => import("@/pages/analysis"));
-const Database = lazy(() => import("@/pages/database"));
 const Login = lazy(() => import("@/pages/login"));
 const Openings = lazy(() => import("@/pages/openings"));
 const Play = lazy(() => import("@/pages/play"));
@@ -60,7 +59,6 @@ function App() {
             <Route element={<RequireAuth />}>
               <Route path="/" element={<Home />} />
               <Route path="/analysis" element={<Analysis />} />
-              <Route path="/database" element={<Database />} />
               <Route path="/openings" element={<Openings />} />
               <Route path="/play" element={<Play />} />
               <Route path="/puzzles" element={<Puzzles />} />

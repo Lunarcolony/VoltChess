@@ -87,10 +87,12 @@ def compute_student_stats(student):
 
     for game in games_with_eval:
         acc = game.eval.accuracy or {}
-        if "white" in acc:
-            accuracy_white.append(acc["white"])
-        if "black" in acc:
-            accuracy_black.append(acc["black"])
+        w = acc.get("white")
+        b = acc.get("black")
+        if isinstance(w, (int, float)):
+            accuracy_white.append(w)
+        if isinstance(b, (int, float)):
+            accuracy_black.append(b)
 
         counts = _count_classifications(game.eval.positions or [])
         blunders["white"] += counts.get("Blunder", {}).get("white", 0)
@@ -99,7 +101,8 @@ def compute_student_stats(student):
         mistakes["black"] += counts.get("Mistake", {}).get("black", 0)
 
     def avg(values):
-        return round(sum(values) / len(values), 1) if values else None
+        nums = [v for v in values if isinstance(v, (int, float))]
+        return round(sum(nums) / len(nums), 1) if nums else None
 
     pending_assignments = Assignment.objects.filter(
         student=student,

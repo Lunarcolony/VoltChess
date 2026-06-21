@@ -104,7 +104,7 @@ export default function NewGameDialog({ open, onClose, setGame }: Props) {
       }}
     >
       <DialogTitle marginY={1} variant="h5">
-        {setGame ? "Load a game" : "Add a game to your database"}
+        {setGame ? "Load a game" : "Add a game"}
       </DialogTitle>
       <DialogContent sx={{ padding: { xs: 2, md: 3 } }}>
         <Grid
