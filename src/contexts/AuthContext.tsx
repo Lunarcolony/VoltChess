@@ -55,30 +55,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(cached);
     }
 
-    // Renew the access token up front when a refresh token is available. This
-    // keeps a reload from depending on a 401 → retry round-trip and, crucially,
-    // `refreshAccessToken` only clears the session when the refresh token
-    // itself is rejected (a real, permanent auth failure) — transient
-    // network/CORS errors leave the session intact.
-    await refreshAccessToken().catch(() => null);
-    if (!hasStoredSession()) {
-      setUser(null);
-      setLoading(false);
-      return;
-    }
-
+    // Use the stored access token first; the axios interceptor refreshes only
+    // on 401. Proactive refresh on every reload was clearing valid sessions
+    // when the refresh endpoint failed even though the access token was still
+    // good (12h lifetime).
     try {
       const res = await api.get<User>("/api/me/");
       setUser(res.data);
       writeCachedUser(res.data);
     } catch {
-      // We get here when `/api/me/` (and the interceptor's refresh retry) could
-      // not complete. Only sign the user out if the session was actually
-      // invalidated — i.e. the refresh token was rejected, which clears
-      // storage. Otherwise this is a transient failure (flaky backend/tunnel,
-      // offline, CORS hiccup); keep the cached session so a reload does not
-      // bounce an otherwise-valid user back to the login page.
-      if (!hasStoredSession() || !cached) {
+      if (!hasStoredSession()) {
         setUser(null);
       }
     } finally {
@@ -143,7 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       user,
       loading,
-      isAuthenticated: !!user && hasStoredSession(),
+      isAuthenticated: hasStoredSession(),
       login,
       logout,
       refreshUser,

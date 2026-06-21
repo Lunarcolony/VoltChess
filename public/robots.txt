@@ -4,9 +4,6 @@ Allow: /
 # Sitemaps
 Sitemap: https://voltchess.me/sitemap.xml
 
-# Crawl-delay (optional)
-Crawl-delay: 1
-
 # Allow specific bots full access
 User-agent: Googlebot
 Allow: /

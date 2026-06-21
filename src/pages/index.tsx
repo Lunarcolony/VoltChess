@@ -1,9 +1,14 @@
-import Head from "@/components/Head";
+import { PageTitle } from "@/components/pageTitle";
 import { useRouter } from "@/hooks/useRouter";
 import { useCallback, useEffect, useState } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Chess } from "chess.js";
-import { Box, Grid2 as Grid, Typography } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  Grid2 as Grid,
+  Typography,
+} from "@mui/material";
 import { useChessActions } from "@/hooks/useChessActions";
 import { useGameDatabase } from "@/hooks/useGameDatabase";
 import { decodeBase64 } from "@/lib/helpers";
@@ -21,9 +26,11 @@ import FeatureCard from "@/sections/home/FeatureCard";
 import WelcomeModal from "@/sections/onboarding/WelcomeModal";
 import { isOnboardingComplete } from "@/sections/onboarding/onboardingStorage";
 import { usePalette } from "@/hooks/usePalette";
-import { DEFAULT_SEO } from "@/data/seo";
+import { DEFAULT_SEO, TRUST_BULLETS } from "@/data/seo";
 import { BLOG_POSTS } from "@/data/blogPosts";
 import NavLink from "@/components/NavLink";
+import { Stockfish17 } from "@/lib/engine/stockfish17";
+import { track } from "@vercel/analytics";
 
 function Home() {
   const palette = usePalette();
@@ -32,10 +39,12 @@ function Home() {
   const evaluationProgress = useAtomValue(evaluationProgressAtom);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingReady, setOnboardingReady] = useState(false);
+  const [navigating, setNavigating] = useState(false);
 
   useEffect(() => {
     setOnboardingReady(true);
     setShowOnboarding(!isOnboardingComplete());
+    void Stockfish17.create(true).catch(() => undefined);
   }, []);
 
   const { setPgn: setGamePgn } = useChessActions(gameAtom);
@@ -61,6 +70,8 @@ function Home() {
       resetAndSetGamePgn(pgn);
       setEvaluationProgress(0);
       prepareNewAnalysisSession(pgn, boardOrientation);
+      track("game_loaded", { source: withTour ? "onboarding" : "home" });
+      setNavigating(true);
       await router.push(withTour ? "/analysis?tour=1" : "/analysis");
     },
     [router, resetAndSetGamePgn, setBoardOrientation, setEvaluationProgress]
@@ -69,6 +80,7 @@ function Home() {
   const handleOnboardingGameLoaded = useCallback(
     (loadedGame: Chess, boardOrientation = true) => {
       setShowOnboarding(false);
+      track("onboarding_complete");
       void startAnalysis(loadedGame, boardOrientation, true);
     },
     [startAnalysis]
@@ -116,15 +128,35 @@ function Home() {
     setBoardOrientation,
   ]);
 
-  if (evaluationProgress) return null;
+  const isReturning = onboardingReady && !showOnboarding;
+
+  if (navigating || evaluationProgress) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "40vh",
+          gap: 2,
+        }}
+      >
+        <CircularProgress size={32} />
+        <Typography color="text.secondary">
+          Preparing your game analysis…
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <>
-      <Head>
-        <title>{DEFAULT_SEO.title}</title>
-        <meta name="description" content={DEFAULT_SEO.description} />
-        <meta name="keywords" content={DEFAULT_SEO.keywords} />
-      </Head>
+      <PageTitle
+        title={DEFAULT_SEO.title}
+        description={DEFAULT_SEO.description}
+        path="/"
+      />
 
       <Box sx={{ maxWidth: 960, mx: "auto" }}>
         <Typography
@@ -135,13 +167,30 @@ function Home() {
             fontSize: { xs: "1.75rem", sm: "2.125rem" },
           }}
         >
-          {onboardingReady && showOnboarding
-            ? "Free Chess Game Review"
-            : "Welcome back"}
+          {isReturning
+            ? "Welcome back"
+            : "Free Chess.com & Lichess Game Analysis"}
         </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 3.5 }}>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 1.5 }}>
           {DEFAULT_SEO.description}
         </Typography>
+
+        <Box
+          component="ul"
+          sx={{
+            m: 0,
+            mb: 2.5,
+            pl: 2.5,
+            color: palette.textMuted,
+            fontSize: "0.9rem",
+          }}
+        >
+          {TRUST_BULLETS.map((bullet) => (
+            <Box component="li" key={bullet} sx={{ mb: 0.5 }}>
+              {bullet}
+            </Box>
+          ))}
+        </Box>
 
         {onboardingReady && (
           <WelcomeModal
@@ -158,20 +207,20 @@ function Home() {
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <FeatureCard
-              title="Play vs Engine"
-              description="Challenge Stockfish at a rating that matches your level. Adjustable strength and time controls."
-              icon="mdi:chess-knight"
-              href="/play"
-              actionLabel="Start a game"
+              title="Free Chess.com Analysis"
+              description="Analyze Chess.com games without Premium — accuracy, blunders, and eval graph."
+              icon="mdi:chess-pawn"
+              href="/free-chess-com-analysis"
+              actionLabel="Analyze Chess.com games"
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
             <FeatureCard
-              title="Tactical Puzzles"
-              description="Solve puzzles to sharpen your calculation and pattern recognition."
-              icon="mdi:puzzle-outline"
-              href="/puzzles"
-              actionLabel="Solve puzzles"
+              title="Free Lichess Review"
+              description="Import Lichess games by username and get a full Stockfish report in seconds."
+              icon="mdi:horse"
+              href="/free-lichess-game-review"
+              actionLabel="Review Lichess games"
             />
           </Grid>
         </Grid>

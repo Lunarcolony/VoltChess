@@ -1,12 +1,16 @@
 export const SITE_URL = "https://voltchess.me";
 
+export const OG_IMAGE = `${SITE_URL}/og-image.png`;
+
 export const DEFAULT_SEO = {
-  title: "VoltChess — Free Chess Game Review & Analysis with Stockfish",
+  title:
+    "Free Chess Game Analysis — Chess.com & Lichess, No Premium | VoltChess",
   description:
-    "Free chess game review and analysis powered by Stockfish. Import Chess.com or Lichess games, find blunders, check accuracy, and improve — no sign-up required.",
+    "Enter your Chess.com or Lichess username, pick a game, and get a full Stockfish analysis report in seconds. Unlimited free game review — no premium, no daily cap, no sign-up.",
   keywords: [
+    "free chess game analysis",
     "free chess game review",
-    "chess game analysis",
+    "chess.com game analysis free",
     "chess.com game review free",
     "free chess analysis",
     "stockfish analysis",
@@ -17,5 +21,13 @@ export const DEFAULT_SEO = {
     "online chess analysis tool",
     "chess game review tool",
     "chess improvement",
+    "chess.com alternative",
+    "unlimited chess analysis free",
   ].join(", "),
 } as const;
+
+export const TRUST_BULLETS = [
+  "No premium required",
+  "Unlimited reviews",
+  "Stockfish 17 in your browser",
+] as const;

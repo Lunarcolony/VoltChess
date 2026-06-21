@@ -2,12 +2,13 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import Layout from "@/sections/layout";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import RequireAuth from "@/components/RequireAuth";
+import RequireAcademyAuth from "@/components/RequireAcademyAuth";
 import RoleRoute from "@/components/RoleRoute";
 import { LoadingSpinner } from "@/components/Loading";
 import RouteAnalytics from "@/components/RouteAnalytics";
 import { Analytics } from "@vercel/analytics/react";
 import { UserRole } from "@/types/user";
+import { LANDING_PAGES } from "@/data/landingPages";
 
 const Home = lazy(() => import("@/pages/index"));
 const Analysis = lazy(() => import("@/pages/analysis"));
@@ -21,6 +22,7 @@ const TermsAndConditions = lazy(() => import("@/pages/terms-and-conditions"));
 const Thanks = lazy(() => import("@/pages/thanks"));
 const BlogIndex = lazy(() => import("@/pages/blog/index"));
 const BlogPost = lazy(() => import("@/pages/blog/post"));
+const LandingPage = lazy(() => import("@/pages/landing"));
 const CoachDashboard = lazy(() => import("@/pages/coach/index"));
 const CoachStudents = lazy(() => import("@/pages/coach/students"));
 const CoachAssignments = lazy(() => import("@/pages/coach/assignments"));
@@ -43,10 +45,20 @@ function App() {
           }
         >
           <Routes>
-            {/* Public — Academy sign-in is the entry point for the app */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/sign-in" element={<Navigate to="/login" replace />} />
-            <Route path="/register" element={<Register />} />
+            {/* Public analysis & SEO landing pages */}
+            <Route path="/" element={<Home />} />
+            <Route path="/analysis" element={<Analysis />} />
+            <Route path="/openings" element={<Openings />} />
+            <Route path="/play" element={<Play />} />
+            <Route path="/puzzles" element={<Puzzles />} />
+            <Route path="/review" element={<Review />} />
+            {LANDING_PAGES.map((page) => (
+              <Route
+                key={page.slug}
+                path={page.path}
+                element={<LandingPage />}
+              />
+            ))}
             <Route path="/blog" element={<BlogIndex />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route
@@ -55,15 +67,13 @@ function App() {
             />
             <Route path="/thanks" element={<Thanks />} />
 
-            {/* Protected — requires JWT from Pi backend */}
-            <Route element={<RequireAuth />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/analysis" element={<Analysis />} />
-              <Route path="/openings" element={<Openings />} />
-              <Route path="/play" element={<Play />} />
-              <Route path="/puzzles" element={<Puzzles />} />
-              {/* Read-only saved-report viewer (no engine). Hubs link here. */}
-              <Route path="/review" element={<Review />} />
+            {/* Academy auth entry */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/sign-in" element={<Navigate to="/login" replace />} />
+            <Route path="/register" element={<Register />} />
+
+            {/* Academy-only (coach / student) */}
+            <Route element={<RequireAcademyAuth />}>
               <Route
                 path="/coach"
                 element={

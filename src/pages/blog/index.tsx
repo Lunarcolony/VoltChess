@@ -14,6 +14,7 @@ export default function BlogIndexPage() {
       <PageTitle
         title="Chess Game Review & Analysis Guides | VoltChess Blog"
         description="Free guides on chess game review, Chess.com analysis, Stockfish game analysis, blunder finding, and PGN review. Learn how to study your games on VoltChess."
+        path="/blog"
       />
       <SchemaOrg
         data={{

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Alert,
   Box,
@@ -14,6 +14,7 @@ import { useSetAtom } from "jotai";
 import { getGameFromPgn } from "@/lib/chess";
 import { GameOrigin } from "@/types/enums";
 import { boardOrientationAtom } from "@/sections/analysis/states";
+import { SAMPLE_GAME_PGN } from "@/data/sampleGame";
 import ChessComInput from "@/sections/loadGame/chessComInput";
 import LichessInput from "@/sections/loadGame/lichessInput";
 import GamePgnInput from "@/sections/loadGame/gamePgnInput";
@@ -22,6 +23,8 @@ import { alpha } from "@mui/material/styles";
 
 interface Props {
   onGameLoaded: (game: Chess, boardOrientation?: boolean) => void;
+  defaultTab?: GameOrigin;
+  showSampleGame?: boolean;
 }
 
 const TABS = [
@@ -32,14 +35,22 @@ const TABS = [
 
 const QUICK_USERS = ["MagnusCarlsen", "GothamChess", "Hikaru"];
 
-export default function HomeGameLoader({ onGameLoaded }: Props) {
+export default function HomeGameLoader({
+  onGameLoaded,
+  defaultTab = GameOrigin.ChessCom,
+  showSampleGame = true,
+}: Props) {
   const palette = usePalette();
   const cardSx = useCardSx();
-  const [tab, setTab] = useState<GameOrigin>(GameOrigin.ChessCom);
+  const [tab, setTab] = useState<GameOrigin>(defaultTab);
   const [pgn, setPgn] = useState("");
   const [chessComUser, setChessComUser] = useState("");
   const [error, setError] = useState("");
   const setBoardOrientation = useSetAtom(boardOrientationAtom);
+
+  useEffect(() => {
+    setTab(defaultTab);
+  }, [defaultTab]);
 
   const loadGame = (pgnText: string, boardOrientation = true) => {
     if (!pgnText) return;
@@ -122,7 +133,7 @@ export default function HomeGameLoader({ onGameLoaded }: Props) {
           </>
         )}
 
-        {tab === GameOrigin.ChessCom && (
+        {tab === GameOrigin.ChessCom && showSampleGame && (
           <Box
             sx={{
               mt: 3,
@@ -133,7 +144,7 @@ export default function HomeGameLoader({ onGameLoaded }: Props) {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
               Try it out:
             </Typography>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1.5 }}>
               {QUICK_USERS.map((user) => (
                 <Button
                   key={user}
@@ -154,6 +165,15 @@ export default function HomeGameLoader({ onGameLoaded }: Props) {
                 </Button>
               ))}
             </Box>
+            <Button
+              size="small"
+              variant="contained"
+              fullWidth
+              onClick={() => loadGame(SAMPLE_GAME_PGN)}
+              sx={{ py: 1 }}
+            >
+              Try a sample game (Morphy&apos;s Opera Game)
+            </Button>
           </Box>
         )}
       </Box>

@@ -1,20 +1,28 @@
 import { useEffect } from "react";
 
 interface SchemaOrgProps {
-  data: Record<string, unknown>;
+  data: Record<string, unknown> | Record<string, unknown>[];
 }
 
 export const SchemaOrg: React.FC<SchemaOrgProps> = ({ data }) => {
   useEffect(() => {
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.textContent = JSON.stringify(data);
-    document.head.appendChild(script);
+    const blocks = Array.isArray(data) ? data : [data];
+    const scripts: HTMLScriptElement[] = [];
+
+    blocks.forEach((block) => {
+      const script = document.createElement("script");
+      script.type = "application/ld+json";
+      script.textContent = JSON.stringify(block);
+      document.head.appendChild(script);
+      scripts.push(script);
+    });
 
     return () => {
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
-      }
+      scripts.forEach((script) => {
+        if (script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
+      });
     };
   }, [data]);
 
@@ -30,7 +38,7 @@ export const chessSoftwareSchema = {
   description:
     "Free chess game review and analysis powered by Stockfish. Upload PGN files, import Chess.com and Lichess games, find blunders, and improve your chess.",
   url: "https://voltchess.me/",
-  screenshot: "https://voltchess.me/og-image.svg",
+  screenshot: "https://voltchess.me/og-image.png",
   operatingSystem: "Any",
   browserRequirements: "Requires JavaScript. Requires HTML5.",
   offers: {
@@ -42,6 +50,7 @@ export const chessSoftwareSchema = {
   creator: {
     "@type": "Organization",
     name: "VoltChess",
+    logo: "https://voltchess.me/logo-512.png",
   },
   keywords: [
     "chess game review",

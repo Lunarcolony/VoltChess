@@ -5,7 +5,7 @@ import { PageTitle } from "@/components/pageTitle";
 import { SchemaOrg } from "@/components/SchemaOrg";
 import { usePalette } from "@/hooks/usePalette";
 import type { BlogPost } from "@/data/blogPosts";
-import { SITE_URL } from "@/data/seo";
+import { SITE_URL, OG_IMAGE } from "@/data/seo";
 import NavLink from "@/components/NavLink";
 
 interface Props {
@@ -15,26 +15,70 @@ interface Props {
 export default function BlogArticle({ post }: Props) {
   const palette = usePalette();
   const url = `${SITE_URL}/blog/${post.slug}`;
+  const ctaHref =
+    post.slug.includes("lichess") || post.slug === "lichess-game-review-free"
+      ? "/free-lichess-game-review"
+      : post.slug.includes("chesscom") ||
+          post.slug === "voltchess-vs-chesscom-premium"
+        ? "/free-chess-com-analysis"
+        : "/free-chess-game-analysis";
+  const ctaLabel =
+    ctaHref === "/free-chess-com-analysis"
+      ? "Analyze your Chess.com games free"
+      : ctaHref === "/free-lichess-game-review"
+        ? "Review your Lichess games free"
+        : "Analyze a game free";
 
   return (
     <>
-      <PageTitle title={post.metaTitle} description={post.metaDescription} />
+      <PageTitle
+        title={post.metaTitle}
+        description={post.metaDescription}
+        path={`/blog/${post.slug}`}
+      />
       <SchemaOrg
-        data={{
-          "@context": "https://schema.org",
-          "@type": "Article",
-          headline: post.title,
-          description: post.metaDescription,
-          datePublished: post.publishedAt,
-          author: { "@type": "Organization", name: "VoltChess" },
-          publisher: {
-            "@type": "Organization",
-            name: "VoltChess",
-            logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.svg` },
+        data={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: post.title,
+            description: post.metaDescription,
+            datePublished: post.publishedAt,
+            author: { "@type": "Organization", name: "VoltChess" },
+            publisher: {
+              "@type": "Organization",
+              name: "VoltChess",
+              logo: { "@type": "ImageObject", url: `${SITE_URL}/logo-512.png` },
+            },
+            mainEntityOfPage: url,
+            keywords: post.keywords,
+            image: OG_IMAGE,
           },
-          mainEntityOfPage: url,
-          keywords: post.keywords,
-        }}
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "Home",
+                item: `${SITE_URL}/`,
+              },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: "Guides",
+                item: `${SITE_URL}/blog`,
+              },
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: post.title,
+                item: url,
+              },
+            ],
+          },
+        ]}
       />
 
       <Box sx={{ maxWidth: 720, mx: "auto", pb: 4 }}>
@@ -109,11 +153,11 @@ export default function BlogArticle({ post }: Props) {
           </Typography>
           <Button
             component={Link}
-            to="/"
+            to={ctaHref}
             variant="contained"
             endIcon={<Icon icon="mdi:arrow-right" width={18} />}
           >
-            Analyze a game free
+            {ctaLabel}
           </Button>
         </Box>
       </Box>

@@ -278,6 +278,39 @@ export const BLOG_POSTS: BlogPost[] = [
       },
     ],
   },
+  {
+    slug: "voltchess-vs-chesscom-premium",
+    title: "VoltChess vs Chess.com Premium — Free Game Review Alternative",
+    metaTitle: "VoltChess vs Chess.com Premium Game Review | Free Alternative",
+    metaDescription:
+      "Compare VoltChess free game review to Chess.com Premium analysis. Same Stockfish-powered accuracy, blunders, and eval graph — no subscription required.",
+    keywords:
+      "voltchess vs chess.com premium, chess.com game review free alternative, free chess.com analysis",
+    publishedAt: "2026-06-21",
+    excerpt:
+      "Chess.com Premium charges for full game review. VoltChess delivers the same core analysis free — here's how they compare.",
+    sections: [
+      {
+        paragraphs: [
+          "Chess.com Premium includes Game Review with move classification, accuracy scores, and an evaluation graph. VoltChess offers the same style of feedback for free: import any public Chess.com game, run Stockfish 17 in your browser, and get a full report without a subscription.",
+          "The main difference is where analysis runs. VoltChess uses client-side Stockfish via WebAssembly, so your games are not uploaded to a remote analysis server. You control depth and engine version, and there is no daily review cap.",
+        ],
+      },
+      {
+        heading: "Feature comparison",
+        paragraphs: [
+          "Both tools provide move grades, blunder detection, accuracy percentages, and eval charts. Chess.com Premium adds platform-native integration and some exclusive review visuals. VoltChess adds PGN upload, Lichess import, an optional coach Academy, and unlimited free reviews for everyone.",
+          "If your goal is to study your own games without paying, VoltChess is built specifically for that use case.",
+        ],
+      },
+      {
+        heading: "How to switch",
+        paragraphs: [
+          "Open voltchess.me/free-chess-com-analysis, enter your Chess.com username, pick a recent game, and analysis starts automatically. No Chess.com Premium or VoltChess account required.",
+        ],
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug: string): BlogPost | undefined {

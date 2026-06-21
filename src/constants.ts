@@ -2,8 +2,8 @@ import { EngineName, MoveClassification } from "./types/enums";
 import { ENGINE_DEFAULTS } from "./constants/engineDefaults";
 import { resolveApiBaseUrl } from "./config/apiUrl";
 
-export const ACCESS_TOKEN = "access";
-export const REFRESH_TOKEN = "refresh";
+export const ACCESS_TOKEN = "voltchess_access";
+export const REFRESH_TOKEN = "voltchess_refresh";
 
 /** Initial default; use getApiBaseUrl() at request time for latest URL */
 export const API_URL = resolveApiBaseUrl();

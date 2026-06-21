@@ -5,5 +5,5 @@
   <rect x="156" y="156" width="40" height="40" rx="6" fill="#243024"/>
   <path d="M158 108 L128 168 H148 L138 198 L178 138 H158 Z" fill="#6a9a6a"/>
   <text x="240" y="175" fill="#e4ece4" font-family="system-ui,Segoe UI,sans-serif" font-size="72" font-weight="700">VoltChess</text>
-  <text x="240" y="240" fill="#889088" font-family="system-ui,Segoe UI,sans-serif" font-size="36">Free chess game review &amp; Stockfish analysis</text>
+  <text x="240" y="240" fill="#889088" font-family="system-ui,Segoe UI,sans-serif" font-size="36">Free Chess.com &amp; Lichess analysis — no premium</text>
 </svg>
