@@ -6,7 +6,7 @@ export const DEFAULT_SEO = {
   title:
     "Free Chess Game Analysis — Chess.com & Lichess, No Premium | VoltChess",
   description:
-    "Enter your Chess.com or Lichess username, pick a game, and get a full Stockfish analysis report in seconds. Unlimited free game review — no premium, no daily cap, no sign-up.",
+    "Free Stockfish analysis for Chess.com and Lichess games. Enter your username, get blunders, accuracy, and eval graph — no premium, unlimited, no sign-up.",
   keywords: [
     "free chess game analysis",
     "free chess game review",

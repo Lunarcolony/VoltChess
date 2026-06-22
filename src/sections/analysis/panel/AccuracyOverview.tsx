@@ -8,6 +8,8 @@ import {
   BAD_CLASSIFICATIONS,
   GOOD_CLASSIFICATIONS,
 } from "./classificationLabels";
+import SplitShareBar from "./SplitShareBar";
+import { REPORT_COLORS } from "./reportColors";
 
 function countMoves(
   positions: { moveClassification?: MoveClassification }[],
@@ -26,21 +28,19 @@ function GoodBadBar({ good, bad }: { good: number; bad: number }) {
   const palette = usePalette();
   const total = good + bad || 1;
   const goodPct = (good / total) * 100;
+  const badPct = 100 - goodPct;
 
   return (
     <Box sx={{ width: "100%", maxWidth: 120, mt: 0.75 }}>
-      <Box
-        sx={{
-          display: "flex",
-          width: "100%",
-          height: 6,
-          borderRadius: 3,
-          overflow: "hidden",
-        }}
-      >
-        <Box sx={{ width: `${goodPct}%`, bgcolor: "#22ac38" }} />
-        <Box sx={{ flex: 1, bgcolor: "#df5353" }} />
-      </Box>
+      <SplitShareBar
+        leftShare={goodPct}
+        rightShare={badPct}
+        height={6}
+        leftColor={REPORT_COLORS.good}
+        rightColor={REPORT_COLORS.bad}
+        leftOutline="#1a7a2e"
+        rightOutline="#a83232"
+      />
       <Typography
         variant="caption"
         sx={{

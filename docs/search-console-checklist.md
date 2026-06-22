@@ -45,6 +45,30 @@ Then push to trigger a Vercel redeploy. After deploy, open `https://voltchess.me
 3. Submit sitemap: `https://voltchess.me/sitemap.xml`
 4. Use **URL Submission** for homepage and `/free-chess-com-analysis`
 
+## IndexNow (Bing + Yandex instant crawl ping)
+
+IndexNow notifies Bing (and other search engines) when URLs change.
+
+**Hosted key file (required):**
+
+- `https://voltchess.me/30a48e821f564f43bd421d99f842e4e2.txt`
+
+After deploy, open that URL — it should show only the key text, not the VoltChess app.
+
+**Submit all sitemap URLs (run after each deploy):**
+
+```bash
+npm run indexnow
+```
+
+This verifies the key file is live, then pings IndexNow with all 20 public URLs.
+
+If deploy just finished and the script fails, wait 1–2 minutes and retry.
+
+**Optional:** set `INDEXNOW_SKIP_VERIFY=true npm run indexnow` to skip the live key check (not recommended).
+
+**You do not need to** manually bulk-submit the same URLs in Bing after IndexNow succeeds — IndexNow replaces that for ongoing updates. Keep the sitemap submitted in Bing Webmaster Tools once.
+
 ## Vercel Analytics funnel events
 
 The app tracks these custom events (see `RouteAnalytics.tsx` and `index.tsx`):

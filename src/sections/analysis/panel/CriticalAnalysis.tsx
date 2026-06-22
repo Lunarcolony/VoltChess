@@ -11,6 +11,7 @@ import {
 } from "@/lib/positionDominance";
 import { Icon } from "@iconify/react";
 import ReportSection from "./ReportSection";
+import SplitShareBar from "./SplitShareBar";
 import { REPORT_COLORS, PHASE_COLORS } from "./reportColors";
 
 const PHASE_LABELS: Record<PhaseId, string> = {
@@ -53,30 +54,11 @@ function PhaseShareBar({
       >
         {PHASE_LABELS[phase]}
       </Typography>
-      <Box
-        sx={{
-          display: "flex",
-          height: 5,
-          borderRadius: 2,
-          overflow: "hidden",
-          bgcolor: REPORT_COLORS.track,
-        }}
-      >
-        <Box
-          sx={{
-            width: `${whiteShare}%`,
-            bgcolor: REPORT_COLORS.whitePlayer,
-            minWidth: whiteShare > 0 ? 2 : 0,
-          }}
-        />
-        <Box
-          sx={{
-            width: `${blackShare}%`,
-            bgcolor: REPORT_COLORS.blackPlayer,
-            minWidth: blackShare > 0 ? 2 : 0,
-          }}
-        />
-      </Box>
+      <SplitShareBar
+        leftShare={whiteShare}
+        rightShare={blackShare}
+        height={8}
+      />
     </Box>
   );
 }

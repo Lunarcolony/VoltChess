@@ -66,7 +66,6 @@ export default function LoadGameInlinePanel({
         borderRadius: 1.5,
         border: `1px dashed ${palette.border}`,
         bgcolor: palette.surface,
-        overflow: "hidden",
       }}
     >
       <Box
@@ -106,8 +105,9 @@ export default function LoadGameInlinePanel({
           display: "flex",
           flexDirection: "column",
           px: 1.5,
+          pt: fillHeight ? 1.25 : 0.5,
           pb: 1,
-          overflow: fillHeight ? "hidden" : "visible",
+          overflow: "visible",
         }}
       >
         {gameOrigin === GameOrigin.ChessCom && (

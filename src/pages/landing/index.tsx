@@ -22,7 +22,8 @@ import { TRUST_BULLETS } from "@/data/seo";
 import { usePalette } from "@/hooks/usePalette";
 import NavLink from "@/components/NavLink";
 import { GameOrigin } from "@/types/enums";
-import { Stockfish17 } from "@/lib/engine/stockfish17";
+import { ENGINE_DEFAULTS } from "@/constants/engineDefaults";
+import { preloadEngine } from "@/lib/engine/sharedEngine";
 
 const TAB_MAP: Record<"chesscom" | "lichess" | "pgn", GameOrigin> = {
   chesscom: GameOrigin.ChessCom,
@@ -44,7 +45,7 @@ export default function LandingPage() {
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    void Stockfish17.create(true).catch(() => undefined);
+    void preloadEngine(ENGINE_DEFAULTS.engine);
   }, []);
 
   const startAnalysis = useCallback(

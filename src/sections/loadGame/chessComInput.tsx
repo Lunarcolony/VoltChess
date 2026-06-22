@@ -153,7 +153,11 @@ export default function ChessComInput({
           renderInput={(params) => (
             <TextField
               {...params}
-              label="Enter your Chess.com username..."
+              label={
+                fillHeight ? undefined : "Enter your Chess.com username..."
+              }
+              placeholder={fillHeight ? "Chess.com username" : undefined}
+              size={fillHeight ? "small" : "medium"}
               variant="outlined"
             />
           )}

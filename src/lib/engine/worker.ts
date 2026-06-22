@@ -36,16 +36,32 @@ export const sendCommandsToWorker = (
   worker: EngineWorker,
   commands: string[],
   finalMessage: string,
-  onNewMessage?: (messages: string[]) => void
+  onNewMessage?: (messages: string[]) => void,
+  timeoutMs = 120_000
 ): Promise<string[]> => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const messages: string[] = [];
+    let settled = false;
+
+    const timeout = window.setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      worker.listen = () => null;
+      reject(
+        new Error(
+          `Engine worker timed out waiting for "${finalMessage}" after ${timeoutMs}ms`
+        )
+      );
+    }, timeoutMs);
 
     worker.listen = (data) => {
       messages.push(data);
       onNewMessage?.(messages);
 
       if (data.startsWith(finalMessage)) {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timeout);
         resolve(messages);
       }
     };

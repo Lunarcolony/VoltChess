@@ -1,70 +1,1 @@
-import { useEffect, useRef } from "react";
-import { useAnalyzeGame } from "@/hooks/useAnalyzeGame";
-import { useCurrentPosition } from "../hooks/useCurrentPosition";
-import { useEngine } from "@/hooks/useEngine";
-import { useGameDatabase } from "@/hooks/useGameDatabase";
-import { useAnalysisQueue } from "@/contexts/AnalysisQueueContext";
-import { engineNameAtom, gameAtom } from "../states";
-import { useAtomValue } from "jotai";
-
-/** Auto-starts analysis when a game loads without a report. */
-export default function AnalyzeButton() {
-  const engineName = useAtomValue(engineNameAtom);
-  const engine = useEngine(engineName);
-  useCurrentPosition(engine);
-  const game = useAtomValue(gameAtom);
-  const { analyzeGame, readyToAnalyse, gameEval } = useAnalyzeGame();
-  const { serverGameFromUrl } = useGameDatabase();
-  const { startAnalysis, state: queueState } = useAnalysisQueue();
-
-  const autoStartedKeyRef = useRef<string | null>(null);
-
-  const gameKey =
-    serverGameFromUrl?.serverId ??
-    (game.history().length > 0 ? game.pgn() : "");
-
-  const isServerPending =
-    !!serverGameFromUrl?.serverId && !serverGameFromUrl.eval;
-
-  useEffect(() => {
-    autoStartedKeyRef.current = null;
-  }, [gameKey]);
-
-  useEffect(() => {
-    if (gameEval) return;
-    if (!gameKey) return;
-    if (autoStartedKeyRef.current === gameKey) return;
-
-    if (isServerPending && serverGameFromUrl?.serverId) {
-      if (queueState.running) return;
-      autoStartedKeyRef.current = gameKey;
-      console.log("[voltchess] queueing server game for analysis");
-      void startAnalysis(serverGameFromUrl.serverId);
-      return;
-    }
-
-    if (!readyToAnalyse) return;
-
-    autoStartedKeyRef.current = gameKey;
-    console.log("[voltchess] starting browser analysis for loaded game");
-    void analyzeGame().then((ok) => {
-      if (ok) {
-        console.log("[voltchess] browser analysis complete");
-      } else {
-        console.warn("[voltchess] browser analysis did not start or failed");
-        autoStartedKeyRef.current = null;
-      }
-    });
-  }, [
-    gameEval,
-    readyToAnalyse,
-    analyzeGame,
-    gameKey,
-    isServerPending,
-    serverGameFromUrl?.serverId,
-    startAnalysis,
-    queueState.running,
-  ]);
-
-  return null;
-}
+import { useEffect, useRef } from "react";import { useAtomValue, useSetAtom } from "jotai";import { useAnalyzeGame } from "@/hooks/useAnalyzeGame";import { useEngine } from "@/hooks/useEngine";import { useGameDatabase } from "@/hooks/useGameDatabase";import { useAnalysisQueue } from "@/contexts/AnalysisQueueContext";import { getSharedEngine } from "@/lib/engine/sharedEngine";import {  engineNameAtom,  evaluationProgressAtom,  gameAtom,  gameEvalAtom,} from "../states";const STALL_MS = 45_000;const STALL_CHECK_MS = 5_000;/** Auto-starts analysis when a game loads without a report. */export default function AnalyzeButton() {  const engineName = useAtomValue(engineNameAtom);  useEngine(engineName);  const game = useAtomValue(gameAtom);  const gameEval = useAtomValue(gameEvalAtom);  const evaluationProgress = useAtomValue(evaluationProgressAtom);  const setEvaluationProgress = useSetAtom(evaluationProgressAtom);  const { analyzeGame, readyToAnalyse } = useAnalyzeGame();  const { serverGameFromUrl } = useGameDatabase();  const { startAnalysis, state: queueState } = useAnalysisQueue();  const autoStartedKeyRef = useRef<string | null>(null);  const progressTrackerRef = useRef({ value: 0, at: Date.now() });  const gameKey =    serverGameFromUrl?.serverId ??    (game.history().length > 0 ? game.pgn() : "");  const isServerPending =    !!serverGameFromUrl?.serverId && !serverGameFromUrl.eval;  useEffect(() => {    autoStartedKeyRef.current = null;    progressTrackerRef.current = { value: 0, at: Date.now() };  }, [gameKey]);  useEffect(() => {    if (gameEval) return;    if (!gameKey) return;    if (autoStartedKeyRef.current === gameKey) return;    if (isServerPending && serverGameFromUrl?.serverId) {      if (queueState.running) return;      autoStartedKeyRef.current = gameKey;      console.log("[voltchess] queueing server game for analysis");      void startAnalysis(serverGameFromUrl.serverId);      return;    }    if (!readyToAnalyse) return;    autoStartedKeyRef.current = gameKey;    console.log("[voltchess] starting browser analysis for loaded game");    void analyzeGame().then((ok) => {      if (ok) {        console.log("[voltchess] browser analysis complete");      } else {        console.warn("[voltchess] browser analysis did not start or failed");        autoStartedKeyRef.current = null;      }    });  }, [    gameEval,    readyToAnalyse,    analyzeGame,    gameKey,    isServerPending,    serverGameFromUrl?.serverId,    startAnalysis,    queueState.running,  ]);  // Recover when analysis stalls (e.g. engine worker hung on first load).  useEffect(() => {    if (evaluationProgress <= 0 || gameEval) {      progressTrackerRef.current = { value: 0, at: Date.now() };      return;    }    if (evaluationProgress > progressTrackerRef.current.value) {      progressTrackerRef.current = {        value: evaluationProgress,        at: Date.now(),      };    }    const id = window.setInterval(() => {      const stalledFor = Date.now() - progressTrackerRef.current.at;      if (stalledFor < STALL_MS) return;      console.warn(        "[voltchess] analysis stalled at",        progressTrackerRef.current.value,        "% — resetting for retry"      );      void getSharedEngine()?.stopAllCurrentJobs();      setEvaluationProgress(0);      autoStartedKeyRef.current = null;      progressTrackerRef.current = { value: 0, at: Date.now() };    }, STALL_CHECK_MS);    return () => window.clearInterval(id);  }, [evaluationProgress, gameEval, setEvaluationProgress]);  return null;}

@@ -3,6 +3,7 @@ import {
   currentPositionAtom,
   engineDepthAtom,
   engineMultiPvAtom,
+  evaluationProgressAtom,
   gameAtom,
   gameEvalAtom,
   savedEvalsAtom,
@@ -22,6 +23,7 @@ export const useCurrentPosition = (engine: UciEngine | null) => {
   const board = useAtomValue(boardAtom);
   const depth = useAtomValue(engineDepthAtom);
   const multiPv = useAtomValue(engineMultiPvAtom);
+  const evaluationProgress = useAtomValue(evaluationProgressAtom);
   const [savedEvals, setSavedEvals] = useAtom(savedEvalsAtom);
 
   useEffect(() => {
@@ -74,6 +76,7 @@ export const useCurrentPosition = (engine: UciEngine | null) => {
 
     if (
       !position.eval &&
+      !evaluationProgress &&
       engine?.getIsReady() &&
       engine.name &&
       !board.isCheckmate() &&
@@ -164,12 +167,12 @@ export const useCurrentPosition = (engine: UciEngine | null) => {
     }
 
     return () => {
-      if (engine?.getIsReady()) {
-        engine?.stopAllCurrentJobs();
+      if (engine?.getIsReady() && !evaluationProgress) {
+        void engine.stopAllCurrentJobs();
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameEval, board, game, engine, depth, multiPv]);
+  }, [gameEval, board, game, engine, depth, multiPv, evaluationProgress]);
 
   return currentPosition;
 };

@@ -24,12 +24,16 @@ import type { Game } from "@/types/game";
 import HomeGameLoader from "@/sections/home/HomeGameLoader";
 import FeatureCard from "@/sections/home/FeatureCard";
 import WelcomeModal from "@/sections/onboarding/WelcomeModal";
-import { isOnboardingComplete } from "@/sections/onboarding/onboardingStorage";
+import {
+  isOnboardingComplete,
+  markOnboardingComplete,
+} from "@/sections/onboarding/onboardingStorage";
 import { usePalette } from "@/hooks/usePalette";
 import { DEFAULT_SEO, TRUST_BULLETS } from "@/data/seo";
 import { BLOG_POSTS } from "@/data/blogPosts";
 import NavLink from "@/components/NavLink";
-import { Stockfish17 } from "@/lib/engine/stockfish17";
+import { ENGINE_DEFAULTS } from "@/constants/engineDefaults";
+import { preloadEngine } from "@/lib/engine/sharedEngine";
 import { track } from "@vercel/analytics";
 
 function Home() {
@@ -44,7 +48,7 @@ function Home() {
   useEffect(() => {
     setOnboardingReady(true);
     setShowOnboarding(!isOnboardingComplete());
-    void Stockfish17.create(true).catch(() => undefined);
+    void preloadEngine(ENGINE_DEFAULTS.engine);
   }, []);
 
   const { setPgn: setGamePgn } = useChessActions(gameAtom);
@@ -64,15 +68,19 @@ function Home() {
   );
 
   const startAnalysis = useCallback(
-    async (loadedGame: Chess, boardOrientation = true, withTour = false) => {
+    async (
+      loadedGame: Chess,
+      boardOrientation = true,
+      fromOnboarding = false
+    ) => {
       const pgn = loadedGame.pgn();
       setBoardOrientation(boardOrientation);
       resetAndSetGamePgn(pgn);
       setEvaluationProgress(0);
       prepareNewAnalysisSession(pgn, boardOrientation);
-      track("game_loaded", { source: withTour ? "onboarding" : "home" });
+      track("game_loaded", { source: fromOnboarding ? "onboarding" : "home" });
       setNavigating(true);
-      await router.push(withTour ? "/analysis?tour=1" : "/analysis");
+      await router.push("/analysis");
     },
     [router, resetAndSetGamePgn, setBoardOrientation, setEvaluationProgress]
   );
@@ -80,6 +88,7 @@ function Home() {
   const handleOnboardingGameLoaded = useCallback(
     (loadedGame: Chess, boardOrientation = true) => {
       setShowOnboarding(false);
+      markOnboardingComplete();
       track("onboarding_complete");
       void startAnalysis(loadedGame, boardOrientation, true);
     },

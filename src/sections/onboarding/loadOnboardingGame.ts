@@ -2,6 +2,7 @@ import { Chess } from "chess.js";
 import { getGameFromPgn } from "@/lib/chess";
 import { getChessComUserRecentGames } from "@/lib/chessCom";
 import { getLichessUserRecentGames } from "@/lib/lichess";
+import type { LoadedGame } from "@/types/game";
 import type { OnboardingPlatform } from "./constants";
 
 export interface OnboardingGameResult {
@@ -9,11 +10,11 @@ export interface OnboardingGameResult {
   boardOrientation: boolean;
 }
 
-export async function loadFirstGameForUser(
+export async function loadGamesForUser(
   username: string,
   platform: OnboardingPlatform,
   signal?: AbortSignal
-): Promise<OnboardingGameResult> {
+): Promise<LoadedGame[]> {
   const trimmed = username.trim();
   if (!trimmed) {
     throw new Error("Please enter a username.");
@@ -28,10 +29,24 @@ export async function loadFirstGameForUser(
     throw new Error("No recent games found for that username.");
   }
 
-  const recent = games[0];
-  const game = getGameFromPgn(recent.pgn);
-  const boardOrientation =
-    trimmed.toLowerCase() !== recent.black?.name?.toLowerCase();
+  return games;
+}
 
+export function loadedGameToChess(
+  loaded: LoadedGame,
+  username: string
+): OnboardingGameResult {
+  const game = getGameFromPgn(loaded.pgn);
+  const boardOrientation =
+    username.trim().toLowerCase() !== loaded.black?.name?.toLowerCase();
   return { game, boardOrientation };
+}
+
+export async function loadFirstGameForUser(
+  username: string,
+  platform: OnboardingPlatform,
+  signal?: AbortSignal
+): Promise<OnboardingGameResult> {
+  const games = await loadGamesForUser(username, platform, signal);
+  return loadedGameToChess(games[0], username);
 }

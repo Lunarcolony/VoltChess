@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Box,
@@ -10,20 +10,23 @@ import {
   Tabs,
   TextField,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { Chess } from "chess.js";
 import { usePalette } from "@/hooks/usePalette";
 import { GameOrigin } from "@/types/enums";
+import type { LoadedGame } from "@/types/game";
 import type { OnboardingPlatform } from "./constants";
-import { loadFirstGameForUser } from "./loadOnboardingGame";
+import GameReviewGrid from "./GameReviewGrid";
+import { loadedGameToChess, loadGamesForUser } from "./loadOnboardingGame";
 import {
   getStoredUsername,
   markOnboardingComplete,
   saveUsername,
 } from "./onboardingStorage";
 
-type ModalStep = "welcome" | "username" | "loading";
+type ModalStep = "welcome" | "username" | "games" | "loading";
 
 interface Props {
   open: boolean;
@@ -70,12 +73,17 @@ function PlatformBadge({ platform }: { platform: OnboardingPlatform }) {
 
 export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
   const palette = usePalette();
+  const isMobile = useMediaQuery("(max-width:600px)");
   const storedUser = useMemo(() => (open ? getStoredUsername() : null), [open]);
   const [step, setStep] = useState<ModalStep>("welcome");
   const [tab, setTab] = useState<GameOrigin>(GameOrigin.ChessCom);
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [games, setGames] = useState<LoadedGame[] | undefined>();
+  const [gamesPlatform, setGamesPlatform] =
+    useState<OnboardingPlatform>("chesscom");
+  const fetchAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -94,31 +102,68 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
     }
     setError("");
     setLoading(false);
+    setGames(undefined);
   }, [open, storedUser]);
 
   const activePlatform: OnboardingPlatform =
     tab === GameOrigin.Lichess ? "lichess" : "chesscom";
 
-  const loadGame = async (user: string, userPlatform: OnboardingPlatform) => {
+  const fetchGames = useCallback(
+    async (user: string, userPlatform: OnboardingPlatform) => {
+      fetchAbortRef.current?.abort();
+      const controller = new AbortController();
+      fetchAbortRef.current = controller;
+
+      setError("");
+      setLoading(true);
+      setStep("games");
+      setGames(undefined);
+      setGamesPlatform(userPlatform);
+      setUsername(user);
+
+      try {
+        const loaded = await loadGamesForUser(
+          user,
+          userPlatform,
+          controller.signal
+        );
+        if (controller.signal.aborted) return;
+        setGames(loaded);
+      } catch (e) {
+        if (controller.signal.aborted) return;
+        const isStoredUserLoad =
+          !!storedUser &&
+          user.trim().toLowerCase() === storedUser.username.toLowerCase() &&
+          userPlatform === storedUser.platform;
+        setStep(isStoredUserLoad ? "welcome" : "username");
+        setError(
+          e instanceof Error ? e.message : "Could not load games. Try again."
+        );
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    },
+    [storedUser]
+  );
+
+  const selectGame = async (game: LoadedGame) => {
     setError("");
     setLoading(true);
     setStep("loading");
 
     try {
-      const { game, boardOrientation } = await loadFirstGameForUser(
-        user,
-        userPlatform
+      const { game: chessGame, boardOrientation } = loadedGameToChess(
+        game,
+        username
       );
-      saveUsername(user, userPlatform);
-      onGameLoaded(game, boardOrientation);
+      saveUsername(username, gamesPlatform);
+      onGameLoaded(chessGame, boardOrientation);
     } catch (e) {
-      const isStoredUserLoad =
-        !!storedUser &&
-        user.trim().toLowerCase() === storedUser.username.toLowerCase() &&
-        userPlatform === storedUser.platform;
-      setStep(isStoredUserLoad ? "welcome" : "username");
+      setStep("games");
       setError(
-        e instanceof Error ? e.message : "Could not load a game. Try again."
+        e instanceof Error ? e.message : "Could not load that game. Try again."
       );
     } finally {
       setLoading(false);
@@ -126,28 +171,39 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
   };
 
   const handleSkip = () => {
+    fetchAbortRef.current?.abort();
     markOnboardingComplete();
     onClose();
   };
 
   const displayName = username.trim() || "Player";
   const initial = displayName.charAt(0).toUpperCase();
+  const isGamesStep = step === "games";
 
   return (
     <Dialog
       open={open}
       onClose={handleSkip}
       fullWidth
-      maxWidth="xs"
+      maxWidth={isGamesStep ? "lg" : "xs"}
+      fullScreen={isGamesStep && isMobile}
       slotProps={{
-        backdrop: { sx: { bgcolor: "rgba(0, 0, 0, 0.85)" } },
+        backdrop: {
+          sx: {
+            bgcolor: isGamesStep
+              ? "rgba(0, 0, 0, 0.72)"
+              : "rgba(0, 0, 0, 0.85)",
+            backdropFilter: isGamesStep ? "blur(8px)" : "none",
+          },
+        },
         paper: {
           sx: {
             bgcolor: palette.surfaceRaised,
             border: `1px solid ${palette.border}`,
-            borderRadius: 3,
+            borderRadius: isGamesStep ? { xs: 0, sm: 3 } : 3,
             overflow: "visible",
-            mx: 2,
+            mx: isGamesStep ? { xs: 0, sm: 2 } : 2,
+            maxHeight: isGamesStep ? { xs: "100dvh", sm: "90vh" } : undefined,
           },
         },
       }}
@@ -162,6 +218,7 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
             right: 8,
             color: palette.textMuted,
             fontSize: "0.75rem",
+            zIndex: 1,
           }}
         >
           Skip
@@ -178,10 +235,22 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
             }}
           >
             <CircularProgress sx={{ color: palette.accent }} />
-            <Typography color="text.secondary">
-              Loading your latest game…
-            </Typography>
+            <Typography color="text.secondary">Loading your game…</Typography>
           </Box>
+        ) : step === "games" ? (
+          <GameReviewGrid
+            username={username}
+            platform={gamesPlatform}
+            games={games}
+            loading={loading}
+            error={error}
+            onSelectGame={(game) => void selectGame(game)}
+            onBack={() => {
+              setError("");
+              setGames(undefined);
+              setStep(storedUser ? "welcome" : "username");
+            }}
+          />
         ) : step === "welcome" && storedUser ? (
           <>
             <Box
@@ -299,7 +368,9 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
               color="primary"
               fullWidth
               disabled={loading}
-              onClick={() => loadGame(storedUser.username, storedUser.platform)}
+              onClick={() =>
+                void fetchGames(storedUser.username, storedUser.platform)
+              }
               sx={{
                 py: 1.35,
                 borderRadius: 2,
@@ -309,7 +380,7 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
                 "&:hover": { bgcolor: palette.accentHover },
               }}
             >
-              Yes, analyze my games
+              Yes, show my games
             </Button>
 
             <Box sx={{ textAlign: "center", mt: 1.5 }}>
@@ -336,8 +407,7 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
               Enter your username
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              We&apos;ll load your most recent game and show you how analysis
-              works.
+              We&apos;ll fetch your recent games so you can pick one to analyze.
             </Typography>
 
             <Tabs
@@ -373,7 +443,7 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
               onChange={(e) => setUsername(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && username.trim()) {
-                  loadGame(username, activePlatform);
+                  void fetchGames(username, activePlatform);
                 }
               }}
               sx={{ mb: 2 }}
@@ -390,7 +460,7 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
               color="primary"
               fullWidth
               disabled={!username.trim() || loading}
-              onClick={() => loadGame(username, activePlatform)}
+              onClick={() => void fetchGames(username, activePlatform)}
               sx={{
                 py: 1.35,
                 borderRadius: 2,
@@ -399,7 +469,7 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
                 "&:hover": { bgcolor: palette.accentHover },
               }}
             >
-              Analyze my latest game
+              Find my games
             </Button>
 
             {storedUser && (

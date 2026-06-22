@@ -4,6 +4,7 @@ import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import NavLink from "@/components/NavLink";
 import ConfirmLogoutDialog from "@/components/ConfirmLogoutDialog";
+import { SHOW_SIGN_IN_BUTTON } from "@/constants";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePalette } from "@/hooks/usePalette";
 import { useRouter } from "@/hooks/useRouter";
@@ -38,6 +39,10 @@ export function SidebarAccount({ onNavigate }: { onNavigate?: () => void }) {
   }
 
   if (!isAuthenticated || !user) {
+    if (!SHOW_SIGN_IN_BUTTON) {
+      return null;
+    }
+
     return (
       <Box sx={{ px: 1.5, pt: 1.25, pb: 0.5 }}>
         <NavLink href="/login">
@@ -169,7 +174,7 @@ export function MobileSignInButton() {
   const palette = usePalette();
   const { isAuthenticated, loading } = useAuth();
 
-  if (loading || isAuthenticated) return null;
+  if (loading || isAuthenticated || !SHOW_SIGN_IN_BUTTON) return null;
 
   return (
     <NavLink href="/login" fullWidth={false}>
@@ -208,7 +213,7 @@ export function MobileHeaderAccount() {
   }
 
   if (!isAuthenticated || !user) {
-    return <MobileSignInButton />;
+    return SHOW_SIGN_IN_BUTTON ? <MobileSignInButton /> : null;
   }
 
   const initial = user.username.charAt(0).toUpperCase();

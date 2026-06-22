@@ -10,6 +10,7 @@
     "build:static": "tsc && vite build --config vite.config.ts",
     "start": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 && tsc --noEmit",
+    "indexnow": "node scripts/submit-indexnow.mjs",
     "deploy": "npm run lint && npm run build && cdk deploy"
   },
   "dependencies": {

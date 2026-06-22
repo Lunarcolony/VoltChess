@@ -26,6 +26,7 @@ export const REPORT_COLORS = {
   rowBg: "#181818",
   rowBorder: "#2c2c2c",
   track: "#2a2a2a",
+  barOutline: "rgba(255, 255, 255, 0.14)",
 } as const;
 
 export const PHASE_COLORS = {

@@ -15,6 +15,13 @@ export const API_URL = resolveApiBaseUrl();
 export const ENABLE_AUTHENTICATION =
   import.meta.env.VITE_ENABLE_AUTHENTICATION !== "false";
 
+/**
+ * Sidebar/mobile "Sign in" entry point. /login remains reachable by URL for testing.
+ * Set VITE_SHOW_SIGN_IN_BUTTON=true when Academy is ready for public users.
+ */
+export const SHOW_SIGN_IN_BUTTON =
+  import.meta.env.VITE_SHOW_SIGN_IN_BUTTON === "true";
+
 export const CLASSIFICATION_COLORS: Record<MoveClassification, string> = {
   [MoveClassification.Opening]: "#dbac86",
   [MoveClassification.Forced]: "#dbac86",

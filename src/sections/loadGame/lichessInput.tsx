@@ -142,7 +142,9 @@ export default function LichessInput({
           renderInput={(params) => (
             <TextField
               {...params}
-              label="Enter your Lichess username..."
+              label={fillHeight ? undefined : "Enter your Lichess username..."}
+              placeholder={fillHeight ? "Lichess username" : undefined}
+              size={fillHeight ? "small" : "medium"}
               variant="outlined"
             />
           )}
