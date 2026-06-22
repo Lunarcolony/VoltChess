@@ -13,6 +13,8 @@ export interface Game {
   eval?: GameEval;
   termination?: string;
   timeControl?: string;
+  /** Platform speed category: bullet, blitz, rapid, classical, daily, etc. */
+  timeClass?: string;
 }
 
 export interface Player {
@@ -30,6 +32,8 @@ export interface LoadedGame {
   black: Player;
   result?: string;
   timeControl?: string;
+  /** Platform speed category: bullet, blitz, rapid, classical, daily, etc. */
+  timeClass?: string;
   movesNb?: number;
   url?: string;
 }

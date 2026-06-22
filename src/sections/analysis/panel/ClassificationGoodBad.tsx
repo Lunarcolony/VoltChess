@@ -85,44 +85,40 @@ function ClassificationColumn({
     >
       <Box
         sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 0.75,
-          px: 1.25,
-          py: 0.75,
-          borderBottom: `1px solid ${palette.borderSubtle}`,
-        }}
-      >
-        <Box
-          sx={{
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
-            bgcolor: dotColor,
-            flexShrink: 0,
-          }}
-        />
-        <Typography variant="body2" fontWeight={600} fontSize="0.8rem">
-          {title}
-        </Typography>
-      </Box>
-
-      <Box
-        sx={{
           display: "grid",
           gridTemplateColumns: "2.25rem 1fr 2.25rem",
           alignItems: "center",
           gap: 0.5,
           px: 1,
-          py: 0.4,
+          py: 0.75,
           borderBottom: `1px solid ${palette.borderSubtle}`,
         }}
       >
         <Box sx={{ display: "flex", justifyContent: "center" }}>
           <PlayerColorIcon color={Color.White} />
         </Box>
-        <Box />
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 0.75,
+            minWidth: 0,
+          }}
+        >
+          <Box
+            sx={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              bgcolor: dotColor,
+              flexShrink: 0,
+            }}
+          />
+          <Typography variant="body2" fontWeight={600} fontSize="0.8rem" noWrap>
+            {title}
+          </Typography>
+        </Box>
         <Box sx={{ display: "flex", justifyContent: "center" }}>
           <PlayerColorIcon color={Color.Black} />
         </Box>

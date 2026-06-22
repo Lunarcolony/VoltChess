@@ -140,11 +140,11 @@ export default function NewGameDialog({ open, onClose, setGame }: Props) {
           )}
 
           {gameOrigin === GameOrigin.ChessCom && (
-            <ChessComInput onSelect={handleAddGame} />
+            <ChessComInput onSelect={handleAddGame} variant="dialog" />
           )}
 
           {gameOrigin === GameOrigin.Lichess && (
-            <LichessInput onSelect={handleAddGame} />
+            <LichessInput onSelect={handleAddGame} variant="dialog" />
           )}
 
           <Snackbar open={!!parsingError}>

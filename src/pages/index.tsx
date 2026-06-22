@@ -5,10 +5,13 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { Chess } from "chess.js";
 import {
   Box,
+  Chip,
   CircularProgress,
   Grid2 as Grid,
   Typography,
 } from "@mui/material";
+import { Icon } from "@iconify/react";
+import { alpha } from "@mui/material/styles";
 import { useChessActions } from "@/hooks/useChessActions";
 import { useGameDatabase } from "@/hooks/useGameDatabase";
 import { decodeBase64 } from "@/lib/helpers";
@@ -168,37 +171,51 @@ function Home() {
       />
 
       <Box sx={{ maxWidth: 960, mx: "auto" }}>
-        <Typography
-          variant="h1"
-          sx={{
-            mb: 0.5,
-            color: palette.text,
-            fontSize: { xs: "1.75rem", sm: "2.125rem" },
-          }}
-        >
-          {isReturning
-            ? "Welcome back"
-            : "Free Chess.com & Lichess Game Analysis"}
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 1.5 }}>
-          {DEFAULT_SEO.description}
-        </Typography>
+        <Box sx={{ mb: 3 }}>
+          <Typography
+            variant="h1"
+            sx={{
+              mb: 1,
+              color: palette.text,
+              fontSize: { xs: "1.85rem", sm: "2.35rem" },
+              fontWeight: 800,
+              lineHeight: 1.15,
+            }}
+          >
+            {isReturning
+              ? "Welcome back"
+              : "Free Chess.com & Lichess Game Analysis"}
+          </Typography>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ mb: 2, lineHeight: 1.65, maxWidth: 720 }}
+          >
+            {DEFAULT_SEO.description}
+          </Typography>
 
-        <Box
-          component="ul"
-          sx={{
-            m: 0,
-            mb: 2.5,
-            pl: 2.5,
-            color: palette.textMuted,
-            fontSize: "0.9rem",
-          }}
-        >
-          {TRUST_BULLETS.map((bullet) => (
-            <Box component="li" key={bullet} sx={{ mb: 0.5 }}>
-              {bullet}
-            </Box>
-          ))}
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+            {TRUST_BULLETS.map((bullet) => (
+              <Chip
+                key={bullet}
+                icon={<Icon icon="mdi:check-circle-outline" width={16} />}
+                label={bullet}
+                size="small"
+                sx={{
+                  height: "auto",
+                  py: 0.75,
+                  bgcolor: alpha(palette.accent, 0.08),
+                  border: `1px solid ${alpha(palette.accent, 0.18)}`,
+                  color: palette.textMuted,
+                  "& .MuiChip-icon": { color: palette.accent },
+                  "& .MuiChip-label": {
+                    whiteSpace: "normal",
+                    lineHeight: 1.35,
+                  },
+                }}
+              />
+            ))}
+          </Box>
         </Box>
 
         {onboardingReady && (

@@ -44,5 +44,6 @@ export interface LichessGame {
   moves: string;
   pgn: string;
   clock: LichessClock;
+  speed?: string;
   url?: string;
 }

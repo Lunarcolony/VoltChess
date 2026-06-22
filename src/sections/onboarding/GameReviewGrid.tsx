@@ -17,6 +17,7 @@ interface Props {
   games: LoadedGame[] | undefined;
   loading: boolean;
   error: string;
+  variant?: "user" | "demo";
   onSelectGame: (game: LoadedGame) => void;
   onBack: () => void;
 }
@@ -27,6 +28,7 @@ export default function GameReviewGrid({
   games,
   loading,
   error,
+  variant = "user",
   onSelectGame,
   onBack,
 }: Props) {
@@ -65,17 +67,23 @@ export default function GameReviewGrid({
         Chess Review
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
-        Latest games from{" "}
-        <Link
-          href={profileUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          underline="hover"
-          sx={{ color: palette.accent, fontWeight: 600 }}
-        >
-          {username}
-        </Link>{" "}
-        on {platformLabel}
+        {variant === "demo" ? (
+          "Pick a classic game to explore analysis — no account needed."
+        ) : (
+          <>
+            Latest games from{" "}
+            <Link
+              href={profileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              underline="hover"
+              sx={{ color: palette.accent, fontWeight: 600 }}
+            >
+              {username}
+            </Link>{" "}
+            on {platformLabel}
+          </>
+        )}
       </Typography>
 
       {loading ? (

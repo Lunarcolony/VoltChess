@@ -112,6 +112,7 @@ const formatLichessGame = (data: LichessGame): LoadedGame => {
     },
     result: getGameResult(data),
     timeControl: `${Math.floor(data.clock?.initial / 60 || 0)}+${data.clock?.increment || 0}`,
+    timeClass: data.speed,
     date: new Date(data.createdAt || data.lastMoveAt).toLocaleDateString(),
     movesNb: data.moves?.split(" ").length || 0,
     url: `https://lichess.org/${data.id}`,

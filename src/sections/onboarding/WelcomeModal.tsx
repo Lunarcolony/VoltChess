@@ -5,6 +5,7 @@ import {
   Button,
   CircularProgress,
   Dialog,
+  Divider,
   Link,
   Tab,
   Tabs,
@@ -12,6 +13,7 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { Icon } from "@iconify/react";
 import { Chess } from "chess.js";
 import { usePalette } from "@/hooks/usePalette";
@@ -20,6 +22,7 @@ import type { LoadedGame } from "@/types/game";
 import type { OnboardingPlatform } from "./constants";
 import GameReviewGrid from "./GameReviewGrid";
 import { loadedGameToChess, loadGamesForUser } from "./loadOnboardingGame";
+import { DEMO_GAMES } from "@/data/demoGames";
 import {
   getStoredUsername,
   markOnboardingComplete,
@@ -83,6 +86,7 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
   const [games, setGames] = useState<LoadedGame[] | undefined>();
   const [gamesPlatform, setGamesPlatform] =
     useState<OnboardingPlatform>("chesscom");
+  const [isDemoSession, setIsDemoSession] = useState(false);
   const fetchAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -103,6 +107,7 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
     setError("");
     setLoading(false);
     setGames(undefined);
+    setIsDemoSession(false);
   }, [open, storedUser]);
 
   const activePlatform: OnboardingPlatform =
@@ -120,6 +125,7 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
       setGames(undefined);
       setGamesPlatform(userPlatform);
       setUsername(user);
+      setIsDemoSession(false);
 
       try {
         const loaded = await loadGamesForUser(
@@ -148,6 +154,17 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
     [storedUser]
   );
 
+  const handleTryDemo = () => {
+    fetchAbortRef.current?.abort();
+    setError("");
+    setLoading(false);
+    setUsername("Demo");
+    setGamesPlatform("chesscom");
+    setGames(DEMO_GAMES);
+    setIsDemoSession(true);
+    setStep("games");
+  };
+
   const selectGame = async (game: LoadedGame) => {
     setError("");
     setLoading(true);
@@ -158,7 +175,9 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
         game,
         username
       );
-      saveUsername(username, gamesPlatform);
+      if (!isDemoSession) {
+        saveUsername(username, gamesPlatform);
+      }
       onGameLoaded(chessGame, boardOrientation);
     } catch (e) {
       setStep("games");
@@ -244,10 +263,12 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
             games={games}
             loading={loading}
             error={error}
+            variant={isDemoSession ? "demo" : "user"}
             onSelectGame={(game) => void selectGame(game)}
             onBack={() => {
               setError("");
               setGames(undefined);
+              setIsDemoSession(false);
               setStep(storedUser ? "welcome" : "username");
             }}
           />
@@ -470,6 +491,44 @@ export default function WelcomeModal({ open, onClose, onGameLoaded }: Props) {
               }}
             >
               Find my games
+            </Button>
+
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                my: 1.75,
+              }}
+            >
+              <Divider sx={{ flex: 1, borderColor: palette.borderSubtle }} />
+              <Typography
+                variant="caption"
+                sx={{ color: palette.textMuted, fontSize: "0.75rem" }}
+              >
+                or
+              </Typography>
+              <Divider sx={{ flex: 1, borderColor: palette.borderSubtle }} />
+            </Box>
+
+            <Button
+              variant="outlined"
+              fullWidth
+              onClick={handleTryDemo}
+              startIcon={<Icon icon="mdi:chess-knight" width={18} />}
+              sx={{
+                py: 1.25,
+                borderRadius: 2,
+                borderColor: alpha(palette.accent, 0.35),
+                color: palette.text,
+                fontWeight: 600,
+                "&:hover": {
+                  borderColor: palette.accent,
+                  bgcolor: alpha(palette.accent, 0.06),
+                },
+              }}
+            >
+              Try demo matches
             </Button>
 
             {storedUser && (

@@ -2,6 +2,7 @@ import { Box, Typography } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { alpha } from "@mui/material/styles";
 import { usePalette } from "@/hooks/usePalette";
+import { getTimeClassLabel } from "@/lib/timeControl";
 import type { LoadedGame } from "@/types/game";
 
 export type UserGameResult = "win" | "loss" | "draw" | "unknown";
@@ -66,7 +67,7 @@ export default function GameReviewCard({
   const palette = usePalette();
   const result = getUserGameResult(game, username);
   const meta = RESULT_META[result];
-  const isRated = (game.white.rating ?? 0) > 0 || (game.black.rating ?? 0) > 0;
+  const timeClassLabel = getTimeClassLabel(game);
 
   return (
     <Box
@@ -114,7 +115,7 @@ export default function GameReviewCard({
             {meta.label}
           </Typography>
         </Box>
-        {isRated && (
+        {timeClassLabel && (
           <Box
             sx={{
               px: 1,
@@ -130,7 +131,7 @@ export default function GameReviewCard({
               fontWeight={600}
               sx={{ color: palette.accent, fontSize: "0.7rem" }}
             >
-              Rated
+              {timeClassLabel}
             </Typography>
           </Box>
         )}
@@ -171,6 +172,12 @@ export default function GameReviewCard({
             <Typography variant="caption">{game.timeControl}</Typography>
           </Box>
         )}
+        {game.movesNb ? (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Icon icon="mdi:chess-pawn" width={15} />
+            <Typography variant="caption">{game.movesNb} moves</Typography>
+          </Box>
+        ) : null}
       </Box>
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: "auto" }}>

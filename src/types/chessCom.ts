@@ -14,6 +14,7 @@ export interface ChessComGame {
   black: ChessComPlayer;
   result: string;
   time_control: string;
+  time_class?: string;
   end_time: number;
   eco?: string;
   termination?: string;

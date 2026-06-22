@@ -81,6 +81,7 @@ const formatChessComGame = (data: ChessComGame): LoadedGame => {
     },
     result,
     timeControl: getGameTimeControl(data),
+    timeClass: data.time_class,
     date: data.end_time
       ? new Date(data.end_time * 1000).toLocaleDateString()
       : new Date().toLocaleDateString(),
