@@ -12,8 +12,7 @@ import {
   processServerAnalysisQueue,
   releaseGameAnalysis,
 } from "@/lib/api/sync";
-
-const LOG = "[voltchess-queue]";
+import { debug } from "@/lib/debug";
 
 export type QueuePhase =
   | "idle"
@@ -53,6 +52,7 @@ function emit() {
 
 function patch(partial: Partial<QueueState>) {
   state = { ...state, ...partial };
+  debug.log("queue", "state patch", partial as Record<string, unknown>);
   emit();
 }
 
@@ -77,6 +77,7 @@ async function loadEngine(): Promise<UciEngine> {
   if (engine?.getIsReady()) return engine;
 
   if (!engineLoadPromise) {
+    debug.log("queue", "loading Stockfish engine");
     patch({
       phase: "loading_engine",
       running: true,
@@ -85,6 +86,7 @@ async function loadEngine(): Promise<UciEngine> {
     });
     engineLoadPromise = Stockfish17.create(true).then((eng) => {
       engine = eng;
+      debug.log("queue", "Stockfish engine ready");
       return eng;
     });
   }
@@ -110,7 +112,7 @@ async function analyzeOne(game: ServerGameDetail): Promise<void> {
     message: `Analyzing ${label}…`,
   });
 
-  console.log(`${LOG} ${label}`);
+  debug.log("queue", "analyzeOne start", { gameId: game.id, label });
 
   const chess = new Chess();
   chess.loadPgn(game.pgn);
@@ -137,34 +139,46 @@ async function analyzeOne(game: ServerGameDetail): Promise<void> {
     settings: evalResult.settings as unknown as Record<string, unknown>,
   });
 
-  console.log(`${LOG} finished ${label}`);
+  debug.log("queue", "analyzeOne complete", { gameId: game.id, label });
 }
 
 async function claimNext(
   priorityId?: string
 ): Promise<ServerGameDetail | null> {
   if (priorityId) {
+    debug.log("queue", "claimNext — trying priority game", { priorityId });
     try {
       return await claimGameAnalysis(priorityId);
     } catch (err) {
-      console.warn(`${LOG} could not claim ${priorityId}`, err);
+      debug.warn("queue", "claimNext — priority claim failed", {
+        priorityId,
+        message: err instanceof Error ? err.message : String(err),
+      });
     }
   }
 
   let pending: ServerGameDetail[];
   try {
+    debug.log("queue", "claimNext — fetching pending list");
     pending = await fetchPendingAnalysis(1);
   } catch (err) {
     throw new Error(formatQueueError(err));
   }
 
   const game = pending[0];
-  if (!game?.pgn) return null;
+  if (!game?.pgn) {
+    debug.log("queue", "claimNext — no pending games");
+    return null;
+  }
 
   try {
+    debug.log("queue", "claimNext — claiming game", { gameId: game.id });
     return await claimGameAnalysis(game.id);
   } catch (err) {
-    console.warn(`${LOG} could not claim ${game.id}`, err);
+    debug.warn("queue", "claimNext — claim failed", {
+      gameId: game.id,
+      message: err instanceof Error ? err.message : String(err),
+    });
     return null;
   }
 }
@@ -182,7 +196,7 @@ export async function runAnalysisQueue(
   opts: RunQueueOptions = {}
 ): Promise<{ gamesDone: number; error?: string }> {
   if (state.running) {
-    console.debug(`${LOG} already running`);
+    debug.log("queue", "runAnalysisQueue — already running, ignoring");
     return { gamesDone: 0, error: "Analysis already in progress" };
   }
 
@@ -190,6 +204,12 @@ export async function runAnalysisQueue(
   const maxGames = opts.maxGames ?? 30;
   let gamesDone = 0;
   let priorityId = opts.priorityGameId;
+
+  debug.log("queue", "runAnalysisQueue — job started", {
+    jobId,
+    maxGames,
+    priorityId,
+  });
 
   patch({
     running: true,
@@ -213,6 +233,10 @@ export async function runAnalysisQueue(
         gamesDone += 1;
         patch({ gamesDone });
       } catch (err) {
+        debug.warn("queue", "analyzeOne failed — releasing claim", {
+          gameId: game.id,
+          message: err instanceof Error ? err.message : String(err),
+        });
         await releaseGameAnalysis(game.id).catch(() => {});
         throw err;
       }
@@ -222,6 +246,12 @@ export async function runAnalysisQueue(
       gamesDone > 0
         ? `Analyzed ${gamesDone} game${gamesDone === 1 ? "" : "s"}`
         : "No games waiting for analysis";
+
+    debug.log("queue", "runAnalysisQueue — job finished OK", {
+      jobId,
+      gamesDone,
+      message,
+    });
 
     patch({
       phase: gamesDone > 0 ? "done" : "idle",
@@ -233,10 +263,14 @@ export async function runAnalysisQueue(
     return { gamesDone };
   } catch (err) {
     const msg = formatQueueError(err);
-    console.error(`${LOG} browser queue failed:`, err);
+    debug.error("queue", "runAnalysisQueue — browser queue failed", {
+      jobId,
+      message: msg,
+    });
 
     let serverDone = 0;
     try {
+      debug.log("queue", "runAnalysisQueue — trying Pi server fallback");
       patch({
         phase: "analyzing",
         message: "Browser failed — trying Pi server fallback…",
@@ -246,6 +280,9 @@ export async function runAnalysisQueue(
       serverDone = serverResult.processed ?? 0;
       if (serverDone > 0) {
         const doneMsg = `Pi analyzed ${serverDone} game${serverDone === 1 ? "" : "s"}`;
+        debug.log("queue", "runAnalysisQueue — Pi fallback succeeded", {
+          serverDone,
+        });
         patch({
           phase: "done",
           running: false,
@@ -256,7 +293,10 @@ export async function runAnalysisQueue(
         return { gamesDone: gamesDone + serverDone };
       }
     } catch (serverErr) {
-      console.warn(`${LOG} server fallback failed:`, serverErr);
+      debug.warn("queue", "runAnalysisQueue — Pi fallback failed", {
+        message:
+          serverErr instanceof Error ? serverErr.message : String(serverErr),
+      });
     }
 
     patch({

@@ -12,13 +12,33 @@ import LocalGameMigrationPrompt from "./components/LocalGameMigrationPrompt";
 import { AnalysisQueueProvider } from "./contexts/AnalysisQueueContext";
 import { loadApiConfig } from "./config/apiUrl";
 import { syncEngineSettingsDefaults } from "./lib/syncEngineSettingsDefaults";
+import { debug, initDebugConsole } from "./lib/debug";
 
+initDebugConsole();
 syncEngineSettingsDefaults();
 
 const queryClient = new QueryClient();
 
+queryClient.getQueryCache().subscribe((event) => {
+  if (event.type !== "updated") return;
+  const q = event.query;
+  debug.log("query", "react-query updated", {
+    queryKey: q.queryKey,
+    status: q.state.status,
+    fetchStatus: q.state.fetchStatus,
+    isStale: q.isStale(),
+    dataUpdatedAt: q.state.dataUpdatedAt
+      ? new Date(q.state.dataUpdatedAt).toISOString()
+      : null,
+  });
+});
+
 async function bootstrap() {
-  await loadApiConfig();
+  debug.log("bootstrap", "app bootstrap start");
+  const apiUrl = await loadApiConfig();
+  debug.log("bootstrap", "API config loaded", {
+    apiUrl: apiUrl || "(same-origin proxy)",
+  });
 
   ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
@@ -34,6 +54,7 @@ async function bootstrap() {
       </QueryClientProvider>
     </React.StrictMode>
   );
+  debug.log("bootstrap", "React root rendered");
 }
 
 void bootstrap();

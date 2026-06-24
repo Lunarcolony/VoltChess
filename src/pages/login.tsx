@@ -17,6 +17,7 @@ import { usePalette } from "@/hooks/usePalette";
 import AuthLayout from "@/sections/auth/AuthLayout";
 import { getApiErrorMessage } from "@/lib/apiErrors";
 import { landingForRole } from "@/lib/auth";
+import { debug } from "@/lib/debug";
 
 function LoginForm() {
   const router = useRouter();
@@ -42,14 +43,21 @@ function LoginForm() {
     }
 
     setLoading(true);
+    debug.log("auth", "login form submit", { username: username.trim() });
     try {
       const me = await login(username.trim(), password);
       const from = (location.state as { from?: { pathname: string } })?.from
         ?.pathname;
-      // Honor an explicit deep link the user was sent to login from; otherwise
-      // drop them on their role's home so they don't have to hunt for it.
-      router.push(from && from !== "/" ? from : landingForRole(me.role));
+      const target = from && from !== "/" ? from : landingForRole(me.role);
+      debug.log("auth", "login form success — redirecting", {
+        target,
+        role: me.role,
+      });
+      router.push(target);
     } catch (err: unknown) {
+      debug.warn("auth", "login form failed", {
+        message: getApiErrorMessage(err),
+      });
       setError(getApiErrorMessage(err));
     } finally {
       setLoading(false);

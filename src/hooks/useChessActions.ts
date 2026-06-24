@@ -19,6 +19,7 @@ export const useChessActions = (chessAtom: PrimitiveAtom<Chess>) => {
     (pgn: string) => {
       const newGame = new Chess();
       newGame.loadPgn(pgn);
+ 
       setGame(newGame);
     },
     [setGame]

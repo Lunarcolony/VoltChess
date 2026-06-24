@@ -1,4 +1,5 @@
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "@/constants";
+import { debug, maskToken } from "@/lib/debug";
 import type { User } from "@/types/user";
 
 const USER_CACHE = "voltchess_user";
@@ -14,13 +15,22 @@ function migrateLegacyAuthKeys(): void {
 
   if (legacyAccess && !localStorage.getItem(ACCESS_TOKEN)) {
     localStorage.setItem(ACCESS_TOKEN, legacyAccess);
+    debug.log("storage", "migrated legacy access token → voltchess_access", {
+      token: maskToken(legacyAccess),
+    });
   }
   if (legacyRefresh && !localStorage.getItem(REFRESH_TOKEN)) {
     localStorage.setItem(REFRESH_TOKEN, legacyRefresh);
+    debug.log("storage", "migrated legacy refresh token → voltchess_refresh", {
+      token: maskToken(legacyRefresh),
+    });
   }
 
   if (legacyAccess) localStorage.removeItem(LEGACY_ACCESS);
   if (legacyRefresh) localStorage.removeItem(LEGACY_REFRESH);
+  if (legacyAccess || legacyRefresh) {
+    debug.log("storage", "legacy auth key migration complete");
+  }
 }
 
 migrateLegacyAuthKeys();
@@ -42,15 +52,30 @@ export function hasStoredSession(): boolean {
 export function setTokens(access: string, refresh: string): void {
   localStorage.setItem(ACCESS_TOKEN, access);
   localStorage.setItem(REFRESH_TOKEN, refresh);
+  debug.log("storage", "wrote tokens to localStorage", {
+    access: maskToken(access),
+    refresh: maskToken(refresh),
+    keys: [ACCESS_TOKEN, REFRESH_TOKEN],
+  });
 }
 
 export function clearAuthStorage(): void {
+  debug.log("storage", "clearing all auth storage", {
+    keys: [
+      ACCESS_TOKEN,
+      REFRESH_TOKEN,
+      USER_CACHE,
+      LEGACY_ACCESS,
+      LEGACY_REFRESH,
+    ],
+  });
   localStorage.removeItem(ACCESS_TOKEN);
   localStorage.removeItem(REFRESH_TOKEN);
   localStorage.removeItem(USER_CACHE);
   localStorage.removeItem(LEGACY_ACCESS);
   localStorage.removeItem(LEGACY_REFRESH);
   if (typeof window !== "undefined") {
+    debug.log("storage", "dispatching voltchess:auth-expired event");
     window.dispatchEvent(new Event("voltchess:auth-expired"));
   }
 }
@@ -58,10 +83,20 @@ export function clearAuthStorage(): void {
 export function readCachedUser(): User | null {
   if (typeof window === "undefined") return null;
   const raw = localStorage.getItem(USER_CACHE);
-  if (!raw) return null;
+  if (!raw) {
+    debug.log("storage", "read cached user — miss (no entry)");
+    return null;
+  }
   try {
-    return JSON.parse(raw) as User;
+    const user = JSON.parse(raw) as User;
+    debug.log("storage", "read cached user — hit", {
+      userId: user.id,
+      username: user.username,
+      role: user.role,
+    });
+    return user;
   } catch {
+    debug.warn("storage", "cached user JSON corrupt — removing entry");
     localStorage.removeItem(USER_CACHE);
     return null;
   }
@@ -69,4 +104,10 @@ export function readCachedUser(): User | null {
 
 export function writeCachedUser(user: User): void {
   localStorage.setItem(USER_CACHE, JSON.stringify(user));
+  debug.log("storage", "wrote cached user to localStorage", {
+    userId: user.id,
+    username: user.username,
+    role: user.role,
+    key: USER_CACHE,
+  });
 }

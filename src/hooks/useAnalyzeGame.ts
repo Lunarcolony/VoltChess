@@ -6,6 +6,7 @@ import { useGameDatabase } from "@/hooks/useGameDatabase";
 import { usePlayersData } from "@/hooks/usePlayersData";
 import { logAnalyticsEvent } from "@/lib/firebase";
 import { syncAnalysisResult } from "@/lib/gameSync";
+import { debug } from "@/lib/debug";
 import { SavedEvals } from "@/types/eval";
 import {
   engineDepthAtom,
@@ -45,7 +46,7 @@ export function useAnalyzeGame() {
         evaluationProgress
       ) {
         if (!engine?.getIsReady()) {
-          console.debug("[voltchess] analysis waiting for Stockfish engine…");
+          debug.log("queue", "useAnalyzeGame — waiting for Stockfish");
         }
         return false;
       }
@@ -55,6 +56,15 @@ export function useAnalyzeGame() {
       if (force) {
         setEval(undefined);
       }
+
+      debug.log("queue", "useAnalyzeGame — starting evaluation", {
+        force,
+        moves: params.fens.length,
+        depth: engineDepth,
+        multiPv: engineMultiPv,
+        serverGameId: serverGameFromUrl?.serverId,
+        localGameId: gameFromUrl?.id,
+      });
 
       try {
         const newGameEval = await engine.evaluateGame({
@@ -81,7 +91,11 @@ export function useAnalyzeGame() {
           newGameEval,
           gameFromUrl?.id,
           serverGameFromUrl?.serverId
-        ).catch((err) => console.warn("Server sync failed:", err));
+        ).catch((err) =>
+          debug.warn("sync", "syncAnalysisResult failed", {
+            message: err instanceof Error ? err.message : String(err),
+          })
+        );
 
         const gameSavedEvals: SavedEvals = params.fens.reduce(
           (acc, fen, idx) => {
@@ -102,9 +116,14 @@ export function useAnalyzeGame() {
           nbPositions: params.fens.length,
         });
 
+        debug.log("queue", "useAnalyzeGame — evaluation complete", {
+          positions: newGameEval.positions.length,
+        });
         return true;
       } catch (error) {
-        console.error(error);
+        debug.error("queue", "useAnalyzeGame — evaluation failed", {
+          message: error instanceof Error ? error.message : String(error),
+        });
         setEvaluationProgress(0);
         return false;
       }

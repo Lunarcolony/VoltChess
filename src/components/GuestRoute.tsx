@@ -5,6 +5,7 @@ import { LoadingSpinner } from "@/components/Loading";
 import { useAuth } from "@/contexts/AuthContext";
 import { ENABLE_AUTHENTICATION } from "@/constants";
 import { landingForRole } from "@/lib/auth";
+import { debug } from "@/lib/debug";
 
 interface GuestRouteProps {
   children: ReactNode;
@@ -31,9 +32,22 @@ export default function GuestRoute({ children, redirectTo }: GuestRouteProps) {
         (from && from !== "/" && from !== "/login" && from !== "/register"
           ? from
           : landingForRole(user?.role));
+      debug.log("route", "GuestRoute — authenticated user redirect", {
+        from: location.pathname,
+        target,
+        role: user?.role,
+      });
       router.replace(target);
     }
-  }, [loading, isAuthenticated, router, redirectTo, location.state, user]);
+  }, [
+    loading,
+    isAuthenticated,
+    router,
+    redirectTo,
+    location.state,
+    location.pathname,
+    user,
+  ]);
 
   if (ENABLE_AUTHENTICATION && loading) {
     return <LoadingSpinner message="Loading..." />;

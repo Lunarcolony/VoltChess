@@ -1,6 +1,7 @@
 import { formatGameToDatabase } from "@/lib/chess";
 import { fetchGame } from "@/lib/api/games";
 import { isServerGameId } from "@/lib/gameSync";
+import { debug } from "@/lib/debug";
 import { isAxiosError } from "axios";
 import { GameEval } from "@/types/eval";
 import { Game } from "@/types/game";
@@ -45,11 +46,14 @@ export const useGameDatabase = (shouldFetchGames?: boolean) => {
 
   useEffect(() => {
     const initDatabase = async () => {
+      debug.log("idb", "opening IndexedDB games v1");
       const db = await openDB<GameDatabaseSchema>("games", 1, {
         upgrade(db) {
+          debug.log("idb", "IndexedDB upgrade — creating games object store");
           db.createObjectStore("games", { keyPath: "id", autoIncrement: true });
         },
       });
+      debug.log("idb", "IndexedDB ready");
       setDb(db);
     };
 
@@ -59,6 +63,9 @@ export const useGameDatabase = (shouldFetchGames?: boolean) => {
   const loadGames = useCallback(async () => {
     if (db && fetchGames) {
       const games = await db.getAll("games");
+      debug.log("idb", "loaded local games from IndexedDB", {
+        count: games.length,
+      });
       setGames(games);
     }
   }, [db, fetchGames, setGames]);
@@ -73,6 +80,7 @@ export const useGameDatabase = (shouldFetchGames?: boolean) => {
 
       const gameToAdd = formatGameToDatabase(game);
       const gameId = await db.add("games", gameToAdd as Game);
+      debug.log("idb", "added local game", { gameId });
 
       loadGames();
 
@@ -89,6 +97,7 @@ export const useGameDatabase = (shouldFetchGames?: boolean) => {
       if (!game) throw new Error("Game not found");
 
       await db.put("games", { ...game, eval: evaluation });
+      debug.log("idb", "saved eval for local game", { gameId });
 
       loadGames();
     },
@@ -109,6 +118,7 @@ export const useGameDatabase = (shouldFetchGames?: boolean) => {
       if (!db) throw new Error("Database not initialized");
 
       await db.delete("games", gameId);
+      debug.log("idb", "deleted local game", { gameId });
 
       loadGames();
     },
@@ -125,6 +135,11 @@ export const useGameDatabase = (shouldFetchGames?: boolean) => {
       return undefined;
     }
 
+    debug.log("idb", "gameId from URL changed", {
+      gameId,
+      isServer: isServerGameId(gameId),
+    });
+
     if (isServerGameId(gameId)) {
       setGameFromUrl(undefined);
 
@@ -133,8 +148,16 @@ export const useGameDatabase = (shouldFetchGames?: boolean) => {
 
       const load = async (): Promise<"ok" | "pending" | "gone"> => {
         try {
+          debug.log("idb", "fetchGame from server", { gameId });
           const serverGame = await fetchGame(gameId);
           if (cancelled) return "pending";
+          const hasEval = !!serverGame.eval;
+          debug.log("idb", "fetchGame result", {
+            gameId,
+            hasEval,
+            white: serverGame.white?.name,
+            black: serverGame.black?.name,
+          });
           setServerGameFromUrl({
             serverId: serverGame.id,
             pgn: serverGame.pgn,
@@ -153,8 +176,13 @@ export const useGameDatabase = (shouldFetchGames?: boolean) => {
         } catch (err) {
           if (!cancelled) setServerGameFromUrl(undefined);
           if (isAxiosError(err) && err.response?.status === 404) {
+            debug.warn("idb", "fetchGame 404 — stopping poll", { gameId });
             return "gone";
           }
+          debug.warn("idb", "fetchGame failed — will retry poll", {
+            gameId,
+            status: isAxiosError(err) ? err.response?.status : undefined,
+          });
           return "pending";
         }
       };
@@ -162,10 +190,12 @@ export const useGameDatabase = (shouldFetchGames?: boolean) => {
       void load().then((state) => {
         if (cancelled || state === "ok") return;
         if (state === "gone") return;
+        debug.log("idb", "starting eval poll (5s interval)", { gameId });
         pollId = setInterval(async () => {
           const next = await load();
           if (next === "ok" || next === "gone") {
             if (pollId) clearInterval(pollId);
+            debug.log("idb", "eval poll stopped", { gameId, reason: next });
           }
         }, 5000);
       });
@@ -182,7 +212,13 @@ export const useGameDatabase = (shouldFetchGames?: boolean) => {
       setGameFromUrl(undefined);
       return undefined;
     }
-    getGame(localId).then((game) => setGameFromUrl(game));
+    getGame(localId).then((game) => {
+      debug.log("idb", "loaded local game from URL", {
+        localId,
+        found: !!game,
+      });
+      setGameFromUrl(game);
+    });
     return undefined;
   }, [gameId, getGame]);
 
