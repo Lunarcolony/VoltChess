@@ -36,7 +36,14 @@ export interface Props {
   showEvaluationBar?: boolean;
   /** Hide built-in player rows (layout renders its own full-width bars) */
   hidePlayerHeaders?: boolean;
+  /**
+   * When set to an array (even empty), fully overrides the built-in
+   * best-move arrow. null falls back to the default behaviour.
+   */
+  arrowsOverrideAtom?: PrimitiveAtom<Arrow[] | null>;
 }
+
+const noArrowsOverrideAtom = atom<Arrow[] | null>(null);
 
 export default function Board({
   id: boardId,
@@ -51,6 +58,7 @@ export default function Board({
   showPlayerMoveIconAtom,
   showEvaluationBar = false,
   hidePlayerHeaders = false,
+  arrowsOverrideAtom = noArrowsOverrideAtom,
 }: Props) {
   const boardRef = useRef<HTMLDivElement>(null);
   const game = useAtomValue(gameAtom);
@@ -65,6 +73,7 @@ export default function Board({
   const [moveClickTo, setMoveClickTo] = useState<Square | null>(null);
   const pieceSet = useAtomValue(pieceSetAtom);
   const boardHue = useAtomValue(boardHueAtom);
+  const arrowsOverride = useAtomValue(arrowsOverrideAtom);
 
   const gameFen = game.fen();
 
@@ -211,6 +220,19 @@ export default function Board({
   );
 
   const customArrows: Arrow[] = useMemo(() => {
+    if (arrowsOverride !== null) {
+      if (!boardHue) return arrowsOverride;
+      return arrowsOverride.map(([from, to, color]) =>
+        color
+          ? ([
+              from,
+              to,
+              tinycolor(color).spin(-boardHue).toHexString(),
+            ] as Arrow)
+          : ([from, to] as Arrow)
+      );
+    }
+
     const bestMove = position?.lastEval?.bestMove;
     const moveClassification = position?.eval?.moveClassification;
 
@@ -234,7 +256,7 @@ export default function Board({
     }
 
     return [];
-  }, [position, showBestMoveArrow, boardHue]);
+  }, [position, showBestMoveArrow, boardHue, arrowsOverride]);
 
   const SquareRenderer: CustomSquareRenderer = useMemo(() => {
     return getSquareRenderer({

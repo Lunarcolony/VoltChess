@@ -14,6 +14,8 @@ export interface LineEval {
   mate?: number;
   depth: number;
   multiPv: number;
+  nps?: number;
+  nodes?: number;
 }
 
 export interface Accuracy {

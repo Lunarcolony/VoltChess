@@ -91,21 +91,33 @@ def copy_build_to_site() -> None:
         print("  Expected voltchess.me next to the VoltChess folder.")
         raise SystemExit(1)
 
-    dist_index = REPO_ROOT / "dist" / "index.html"
-    if not dist_index.is_file():
-        print(f"ERROR: Build output missing: {dist_index}")
+    dist = REPO_ROOT / "dist"
+    if not dist.is_dir():
+        print(f"ERROR: Build output missing: {dist}")
         raise SystemExit(1)
 
-    deploy_index = DEPLOY_SITE / "index.html"
-    shutil.copy2(dist_index, deploy_index)
-    print(f"  {dist_index}")
-    print(f"  -> {deploy_index}")
+    for item in dist.iterdir():
+        dest = DEPLOY_SITE / item.name
+        if item.is_dir():
+            if dest.exists():
+                shutil.rmtree(dest)
+            shutil.copytree(item, dest)
+        else:
+            shutil.copy2(item, dest)
+        print(f"  {item}")
+        print(f"  -> {dest}")
 
     api_config = REPO_ROOT / "public" / "api-config.json"
     if api_config.is_file():
         shutil.copy2(api_config, DEPLOY_SITE / "api-config.json")
         print(f"  {api_config}")
         print(f"  -> {DEPLOY_SITE / 'api-config.json'}")
+
+    vercel_config = REPO_ROOT / "vercel.json"
+    if vercel_config.is_file():
+        shutil.copy2(vercel_config, DEPLOY_SITE / "vercel.json")
+        print(f"  {vercel_config}")
+        print(f"  -> {DEPLOY_SITE / 'vercel.json'}")
 
 
 def update_source_files(url: str = PRODUCTION_API_URL) -> None:
@@ -183,7 +195,7 @@ def check_public_health(url: str = PRODUCTION_API_URL, *, attempts: int = 6, del
 
 def push_deploy_repo(url: str = PRODUCTION_API_URL) -> None:
     print("Pushing voltchess.me to GitHub...")
-    subprocess.run(["git", "add", "index.html", "api-config.json"], cwd=DEPLOY_SITE, check=True)
+    subprocess.run(["git", "add", "-A"], cwd=DEPLOY_SITE, check=True)
     status = subprocess.run(
         ["git", "status", "--porcelain"],
         cwd=DEPLOY_SITE,
@@ -379,7 +391,7 @@ def main() -> int:
         try_public_health()
         deploy_frontend(push=not args.no_push, build=not args.no_build)
         print()
-        print("Done. Live site: https://www.voltchess.me")
+        print("Done. Live site: https://voltchess.me")
         return 0
 
     password = args.password or getpass.getpass(f"Pi SSH password ({USER}@{HOST}): ")
@@ -414,7 +426,7 @@ def main() -> int:
         print()
         print("Done.")
         print(f"  API:       {PRODUCTION_API_URL}")
-        print("  Live site: https://www.voltchess.me")
+        print("  Live site: https://voltchess.me")
         return 0
     finally:
         client.close()

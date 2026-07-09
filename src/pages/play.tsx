@@ -15,7 +15,7 @@ function Play() {
 
   return (
     <>
-      <PageTitle title="Play vs Engine — VoltChess" />
+      <PageTitle title="Play vs Engine — VoltChess" noindex />
 
       <PageContainer
         title="Play vs Engine"

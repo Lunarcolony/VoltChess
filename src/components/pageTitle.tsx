@@ -6,10 +6,12 @@ export const PageTitle = ({
   title,
   description,
   path,
+  noindex = false,
 }: {
   title: string;
   description?: string;
   path?: string;
+  noindex?: boolean;
 }) => {
   const location = useLocation();
   const metaDescription = description || DEFAULT_SEO.description;
@@ -19,6 +21,10 @@ export const PageTitle = ({
   return (
     <Head>
       <title>{title}</title>
+      <meta
+        name="robots"
+        content={noindex ? "noindex, nofollow" : "index, follow"}
+      />
       <meta name="description" content={metaDescription} />
       <link rel="canonical" href={canonical} />
       <meta property="og:title" content={title} />

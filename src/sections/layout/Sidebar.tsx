@@ -11,6 +11,7 @@ import {
   useMediaQuery,
   useTheme,
   Link as MuiLink,
+  Tooltip,
 } from "@mui/material";
 import { useState, useMemo } from "react";
 import NavLink from "@/components/NavLink";
@@ -59,6 +60,7 @@ function navForRole(
 }
 
 const SIDEBAR_WIDTH = 220;
+const GITHUB_REPO_URL = "https://github.com/Lunarcolony/VoltChess";
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const palette = usePalette();
@@ -152,22 +154,53 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             borderTop: `1px solid ${palette.borderSubtle}`,
           }}
         >
-          <Typography
-            fontSize="0.65rem"
-            lineHeight={1.45}
-            color="text.secondary"
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              gap: 0.5,
+            }}
           >
-            Free chess game review · Powered by{" "}
-            <MuiLink
-              href="https://github.com/GuillaumeSD/Chesskit"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="hover"
-              sx={{ color: palette.textMuted, fontSize: "inherit" }}
+            <Typography
+              fontSize="0.65rem"
+              lineHeight={1.45}
+              color="text.secondary"
+              sx={{ flex: 1, minWidth: 0 }}
             >
-              Chesskit
-            </MuiLink>
-          </Typography>
+              Free chess game review · Powered by{" "}
+              <MuiLink
+                href="https://github.com/GuillaumeSD/Chesskit"
+                target="_blank"
+                rel="noopener noreferrer"
+                underline="hover"
+                sx={{ color: palette.textMuted, fontSize: "inherit" }}
+              >
+                Chesskit
+              </MuiLink>
+            </Typography>
+            <Tooltip title="View source on GitHub">
+              <IconButton
+                component="a"
+                href={GITHUB_REPO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                size="small"
+                aria-label="View source on GitHub"
+                sx={{
+                  color: palette.textMuted,
+                  mt: -0.25,
+                  flexShrink: 0,
+                  "&:hover": {
+                    color: palette.text,
+                    bgcolor: palette.surfaceRaised,
+                  },
+                }}
+              >
+                <Icon icon="mdi:github" width={18} />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Box>
       </Box>
     </Box>

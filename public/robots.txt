@@ -1,16 +1,20 @@
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /sign-in
+Disallow: /coach/
+Disallow: /student
+Disallow: /play
+Disallow: /review
+Disallow: /thanks
 
 # Sitemaps
 Sitemap: https://voltchess.me/sitemap.xml
 
-# Allow specific bots full access
 User-agent: Googlebot
 Allow: /
 
 User-agent: Bingbot
 Allow: /
-
-# Block any sensitive areas if needed
-# Disallow: /admin/
-# Disallow: /private/

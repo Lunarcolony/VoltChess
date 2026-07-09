@@ -14,6 +14,7 @@ import {
 import { Icon } from "@iconify/react";
 import Link from "@/components/Link";
 import GuestRoute from "@/components/GuestRoute";
+import { PageTitle } from "@/components/pageTitle";
 import { useRouter } from "@/hooks/useRouter";
 import { usePalette } from "@/hooks/usePalette";
 import { useAuth } from "@/contexts/AuthContext";
@@ -268,6 +269,7 @@ function RegisterForm() {
 export default function Register() {
   return (
     <GuestRoute>
+      <PageTitle title="Create Account — VoltChess Academy" noindex />
       <RegisterForm />
     </GuestRoute>
   );

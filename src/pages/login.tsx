@@ -11,6 +11,7 @@ import {
 import { Icon } from "@iconify/react";
 import Link from "@/components/Link";
 import GuestRoute from "@/components/GuestRoute";
+import { PageTitle } from "@/components/pageTitle";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "@/hooks/useRouter";
 import { usePalette } from "@/hooks/usePalette";
@@ -162,6 +163,7 @@ function LoginForm() {
 export default function Login() {
   return (
     <GuestRoute>
+      <PageTitle title="Sign In — VoltChess Academy" noindex />
       <LoginForm />
     </GuestRoute>
   );

@@ -3,7 +3,14 @@ import { Icon } from "@iconify/react";
 import { ReactNode, useState } from "react";
 import { usePalette } from "@/hooks/usePalette";
 
-export type AnalysisTabId = "report" | "engine" | "moves" | "game" | "settings";
+export type AnalysisTabId =
+  | "report"
+  | "engine"
+  | "moves"
+  | "game"
+  | "times"
+  | "export"
+  | "settings";
 
 export interface AnalysisTabDef {
   id: AnalysisTabId;
@@ -66,8 +73,10 @@ export default function AnalysisPanelTabs({
           "& .MuiTabs-indicator": { bgcolor: palette.accent, height: 3 },
           "& .MuiTab-root": {
             minHeight: 42,
+            minWidth: 0,
+            px: { xs: 0.5, sm: 1 },
             py: 0.75,
-            fontSize: { xs: "0.78rem", sm: "0.85rem" },
+            fontSize: { xs: "0.72rem", sm: "0.8rem" },
             fontWeight: 500,
             textTransform: "none",
             color: palette.textMuted,

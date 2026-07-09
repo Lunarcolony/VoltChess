@@ -16,7 +16,19 @@ import { getMovesClassification } from "@/lib/engine/helpers/moveClassification"
 import { openings } from "@/data/openings";
 import { UciEngine } from "@/lib/engine/uciEngine";
 
-export const useCurrentPosition = (engine: UciEngine | null) => {
+export interface UseCurrentPositionOptions {
+  /** When false the engine never runs; stored evals are still displayed */
+  enabled?: boolean;
+  /** Keep searching stored positions whose depth/lines are below the target */
+  deepen?: boolean;
+}
+
+export const useCurrentPosition = (
+  engine: UciEngine | null,
+  options?: UseCurrentPositionOptions
+) => {
+  const enabled = options?.enabled ?? true;
+  const deepen = options?.deepen ?? false;
   const [currentPosition, setCurrentPosition] = useAtom(currentPositionAtom);
   const gameEval = useAtomValue(gameEvalAtom);
   const game = useAtomValue(gameAtom);
@@ -74,14 +86,22 @@ export const useCurrentPosition = (engine: UciEngine | null) => {
 
     setCurrentPosition(position);
 
-    if (
-      !position.eval &&
+    const engineUsable =
+      enabled &&
       !evaluationProgress &&
-      engine?.getIsReady() &&
-      engine.name &&
+      !!engine?.getIsReady() &&
+      !!engine?.name &&
       !board.isCheckmate() &&
-      !board.isStalemate()
-    ) {
+      !board.isStalemate();
+
+    const storedDepth = position.eval?.lines?.[0]?.depth ?? 0;
+    const storedLinesNb = position.eval?.lines?.length ?? 0;
+    const needsDeepening =
+      deepen &&
+      !!position.eval &&
+      (storedDepth < depth || storedLinesNb < multiPv);
+
+    if (engineUsable && engine && !position.eval) {
       const getFenEngineEval = async (
         fen: string,
         setPartialEval?: (positionEval: PositionEval) => void
@@ -166,13 +186,74 @@ export const useCurrentPosition = (engine: UciEngine | null) => {
       getPositionEval();
     }
 
+    if (engineUsable && engine && needsDeepening && position.eval) {
+      const storedEval = position.eval;
+      const fen = board.fen();
+
+      const mergePartial = (positionEval: PositionEval) => {
+        const partialDepth = positionEval.lines?.[0]?.depth ?? 0;
+        if (partialDepth < storedDepth || !positionEval.lines.length) return;
+        setCurrentPosition({
+          ...position,
+          eval: {
+            ...positionEval,
+            moveClassification: storedEval.moveClassification,
+            opening: storedEval.opening,
+          },
+        });
+      };
+
+      const deepenPosition = async () => {
+        const savedEval = savedEvals[fen];
+        if (
+          savedEval &&
+          savedEval.engine === engine.name &&
+          (savedEval.lines?.length ?? 0) >= multiPv &&
+          (savedEval.lines[0].depth ?? 0) >= depth
+        ) {
+          mergePartial({
+            ...savedEval,
+            lines: savedEval.lines.slice(0, multiPv),
+          });
+          return;
+        }
+
+        const rawPositionEval = await engine.evaluatePositionWithUpdate({
+          fen,
+          depth,
+          multiPv,
+          setPartialEval: mergePartial,
+        });
+
+        setSavedEvals((prev) => ({
+          ...prev,
+          [fen]: { ...rawPositionEval, engine: engine.name },
+        }));
+        mergePartial(rawPositionEval);
+      };
+
+      deepenPosition().catch(() => {
+        // Navigation away stops the search mid-flight; nothing to recover.
+      });
+    }
+
     return () => {
       if (engine?.getIsReady() && !evaluationProgress) {
         void engine.stopAllCurrentJobs();
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameEval, board, game, engine, depth, multiPv, evaluationProgress]);
+  }, [
+    gameEval,
+    board,
+    game,
+    engine,
+    depth,
+    multiPv,
+    evaluationProgress,
+    enabled,
+    deepen,
+  ]);
 
   return currentPosition;
 };

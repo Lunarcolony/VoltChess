@@ -12,6 +12,7 @@ import { getAnalysisBoardSize, useScreenSize } from "@/hooks/useScreenSize";
 import { Color } from "@/types/enums";
 import Board from "@/components/board";
 import { usePlayersData } from "@/hooks/usePlayersData";
+import { advancedArrowsAtom } from "../advanced/states";
 
 export default function BoardContainer() {
   const screenSize = useScreenSize();
@@ -38,6 +39,7 @@ export default function BoardContainer() {
       showPlayerMoveIconAtom={showPlayerMoveIconAtom}
       showEvaluationBar={true}
       hidePlayerHeaders
+      arrowsOverrideAtom={advancedArrowsAtom}
     />
   );
 }

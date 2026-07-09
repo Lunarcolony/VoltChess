@@ -1,256 +1,19 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { SITE_URL } from "./seo-urls.mjs";
+import {
+  loadSeoData,
+  escapeHtml,
+  buildHomeBody,
+  buildLandingBody,
+  buildBlogIndexBody,
+  buildBlogPostBody,
+  buildAppPageBody,
+} from "./seo-body.mjs";
 
-const SITE_URL = "https://voltchess.me";
 const OG_IMAGE = `${SITE_URL}/og-image.png`;
 
-/** @typedef {{ path: string, title: string, description: string, jsonLd?: object | object[] }} SeoPage */
-
-/** @type {SeoPage[]} */
-const pages = [
-  {
-    path: "/",
-    title:
-      "Free Chess Game Analysis — Chess.com & Lichess, No Premium | VoltChess",
-    description:
-      "Free Stockfish analysis for Chess.com and Lichess games. Enter your username, get blunders, accuracy, and eval graph — no premium, unlimited, no sign-up.",
-    jsonLd: [
-      {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        name: "VoltChess",
-        applicationCategory: "GameApplication",
-        description:
-          "Free chess game review and analysis powered by Stockfish. Import Chess.com or Lichess games, find blunders, check accuracy, and improve your play.",
-        url: `${SITE_URL}/`,
-        operatingSystem: "Any",
-        browserRequirements: "Requires JavaScript. Requires HTML5.",
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "USD",
-        },
-        creator: {
-          "@type": "Organization",
-          name: "VoltChess",
-          logo: `${SITE_URL}/logo-512.png`,
-        },
-        featureList: [
-          "Free chess game review",
-          "Stockfish engine analysis",
-          "Chess.com game import",
-          "Lichess game import",
-          "PGN file analysis",
-          "Blunder and mistake detection",
-          "Move accuracy scores",
-          "Evaluation graph",
-          "No registration required",
-        ],
-      },
-      {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        name: "VoltChess",
-        url: SITE_URL,
-        logo: `${SITE_URL}/logo-512.png`,
-      },
-      {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        name: "VoltChess",
-        url: `${SITE_URL}/`,
-        description:
-          "Free unlimited chess game analysis and review powered by Stockfish.",
-        publisher: { "@type": "Organization", name: "VoltChess" },
-      },
-      {
-        "@context": "https://schema.org",
-        "@type": "ItemList",
-        name: "VoltChess main sections",
-        itemListElement: [
-          {
-            "@type": "SiteNavigationElement",
-            position: 1,
-            name: "Free Chess.com Analysis",
-            url: `${SITE_URL}/free-chess-com-analysis`,
-          },
-          {
-            "@type": "SiteNavigationElement",
-            position: 2,
-            name: "Free Lichess Game Review",
-            url: `${SITE_URL}/free-lichess-game-review`,
-          },
-          {
-            "@type": "SiteNavigationElement",
-            position: 3,
-            name: "Chess Analysis Guides",
-            url: `${SITE_URL}/blog`,
-          },
-          {
-            "@type": "SiteNavigationElement",
-            position: 4,
-            name: "Game Analysis",
-            url: `${SITE_URL}/analysis`,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    path: "/free-chess-com-analysis",
-    title: "Free Chess.com Game Analysis — No Premium Required | VoltChess",
-    description:
-      "Analyze Chess.com games for free with Stockfish. Get move classifications, accuracy scores, blunder detection, and evaluation graphs — same features as Chess.com Premium, no subscription.",
-  },
-  {
-    path: "/free-lichess-game-review",
-    title: "Free Lichess Game Review & Analysis | VoltChess",
-    description:
-      "Review Lichess games for free with Stockfish. Enter your Lichess username, load any recent game, and get a full analysis report in seconds. Unlimited and free.",
-  },
-  {
-    path: "/free-chess-game-analysis",
-    title: "Free Unlimited Chess Game Analysis with Stockfish | VoltChess",
-    description:
-      "Unlimited free chess game analysis powered by Stockfish 17. Import PGN files, Chess.com and Lichess games. No daily caps, no premium tier, no sign-up required.",
-  },
-  {
-    path: "/blog",
-    title: "Chess Game Review & Analysis Guides | VoltChess Blog",
-    description:
-      "Free guides on chess game review, Chess.com analysis, Stockfish game analysis, blunder finding, and PGN review. Learn how to study your games on VoltChess.",
-    jsonLd: {
-      "@context": "https://schema.org",
-      "@type": "Blog",
-      name: "VoltChess Guides",
-      description:
-        "Free chess game review and analysis guides powered by Stockfish.",
-      url: `${SITE_URL}/blog`,
-      publisher: { "@type": "Organization", name: "VoltChess" },
-    },
-  },
-  {
-    path: "/blog/free-chess-game-review",
-    title: "Free Chess Game Review Online | VoltChess — Stockfish Game Analysis",
-    description:
-      "Get a free chess game review for every game you play. VoltChess uses Stockfish to score accuracy, flag blunders, and show where you won or lost the game. No subscription.",
-    jsonLd: articleSchema(
-      "Free Chess Game Review — Analyze Every Move with Stockfish",
-      "Get a free chess game review for every game you play. VoltChess uses Stockfish to score accuracy, flag blunders, and show where you won or lost the game. No subscription.",
-      "2025-06-12"
-    ),
-  },
-  {
-    path: "/blog/chesscom-game-review-free",
-    title: "Free Chess.com Game Review Alternative | VoltChess — No Premium",
-    description:
-      "Analyze Chess.com games for free without Chess.com Premium. Import by link or PGN and get Stockfish game review, accuracy, and blunder detection on VoltChess.",
-    jsonLd: articleSchema(
-      "Free Chess.com Game Review — No Premium Required",
-      "Analyze Chess.com games for free without Chess.com Premium. Import by link or PGN and get Stockfish game review, accuracy, and blunder detection on VoltChess.",
-      "2025-06-12"
-    ),
-  },
-  {
-    path: "/blog/how-to-analyze-chess-games",
-    title: "How to Analyze Your Chess Games | Free Step-by-Step Guide | VoltChess",
-    description:
-      "Learn how to analyze chess games step by step. Use Stockfish to find blunders, review openings, and improve faster — free on VoltChess with PGN or Chess.com import.",
-    jsonLd: articleSchema(
-      "How to Analyze Your Chess Games (Step-by-Step Guide)",
-      "Learn how to analyze chess games step by step with Stockfish on VoltChess.",
-      "2025-06-12"
-    ),
-  },
-  {
-    path: "/blog/free-chess-analysis-stockfish",
-    title: "Free Chess Analysis with Stockfish | VoltChess Browser Engine",
-    description:
-      "Run Stockfish chess analysis free in your browser. VoltChess loads Stockfish 17 locally — no server queue, no account, full game review with evaluation graph and move grades.",
-    jsonLd: articleSchema(
-      "Free Chess Analysis with Stockfish — In Your Browser",
-      "Run Stockfish chess analysis free in your browser on VoltChess.",
-      "2025-06-12"
-    ),
-  },
-  {
-    path: "/blog/find-chess-blunders-free",
-    title: "Find Chess Blunders Free | VoltChess Blunder Finder",
-    description:
-      "Find blunders in your chess games for free. VoltChess highlights mistakes, inaccuracies, and missed wins with Stockfish — import from Chess.com, Lichess, or PGN.",
-    jsonLd: articleSchema(
-      "Find Chess Blunders Free — Spot Mistakes Instantly",
-      "Find blunders in your chess games for free with VoltChess and Stockfish.",
-      "2025-06-12"
-    ),
-  },
-  {
-    path: "/blog/analyze-pgn-online-free",
-    title: "Analyze PGN Online Free | VoltChess PGN Chess Analyzer",
-    description:
-      "Upload or paste a PGN file for free chess analysis online. VoltChess runs Stockfish in your browser and produces a full game review with accuracy and blunder detection.",
-    jsonLd: articleSchema(
-      "Analyze PGN Files Online Free",
-      "Upload or paste a PGN file for free chess analysis online on VoltChess.",
-      "2025-06-12"
-    ),
-  },
-  {
-    path: "/blog/lichess-game-review-free",
-    title: "Free Lichess Game Review | VoltChess — Analyze Lichess Games",
-    description:
-      "Get a free Lichess game review with Stockfish on VoltChess. Import Lichess games by username or link — accuracy scores, blunder finder, and evaluation graph included.",
-    jsonLd: articleSchema(
-      "Free Lichess Game Review & Analysis",
-      "Get a free Lichess game review with Stockfish on VoltChess.",
-      "2025-06-12"
-    ),
-  },
-  {
-    path: "/blog/chess-move-accuracy-scores",
-    title: "Chess Move Accuracy Explained | VoltChess Game Analysis Guide",
-    description:
-      "What does chess move accuracy mean? Learn how accuracy scores work, how Stockfish calculates them, and how to use accuracy in your free game review on VoltChess.",
-    jsonLd: articleSchema(
-      "Chess Move Accuracy — What Your Score Really Means",
-      "Learn how chess move accuracy scores work in VoltChess game review.",
-      "2025-06-12"
-    ),
-  },
-  {
-    path: "/blog/chess-game-analysis-for-beginners",
-    title: "Chess Game Analysis for Beginners | Free Guide | VoltChess",
-    description:
-      "New to chess game analysis? Start here — free beginner guide to reviewing games, finding blunders, and improving with Stockfish on VoltChess.",
-    jsonLd: articleSchema(
-      "Chess Game Analysis for Beginners",
-      "Free beginner guide to reviewing chess games on VoltChess.",
-      "2025-06-12"
-    ),
-  },
-  {
-    path: "/blog/unlimited-free-chess-game-analysis",
-    title: "Unlimited Free Chess Game Analysis | VoltChess — No Limits",
-    description:
-      "Analyze unlimited chess games for free with no daily caps. VoltChess offers full Stockfish game review, PGN import, and blunder detection without a paywall.",
-    jsonLd: articleSchema(
-      "Unlimited Free Chess Game Analysis — No Daily Caps",
-      "Analyze unlimited chess games for free with no daily caps on VoltChess.",
-      "2025-06-12"
-    ),
-  },
-  {
-    path: "/blog/voltchess-vs-chesscom-premium",
-    title: "VoltChess vs Chess.com Premium Game Review | Free Alternative",
-    description:
-      "Compare VoltChess free game review to Chess.com Premium analysis. Same Stockfish-powered accuracy, blunders, and eval graph — no subscription required.",
-    jsonLd: articleSchema(
-      "VoltChess vs Chess.com Premium — Free Game Review Alternative",
-      "Compare VoltChess free game review to Chess.com Premium analysis.",
-      "2026-06-21"
-    ),
-  },
-];
+/** @typedef {{ path: string, title: string, description: string, bodyHtml: string, jsonLd?: object | object[] }} SeoPage */
 
 function articleSchema(headline, description, datePublished) {
   return {
@@ -268,12 +31,169 @@ function articleSchema(headline, description, datePublished) {
   };
 }
 
-function escapeHtml(value) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+function homeJsonLd() {
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      name: "VoltChess",
+      applicationCategory: "GameApplication",
+      description:
+        "Free chess game review and analysis powered by Stockfish. Import Chess.com or Lichess games, find blunders, check accuracy, and improve your play.",
+      url: `${SITE_URL}/`,
+      operatingSystem: "Any",
+      browserRequirements: "Requires JavaScript. Requires HTML5.",
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+      },
+      creator: {
+        "@type": "Organization",
+        name: "VoltChess",
+        logo: `${SITE_URL}/logo-512.png`,
+      },
+      featureList: [
+        "Free chess game review",
+        "Stockfish engine analysis",
+        "Chess.com game import",
+        "Lichess game import",
+        "PGN file analysis",
+        "Blunder and mistake detection",
+        "Move accuracy scores",
+        "Evaluation graph",
+        "No registration required",
+      ],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "VoltChess",
+      url: SITE_URL,
+      logo: `${SITE_URL}/logo-512.png`,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "VoltChess",
+      url: `${SITE_URL}/`,
+      description:
+        "Free unlimited chess game analysis and review powered by Stockfish.",
+      publisher: { "@type": "Organization", name: "VoltChess" },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      name: "VoltChess main sections",
+      itemListElement: [
+        {
+          "@type": "SiteNavigationElement",
+          position: 1,
+          name: "Free Chess.com Analysis",
+          url: `${SITE_URL}/free-chess-com-analysis`,
+        },
+        {
+          "@type": "SiteNavigationElement",
+          position: 2,
+          name: "Free Lichess Game Review",
+          url: `${SITE_URL}/free-lichess-game-review`,
+        },
+        {
+          "@type": "SiteNavigationElement",
+          position: 3,
+          name: "Chess Analysis Guides",
+          url: `${SITE_URL}/blog`,
+        },
+        {
+          "@type": "SiteNavigationElement",
+          position: 4,
+          name: "Game Analysis",
+          url: `${SITE_URL}/analysis`,
+        },
+      ],
+    },
+  ];
+}
+
+const APP_PAGES = [
+  {
+    path: "/analysis",
+    title: "Chess Game Analysis — Free Stockfish Review | VoltChess",
+    description:
+      "Analyze chess games free with Stockfish in your browser. Import Chess.com, Lichess, or PGN files for move grades, accuracy, and blunder detection.",
+  },
+  {
+    path: "/openings",
+    title: "Chess Openings Explorer | VoltChess",
+    description:
+      "Explore chess openings and build your repertoire on VoltChess alongside free Stockfish game analysis.",
+  },
+  {
+    path: "/puzzles",
+    title: "Chess Puzzles | VoltChess",
+    description:
+      "Practice chess tactics and puzzles on VoltChess. Improve alongside free Stockfish game review.",
+  },
+  {
+    path: "/terms-and-conditions",
+    title: "Terms and Conditions | VoltChess",
+    description: "Terms of use for VoltChess free chess analysis and Academy features.",
+  },
+];
+
+/** @returns {Promise<SeoPage[]>} */
+async function buildPages() {
+  const { blogPosts, landingPages } = await loadSeoData();
+
+  /** @type {SeoPage[]} */
+  const pages = [
+    {
+      path: "/",
+      title:
+        "Free Chess Game Analysis — Chess.com & Lichess, No Premium | VoltChess",
+      description:
+        "Free Stockfish analysis for Chess.com and Lichess games. Enter your username, get blunders, accuracy, and eval graph — no premium, unlimited, no sign-up.",
+      bodyHtml: buildHomeBody(),
+      jsonLd: homeJsonLd(),
+    },
+    ...landingPages.map((page) => ({
+      path: page.path,
+      title: page.metaTitle,
+      description: page.metaDescription,
+      bodyHtml: buildLandingBody(page),
+    })),
+    {
+      path: "/blog",
+      title: "Chess Game Review & Analysis Guides | VoltChess Blog",
+      description:
+        "Free guides on chess game review, Chess.com analysis, Stockfish game analysis, blunder finding, and PGN review. Learn how to study your games on VoltChess.",
+      bodyHtml: buildBlogIndexBody(blogPosts),
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "Blog",
+        name: "VoltChess Guides",
+        description:
+          "Free chess game review and analysis guides powered by Stockfish.",
+        url: `${SITE_URL}/blog`,
+        publisher: { "@type": "Organization", name: "VoltChess" },
+      },
+    },
+    ...blogPosts.map((post) => ({
+      path: `/blog/${post.slug}`,
+      title: post.metaTitle,
+      description: post.metaDescription,
+      bodyHtml: buildBlogPostBody(post),
+      jsonLd: articleSchema(post.title, post.metaDescription, post.publishedAt),
+    })),
+    ...APP_PAGES.map((page) => ({
+      path: page.path,
+      title: page.title,
+      description: page.description,
+      bodyHtml: buildAppPageBody(page.path),
+    })),
+  ];
+
+  return pages;
 }
 
 function buildHeadTags(page) {
@@ -290,9 +210,12 @@ function buildHeadTags(page) {
         .join("\n")
     : "";
 
-  return `<title>\n      ${title}\n    </title>
+  return `<title>
+      ${title}
+    </title>
     <meta name="title" content="${title}" />
     <meta name="description" content="${description}" />
+    <meta name="robots" content="index, follow" />
     <link rel="canonical" href="${canonical}" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="${canonical}" />
@@ -326,6 +249,13 @@ function injectSeo(html, page) {
     );
   }
 
+  if (page.bodyHtml) {
+    result = result.replace(
+      '<div id="root"></div>',
+      `<div id="root">${page.bodyHtml}</div>`
+    );
+  }
+
   return result;
 }
 
@@ -356,6 +286,7 @@ async function main() {
   }
 
   const template = readFileSync(templatePath, "utf8");
+  const pages = await buildPages();
 
   for (const page of pages) {
     writePage(distDir, page, template);

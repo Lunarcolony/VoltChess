@@ -12,6 +12,7 @@ import {
   showBestMoveArrowAtom,
   showPlayerMoveIconAtom,
 } from "../states";
+import { advancedModeAtom } from "../advanced/states";
 import { usePalette } from "@/hooks/usePalette";
 import { colorThemeAtom } from "@/theme/colorThemeAtom";
 import {
@@ -175,6 +176,7 @@ export default function SettingsTabPanel() {
   const [colorTheme, setColorTheme] = useAtom(colorThemeAtom);
   const [showArrow, setShowArrow] = useAtom(showBestMoveArrowAtom);
   const [showMoveIcon, setShowMoveIcon] = useAtom(showPlayerMoveIconAtom);
+  const [advancedMode, setAdvancedMode] = useAtom(advancedModeAtom);
   const setBoardOrientation = useSetAtom(boardOrientationAtom);
   const engineName = useAtomValue(engineNameAtom);
   const engineDepth = useAtomValue(engineDepthAtom);
@@ -184,6 +186,18 @@ export default function SettingsTabPanel() {
     <Stack gap={1.5} sx={{ pb: 1 }}>
       <Section title="Game">
         <LoadGame />
+      </Section>
+
+      <Section title="Analysis mode">
+        <ToggleRow
+          label="Advanced analysis (Lichess-style)"
+          checked={advancedMode}
+          onChange={setAdvancedMode}
+        />
+        <Typography fontSize="0.7rem" color="text.secondary">
+          Deep engine panel with multiple lines, threat mode, inline best-move
+          variations, winning-chances chart, move times and export tools.
+        </Typography>
       </Section>
 
       <Section title="Classification names">
