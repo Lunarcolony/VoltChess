@@ -4,11 +4,6 @@
   "trailingSlash": false,
   "redirects": [
     {
-      "source": "/github",
-      "destination": "https://github.com/Lunarcolony/VoltChess",
-      "permanent": false
-    },
-    {
       "source": "/reanalysis",
       "destination": "/free-chess-game-analysis",
       "permanent": true
@@ -20,6 +15,13 @@
     }
   ],
   "routes": [
+    {
+      "src": "/github",
+      "status": 307,
+      "headers": {
+        "Location": "https://github.com/Lunarcolony/VoltChess"
+      }
+    },
     { "handle": "filesystem" },
     { "src": "/.*", "dest": "/index.html" }
   ],
