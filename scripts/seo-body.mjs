@@ -85,25 +85,141 @@ export function buildBlogIndexBody(posts) {
 
   return `<main>
   <h1>Chess Analysis Guides</h1>
-  <p>Free guides on chess game review, Chess.com analysis, Stockfish game analysis, blunder finding, and PGN review.</p>
+  <p>Practical how-tos for reviewing your games: import from Chess.com or Lichess, read the eval graph, find blunders, and turn engine data into real improvement — free, unlimited Stockfish in your browser.</p>
+  <p><a href="${abs("/free-chess-game-analysis")}">Start a free game review</a></p>
   <ul>
       ${links}
   </ul>
 </main>`;
 }
 
-export function buildBlogPostBody(post) {
-  const sections = post.sections
-    .map((section) => {
-      const heading = section.heading
-        ? `<h2>${escapeHtml(section.heading)}</h2>`
-        : "";
-      const paragraphs = section.paragraphs
-        .map((p) => `<p>${escapeHtml(p)}</p>`)
-        .join("\n    ");
-      return `${heading}\n    ${paragraphs}`;
-    })
+function renderBlogSection(section) {
+  const type = section.type ?? "prose";
+
+  if (type === "prose") {
+    const heading = section.heading
+      ? `<h2>${escapeHtml(section.heading)}</h2>`
+      : "";
+    const paragraphs = (section.paragraphs ?? [])
+      .map((p) => `<p>${escapeHtml(p)}</p>`)
+      .join("\n    ");
+    return `${heading}\n    ${paragraphs}`;
+  }
+
+  if (type === "steps") {
+    const heading = section.heading
+      ? `<h2>${escapeHtml(section.heading)}</h2>`
+      : "";
+    const steps = (section.steps ?? [])
+      .map(
+        (step, idx) =>
+          `<section><h3>Step ${idx + 1} — ${escapeHtml(step.title)}</h3><p>${escapeHtml(step.body)}</p></section>`
+      )
+      .join("\n    ");
+    return `${heading}\n    ${steps}`;
+  }
+
+  if (type === "checklist") {
+    const heading = section.heading
+      ? `<h2>${escapeHtml(section.heading)}</h2>`
+      : "";
+    const items = (section.items ?? [])
+      .map(
+        (item) =>
+          `<section><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.body)}</p></section>`
+      )
+      .join("\n    ");
+    return `${heading}\n    ${items}`;
+  }
+
+  if (type === "callout") {
+    const title = section.title
+      ? `<h2>${escapeHtml(section.title)}</h2>`
+      : "";
+    return `${title}\n    <p>${escapeHtml(section.body)}</p>`;
+  }
+
+  if (type === "faq") {
+    const heading = section.heading
+      ? `<h2>${escapeHtml(section.heading)}</h2>`
+      : `<h2>Frequently asked questions</h2>`;
+    const items = (section.items ?? [])
+      .map(
+        (faq) =>
+          `<section><h3>${escapeHtml(faq.question)}</h3><p>${escapeHtml(faq.answer)}</p></section>`
+      )
+      .join("\n    ");
+    return `${heading}\n    ${items}`;
+  }
+
+  if (type === "loader") {
+    const heading = section.heading
+      ? `<h2>${escapeHtml(section.heading)}</h2>`
+      : "";
+    const caption = section.caption
+      ? `<p>${escapeHtml(section.caption)}</p>`
+      : "";
+    return `${heading}\n    ${caption}\n    <p><a href="${abs("/free-chess-game-analysis")}">Load a game and start free analysis</a></p>`;
+  }
+
+  if (type === "grades") {
+    const heading = section.heading
+      ? `<h2>${escapeHtml(section.heading)}</h2>`
+      : "";
+    const items = (section.items ?? [])
+      .map(
+        (item) =>
+          `<section><h3>${escapeHtml(item.label)}</h3><p>${escapeHtml(item.description)}</p></section>`
+      )
+      .join("\n    ");
+    return `${heading}\n    ${items}`;
+  }
+
+  if (type === "compare") {
+    const heading = section.heading
+      ? `<h2>${escapeHtml(section.heading)}</h2>`
+      : "";
+    const rows = (section.rows ?? [])
+      .map(
+        (row) =>
+          `<tr><th scope="row">${escapeHtml(row.feature)}</th><td>${escapeHtml(row.left)}</td><td>${escapeHtml(row.right)}</td></tr>`
+      )
+      .join("\n      ");
+    return `${heading}
+    <table>
+      <thead><tr><th>Feature</th><th>${escapeHtml(section.leftLabel)}</th><th>${escapeHtml(section.rightLabel)}</th></tr></thead>
+      <tbody>
+      ${rows}
+      </tbody>
+    </table>`;
+  }
+
+  return "";
+}
+
+function collectBlogFaqs(post) {
+  return (post.sections ?? []).flatMap((section) =>
+    section.type === "faq" ? section.items ?? [] : []
+  );
+}
+
+export function buildBlogPostBody(post, allPosts = []) {
+  const sections = (post.sections ?? [])
+    .map((section) => renderBlogSection(section))
+    .filter(Boolean)
     .join("\n  ");
+
+  const related = (post.relatedSlugs ?? [])
+    .map((slug) => {
+      const relatedPost = allPosts.find((entry) => entry.slug === slug);
+      const title = relatedPost?.title ?? slug;
+      return `<li><a href="${abs(`/blog/${slug}`)}">${escapeHtml(title)}</a></li>`;
+    })
+    .join("\n      ");
+
+  const relatedBlock = related
+    ? `<section><h2>Related guides</h2><ul>\n      ${related}\n    </ul></section>`
+    : "";
 
   const ctaPath = post.slug.includes("lichess")
     ? "/free-lichess-game-review"
@@ -118,9 +234,24 @@ export function buildBlogPostBody(post) {
     <h1>${escapeHtml(post.title)}</h1>
     <p>${escapeHtml(post.excerpt)}</p>
     ${sections}
+    ${relatedBlock}
     <p><a href="${abs(ctaPath)}">Try free chess analysis on VoltChess</a></p>
   </article>
 </main>`;
+}
+
+export function buildBlogFaqSchema(post) {
+  const faqs = collectBlogFaqs(post);
+  if (faqs.length === 0) return null;
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: { "@type": "Answer", text: faq.answer },
+    })),
+  };
 }
 
 const APP_PAGE_BODIES = {
@@ -143,6 +274,11 @@ const APP_PAGE_BODIES = {
   <h1>Terms and Conditions</h1>
   <p>Terms of use for VoltChess — free chess game analysis and optional Academy coaching features.</p>
   <p><a href="${abs("/")}">Back to VoltChess home</a></p>
+</main>`,
+  "/moved": `<main>
+  <h1>VoltChess moved</h1>
+  <p>The old domain voltchess.me expired. The free Stockfish analyzer is now at <a href="${abs("/")}">${SITE_URL.replace("https://", "")}</a> — same app, no sign-up. Please update bookmarks.</p>
+  <p><a href="${abs("/")}">Open the analyzer</a></p>
 </main>`,
 };
 

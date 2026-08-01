@@ -17,7 +17,7 @@ REQUEST_TIMEOUT = 25
 # moment…") for requests that do not send a real User-Agent. Lichess also asks
 # integrations to identify themselves. Always send a descriptive UA so imports
 # don't silently fail with "user not found".
-USER_AGENT = "VoltChess/1.0 (+https://voltchess.me; chess analysis academy)"
+USER_AGENT = "VoltChess/1.0 (+https://voltchess.vercel.app; chess analysis academy)"
 
 
 def _get(url: str, *, headers: dict | None = None) -> requests.Response:

@@ -4,14 +4,13 @@
   "trailingSlash": false,
   "redirects": [
     {
-      "source": "/:path+/",
-      "destination": "/:path+",
+      "source": "/reanalysis",
+      "destination": "/free-chess-game-analysis",
       "permanent": true
     },
     {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "www.voltchess.me" }],
-      "destination": "https://voltchess.me/:path*",
+      "source": "/:path+/",
+      "destination": "/:path+",
       "permanent": true
     }
   ],

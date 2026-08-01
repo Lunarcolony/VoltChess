@@ -100,7 +100,7 @@ if [[ -f "$ENV_FILE" ]]; then
   fi
   if ! grep -q 'trycloudflare' "$ENV_FILE" 2>/dev/null; then
     if grep -q '^CORS_ALLOWED_ORIGINS=' "$ENV_FILE"; then
-      sed -i 's|^CORS_ALLOWED_ORIGINS=\(.*\)|CORS_ALLOWED_ORIGINS=\1,https://voltchess.me,https://www.voltchess.me|' "$ENV_FILE"
+      sed -i 's|^CORS_ALLOWED_ORIGINS=\(.*\)|CORS_ALLOWED_ORIGINS=\1,https://voltchess.vercel.app|' "$ENV_FILE"
     fi
   fi
   sudo systemctl restart voltchess-api 2>/dev/null || true

@@ -28,9 +28,15 @@ import {
 } from "./lichess";
 import { computeDivision } from "./division";
 
+const CHART_Y_MAX = 1.05;
+
 interface EvalChartItem {
   ply: number;
   chances: number;
+  /** Winning chances clamped to ≥ 0 — fills the band above the zero line */
+  chancesUp: number;
+  /** Winning chances clamped to ≤ 0 — fills the band below the zero line */
+  chancesDown: number;
   moveLabel: string;
   evalLabel: string;
   judgment?: string;
@@ -96,9 +102,13 @@ export default function LichessEvalChart() {
         : "Start";
       const classification = positionEval.moveClassification;
 
+      const chances = getWinningChances(positionEval.lines[0]);
+
       return {
         ply: index,
-        chances: getWinningChances(positionEval.lines[0]),
+        chances,
+        chancesUp: Math.max(0, chances),
+        chancesDown: Math.min(0, chances),
         moveLabel,
         evalLabel: renderLichessEval(positionEval.lines[0]),
         judgment: classification ? JUDGMENT_LABELS[classification] : undefined,
@@ -138,7 +148,7 @@ export default function LichessEvalChart() {
       sx={{
         height: { xs: 110, sm: 140 },
         width: "100%",
-        bgcolor: palette.surface,
+        background: `linear-gradient(180deg, ${palette.surfaceRaised} 0%, ${palette.bg} 100%)`,
         border: `1px solid ${palette.border}`,
         borderRadius: 1.5,
         overflow: "hidden",
@@ -156,17 +166,8 @@ export default function LichessEvalChart() {
           }}
           style={{ cursor: "pointer" }}
         >
-          <defs>
-            <linearGradient id="lichessWinChances" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={LICHESS_COLORS.chartWhiteFill} />
-              <stop offset="50%" stopColor={LICHESS_COLORS.chartWhiteFill} />
-              <stop offset="50%" stopColor={LICHESS_COLORS.chartBlackFill} />
-              <stop offset="100%" stopColor={LICHESS_COLORS.chartBlackFill} />
-            </linearGradient>
-          </defs>
-
           <XAxis dataKey="ply" hide />
-          <YAxis domain={[-1.05, 1.05]} hide />
+          <YAxis domain={[-CHART_Y_MAX, CHART_Y_MAX]} hide />
 
           <Tooltip
             content={<ChartTooltip />}
@@ -174,20 +175,42 @@ export default function LichessEvalChart() {
             cursor={{ stroke: "grey", strokeWidth: 1, strokeOpacity: 0.4 }}
           />
 
+          {/* Fill between the eval line and y=0 (lichess-style), not full-height bands */}
+          <Area
+            type="monotone"
+            dataKey="chancesDown"
+            baseValue={0}
+            stroke="none"
+            fill={LICHESS_COLORS.chartBlackFill}
+            fillOpacity={1}
+            isAnimationActive={false}
+            legendType="none"
+            tooltipType="none"
+          />
+          <Area
+            type="monotone"
+            dataKey="chancesUp"
+            baseValue={0}
+            stroke="none"
+            fill={LICHESS_COLORS.chartWhiteFill}
+            fillOpacity={1}
+            isAnimationActive={false}
+            legendType="none"
+            tooltipType="none"
+          />
+
+          <ReferenceLine y={0} stroke="#676664" strokeWidth={1} />
+
           <Area
             type="monotone"
             dataKey="chances"
             stroke={LICHESS_COLORS.chartLine}
             strokeWidth={1.5}
-            fill="url(#lichessWinChances)"
-            fillOpacity={1}
-            baseValue={-1.05}
+            fill="none"
             dot={renderDot}
             activeDot={{ r: 3.5, fill: LICHESS_COLORS.chartLine }}
             isAnimationActive={false}
           />
-
-          <ReferenceLine y={0} stroke="#676664" strokeWidth={1} />
 
           {division.middlegame !== undefined && (
             <ReferenceLine

@@ -391,7 +391,7 @@ def main() -> int:
         try_public_health()
         deploy_frontend(push=not args.no_push, build=not args.no_build)
         print()
-        print("Done. Live site: https://voltchess.me")
+        print("Done. Live site: https://voltchess.vercel.app")
         return 0
 
     password = args.password or getpass.getpass(f"Pi SSH password ({USER}@{HOST}): ")
@@ -426,7 +426,7 @@ def main() -> int:
         print()
         print("Done.")
         print(f"  API:       {PRODUCTION_API_URL}")
-        print("  Live site: https://voltchess.me")
+        print("  Live site: https://voltchess.vercel.app")
         return 0
     finally:
         client.close()

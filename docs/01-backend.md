@@ -181,7 +181,7 @@ Inside each app you'll repeatedly see the same standard Django files: `models.py
 - `DATABASES` — database connection config; Postgres by default, SQLite when `USE_SQLITE=true`.
 - `AUTH_USER_MODEL` — `"accounts.User"`, the custom user model.
 - `AUTH_PASSWORD_VALIDATORS` — the password-strength rules enforced everywhere.
-- `CORS_ALLOWED_ORIGINS` / `CORS_ALLOWED_ORIGIN_REGEXES` / `CORS_ALLOW_CREDENTIALS` — which web front-ends may call the API (localhost, voltchess.me, and any `*.vercel.app` / `*.trycloudflare.com`).
+- `CORS_ALLOWED_ORIGINS` / `CORS_ALLOWED_ORIGIN_REGEXES` / `CORS_ALLOW_CREDENTIALS` — which web front-ends may call the API (localhost, `https://voltchess.vercel.app`, and any `*.vercel.app` / `*.trycloudflare.com`).
 - `REST_FRAMEWORK` — sets the default authentication to JWT and default permission to "must be logged in."
 - `SIMPLE_JWT` — access tokens last 12 hours, refresh tokens 90 days, and refresh tokens rotate on each use (long, low-friction sessions).
 

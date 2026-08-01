@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { OG_IMAGE, SITE_URL } from "@/data/seo";
 
 interface SchemaOrgProps {
   data: Record<string, unknown> | Record<string, unknown>[];
@@ -37,8 +38,8 @@ export const chessSoftwareSchema = {
   applicationSubCategory: "Chess Analysis Software",
   description:
     "Free chess game review and analysis powered by Stockfish. Upload PGN files, import Chess.com and Lichess games, find blunders, and improve your chess.",
-  url: "https://voltchess.me/",
-  screenshot: "https://voltchess.me/og-image.png",
+  url: `${SITE_URL}/`,
+  screenshot: OG_IMAGE,
   operatingSystem: "Any",
   browserRequirements: "Requires JavaScript. Requires HTML5.",
   offers: {
@@ -50,7 +51,7 @@ export const chessSoftwareSchema = {
   creator: {
     "@type": "Organization",
     name: "VoltChess",
-    logo: "https://voltchess.me/logo-512.png",
+    logo: `${SITE_URL}/logo-512.png`,
   },
   keywords: [
     "chess game review",

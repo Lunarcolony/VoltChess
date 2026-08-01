@@ -4,6 +4,7 @@ import { Chess, PieceSymbol, Square } from "chess.js";
 import { getPositionWinPercentage } from "./engine/helpers/winPercentage";
 import { Color } from "@/types/enums";
 import { Piece } from "react-chessboard/dist/chessboard/types";
+import { SITE_HOST } from "@/data/seo";
 
 export const getEvaluateGameParams = (game: Chess): EvaluateGameParams => {
   const history = game.history({ verbose: true });
@@ -58,7 +59,7 @@ export const setGameHeaders = (
   params: { white?: Player; black?: Player; resigned?: Color } = {}
 ): Chess => {
   game.setHeader("Event", "VoltChess Game");
-  game.setHeader("Site", "voltchess.me");
+  game.setHeader("Site", SITE_HOST);
   game.setHeader(
     "Date",
     new Date().toISOString().split("T")[0].replace(/-/g, ".")

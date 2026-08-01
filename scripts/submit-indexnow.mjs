@@ -3,6 +3,7 @@ import { join } from "node:path";
 import {
   INDEXNOW_KEY,
   SITE_HOST,
+  SITE_URL,
   getPublicUrls,
   indexNowKeyUrl,
 } from "./seo-urls.mjs";
@@ -58,7 +59,7 @@ async function main() {
     process.exit(1);
   }
 
-  const keyLocation = `${process.env.INDEXNOW_SITE_URL || "https://voltchess.me"}/${key}.txt`;
+  const keyLocation = `${process.env.INDEXNOW_SITE_URL || SITE_URL}/${key}.txt`;
   const skipVerify = process.env.INDEXNOW_SKIP_VERIFY === "true";
 
   if (!skipVerify) {

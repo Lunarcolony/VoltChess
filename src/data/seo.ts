@@ -1,4 +1,22 @@
-export const SITE_URL = "https://voltchess.me";
+const DEFAULT_SITE_URL = "https://voltchess.vercel.app";
+
+export const SITE_URL = (
+  import.meta.env.VITE_SITE_URL?.trim() || DEFAULT_SITE_URL
+).replace(/\/$/, "");
+
+export const SITE_HOST = new URL(SITE_URL).host;
+
+/** Former production host — keep for PGN / session compatibility. */
+export const LEGACY_SITE_HOSTS = ["voltchess.me"] as const;
+
+export function isVoltChessSiteHost(host: string | undefined | null): boolean {
+  if (!host) return false;
+  const normalized = host.toLowerCase();
+  return (
+    normalized === SITE_HOST.toLowerCase() ||
+    LEGACY_SITE_HOSTS.some((h) => h === normalized)
+  );
+}
 
 export const OG_IMAGE = `${SITE_URL}/og-image.png`;
 

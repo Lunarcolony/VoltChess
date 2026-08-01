@@ -20,6 +20,7 @@ const Review = lazy(() => import("@/pages/review"));
 const Register = lazy(() => import("@/pages/register"));
 const TermsAndConditions = lazy(() => import("@/pages/terms-and-conditions"));
 const Thanks = lazy(() => import("@/pages/thanks"));
+const Moved = lazy(() => import("@/pages/moved"));
 const BlogIndex = lazy(() => import("@/pages/blog/index"));
 const BlogPost = lazy(() => import("@/pages/blog/post"));
 const LandingPage = lazy(() => import("@/pages/landing"));
@@ -52,6 +53,10 @@ function App() {
             <Route path="/play" element={<Play />} />
             <Route path="/puzzles" element={<Puzzles />} />
             <Route path="/review" element={<Review />} />
+            <Route
+              path="/reanalysis"
+              element={<Navigate to="/free-chess-game-analysis" replace />}
+            />
             {LANDING_PAGES.map((page) => (
               <Route
                 key={page.slug}
@@ -66,6 +71,7 @@ function App() {
               element={<TermsAndConditions />}
             />
             <Route path="/thanks" element={<Thanks />} />
+            <Route path="/moved" element={<Moved />} />
 
             {/* Academy auth entry */}
             <Route path="/login" element={<Login />} />

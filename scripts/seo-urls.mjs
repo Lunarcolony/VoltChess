@@ -1,7 +1,14 @@
 /** Shared public URLs for sitemap.xml and IndexNow submissions. */
 
-export const SITE_URL = "https://voltchess.me";
-export const SITE_HOST = "voltchess.me";
+const DEFAULT_SITE_URL = "https://voltchess.vercel.app";
+
+export const SITE_URL = (
+  process.env.VITE_SITE_URL?.trim() ||
+  process.env.SITE_URL?.trim() ||
+  DEFAULT_SITE_URL
+).replace(/\/$/, "");
+
+export const SITE_HOST = new URL(SITE_URL).host;
 
 export const INDEXNOW_KEY = "30a48e821f564f43bd421d99f842e4e2";
 
@@ -29,6 +36,7 @@ export const staticPaths = [
   "/openings",
   "/puzzles",
   "/terms-and-conditions",
+  "/moved",
 ];
 
 /** Absolute URLs indexed in sitemap.xml (IndexNow-safe). */

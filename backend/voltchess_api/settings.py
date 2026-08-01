@@ -121,7 +121,7 @@ CORS_ALLOWED_ORIGINS = [
     o.strip()
     for o in os.environ.get(
         "CORS_ALLOWED_ORIGINS",
-        "http://localhost:3000,http://127.0.0.1:3000,https://voltchess.me,https://www.voltchess.me",
+        "http://localhost:3000,http://127.0.0.1:3000,https://voltchess.vercel.app",
     ).split(",")
     if o.strip()
 ]

@@ -12,7 +12,7 @@
 
 | Environment | How to connect |
 |-------------|----------------|
-| **Vercel / voltchess.me** | Set `VITE_API_URL=https://your-api-domain` in Vercel → Environment Variables |
+| **Vercel / voltchess.vercel.app** | Set `VITE_API_URL=https://your-api-domain` in Vercel → Environment Variables |
 | **Local dev** | Leave `VITE_API_URL` unset; set `API_PROXY_TARGET=http://127.0.0.1:8000` in `.env` for the Vite proxy |
 | **Pi deploy** | Run `deploy.bat` from repo root (prompts for Pi SSH password; do not commit passwords) |
 

@@ -2,7 +2,10 @@
 
 Free chess analysis powered by Stockfish — upload a PGN, review blunders, and improve your game. No sign-up required.
 
-**Live:** [voltchess.me](https://voltchess.me)
+**Live:** [voltchess.vercel.app](https://voltchess.vercel.app)  
+**Domain notice:** [voltchess.me expired — we moved](https://voltchess.vercel.app/moved)
+
+> **VoltChess moved.** `voltchess.me` expired — the free analyzer is now at **https://voltchess.vercel.app** (same app, no sign-up). Please update bookmarks.
 
 ## Features
 

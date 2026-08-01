@@ -14,6 +14,7 @@ import {
   gameAtom,
   gameEvalAtom,
 } from "@/sections/analysis/states";
+import { isVoltChessSiteHost, LEGACY_SITE_HOSTS, SITE_HOST } from "@/data/seo";
 
 const SESSION_KEY = "voltchess-analysis-session";
 
@@ -122,7 +123,7 @@ export function useAnalysisSession() {
       applyGame(
         gameUrl.pgn,
         gameUrl.eval,
-        !(gameUrl.black.name === "You" && gameUrl.site === "voltchess.me")
+        !(gameUrl.black.name === "You" && isVoltChessSiteHost(gameUrl.site))
       );
     };
 
@@ -150,7 +151,9 @@ export function useAnalysisSession() {
         serverGameFromUrl.eval,
         !(
           serverGameFromUrl.black.name === "You" &&
-          serverGameFromUrl.pgn.includes("voltchess.me")
+          [SITE_HOST, ...LEGACY_SITE_HOSTS].some((host) =>
+            serverGameFromUrl.pgn.includes(host)
+          )
         )
       );
     } else if (typeof pgnParam === "string") {

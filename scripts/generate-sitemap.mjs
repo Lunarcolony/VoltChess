@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   SITE_URL,
@@ -18,6 +18,7 @@ const staticMeta = {
   "/openings": { priority: "0.7", changefreq: "monthly" },
   "/puzzles": { priority: "0.7", changefreq: "monthly" },
   "/terms-and-conditions": { priority: "0.3", changefreq: "yearly" },
+  "/moved": { priority: "0.4", changefreq: "yearly" },
 };
 
 function urlEntry(path, priority, changefreq, image = false) {
@@ -41,7 +42,10 @@ function urlEntry(path, priority, changefreq, image = false) {
 
 const urls = [
   ...staticPaths.map((path) => {
-    const meta = staticMeta[path];
+    const meta = staticMeta[path] ?? {
+      priority: "0.5",
+      changefreq: "monthly",
+    };
     return urlEntry(path, meta.priority, meta.changefreq, meta.image);
   }),
   ...blogSlugs.map((slug) =>
@@ -56,12 +60,43 @@ ${urls.join("\n")}
 </urlset>
 `;
 
+const robotsTxt = `User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /sign-in
+Disallow: /coach/
+Disallow: /student
+Disallow: /play
+Disallow: /review
+Disallow: /thanks
+
+# Sitemaps
+Sitemap: ${SITE_URL}/sitemap.xml
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+`;
+
 for (const dir of ["public", "dist"]) {
   try {
     writeFileSync(join(dir, "sitemap.xml"), xml);
     console.log(`generate-sitemap: wrote ${dir}/sitemap.xml (${lastmod})`);
   } catch {
     if (dir === "public") throw new Error("public/sitemap.xml write failed");
+  }
+}
+
+for (const dir of ["public", "dist"]) {
+  try {
+    writeFileSync(join(dir, "robots.txt"), robotsTxt);
+    console.log(`generate-sitemap: wrote ${dir}/robots.txt`);
+  } catch {
+    if (dir === "public") throw new Error("public/robots.txt write failed");
   }
 }
 

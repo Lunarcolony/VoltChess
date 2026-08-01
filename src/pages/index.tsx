@@ -27,12 +27,12 @@ import type { Game } from "@/types/game";
 import HomeGameLoader from "@/sections/home/HomeGameLoader";
 import FeatureCard from "@/sections/home/FeatureCard";
 import WelcomeModal from "@/sections/onboarding/WelcomeModal";
+import { DEFAULT_SEO, TRUST_BULLETS, isVoltChessSiteHost } from "@/data/seo";
 import {
   isOnboardingComplete,
   markOnboardingComplete,
 } from "@/sections/onboarding/onboardingStorage";
 import { usePalette } from "@/hooks/usePalette";
-import { DEFAULT_SEO, TRUST_BULLETS } from "@/data/seo";
 import { BLOG_POSTS } from "@/data/blogPosts";
 import NavLink from "@/components/NavLink";
 import { ENGINE_DEFAULTS } from "@/constants/engineDefaults";
@@ -109,7 +109,7 @@ function Home() {
       resetAndSetGamePgn(gameUrl.pgn);
       setEval(gameUrl.eval);
       setBoardOrientation(
-        !(gameUrl.black.name === "You" && gameUrl.site === "voltchess.me")
+        !(gameUrl.black.name === "You" && isVoltChessSiteHost(gameUrl.site))
       );
     };
 

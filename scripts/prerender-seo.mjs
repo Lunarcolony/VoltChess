@@ -8,6 +8,7 @@ import {
   buildLandingBody,
   buildBlogIndexBody,
   buildBlogPostBody,
+  buildBlogFaqSchema,
   buildAppPageBody,
 } from "./seo-body.mjs";
 
@@ -139,6 +140,12 @@ const APP_PAGES = [
     title: "Terms and Conditions | VoltChess",
     description: "Terms of use for VoltChess free chess analysis and Academy features.",
   },
+  {
+    path: "/moved",
+    title: "VoltChess moved — new official URL | VoltChess",
+    description:
+      "voltchess.me expired. VoltChess free chess analysis is now at voltchess.vercel.app — same app, no sign-up.",
+  },
 ];
 
 /** @returns {Promise<SeoPage[]>} */
@@ -178,13 +185,18 @@ async function buildPages() {
         publisher: { "@type": "Organization", name: "VoltChess" },
       },
     },
-    ...blogPosts.map((post) => ({
-      path: `/blog/${post.slug}`,
-      title: post.metaTitle,
-      description: post.metaDescription,
-      bodyHtml: buildBlogPostBody(post),
-      jsonLd: articleSchema(post.title, post.metaDescription, post.publishedAt),
-    })),
+    ...blogPosts.map((post) => {
+      const faqSchema = buildBlogFaqSchema(post);
+      return {
+        path: `/blog/${post.slug}`,
+        title: post.metaTitle,
+        description: post.metaDescription,
+        bodyHtml: buildBlogPostBody(post, blogPosts),
+        jsonLd: faqSchema
+          ? [articleSchema(post.title, post.metaDescription, post.publishedAt), faqSchema]
+          : articleSchema(post.title, post.metaDescription, post.publishedAt),
+      };
+    }),
     ...APP_PAGES.map((page) => ({
       path: page.path,
       title: page.title,

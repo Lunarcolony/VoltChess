@@ -23,6 +23,7 @@ import {
   gameAtom,
   gameEvalAtom,
 } from "../states";
+import { advancedModeAtom } from "../advanced/states";
 import { useAnalyzeGame } from "@/hooks/useAnalyzeGame";
 import { useGameDatabase } from "@/hooks/useGameDatabase";
 import { useAnalysisQueue } from "@/contexts/AnalysisQueueContext";
@@ -42,12 +43,13 @@ export default function ReportTabPanel() {
   const game = useAtomValue(gameAtom);
   const gameEval = useAtomValue(gameEvalAtom);
   const progress = useAtomValue(evaluationProgressAtom);
-  const { analyzeGame, reanalyzeGame, engineReady } = useAnalyzeGame();
+  const { analyzeGame, engineReady } = useAnalyzeGame();
   const { serverGameFromUrl } = useGameDatabase();
   const { state: queueState, startAnalysis } = useAnalysisQueue();
   const { setPgn: setGamePgn } = useChessActions(gameAtom);
   const { resetToStartingPosition: resetBoard } = useChessActions(boardAtom);
   const setEval = useSetAtom(gameEvalAtom);
+  const setAdvancedMode = useSetAtom(advancedModeAtom);
   const { user } = useAuth();
   const showCoachNotes =
     user?.role === UserRole.Coach || user?.role === UserRole.Admin;
@@ -191,11 +193,11 @@ export default function ReportTabPanel() {
           <Button
             variant="outlined"
             fullWidth
-            disabled={isAnalyzing || !engineReady}
-            onClick={() => reanalyzeGame()}
+            onClick={() => setAdvancedMode(true)}
+            startIcon={<Icon icon="mdi:lightning-bolt" width={18} />}
             sx={{ mb: 1.5 }}
           >
-            Re-analyze this game
+            Try advanced analysis
           </Button>
         </>
       )}

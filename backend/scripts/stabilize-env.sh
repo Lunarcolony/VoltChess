@@ -58,7 +58,7 @@ dedupe_cors() {
 
 if grep -q '^CORS_ALLOWED_ORIGINS=' "$ENV_FILE"; then
   current="$(grep '^CORS_ALLOWED_ORIGINS=' "$ENV_FILE" | cut -d= -f2-)"
-  for origin in "https://${API_HOST}" "https://voltchess.me" "https://www.voltchess.me"; do
+  for origin in "https://${API_HOST}" "https://voltchess.vercel.app"; do
     if [[ "$current" != *"$origin"* ]]; then
       current="${current},${origin}"
     fi
@@ -66,7 +66,7 @@ if grep -q '^CORS_ALLOWED_ORIGINS=' "$ENV_FILE"; then
   cleaned="$(dedupe_cors "$current")"
   sed -i "s|^CORS_ALLOWED_ORIGINS=.*|CORS_ALLOWED_ORIGINS=${cleaned}|" "$ENV_FILE"
 else
-  echo "CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,https://voltchess.me,https://www.voltchess.me,https://${API_HOST}" >>"$ENV_FILE"
+  echo "CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,https://voltchess.vercel.app,https://${API_HOST}" >>"$ENV_FILE"
 fi
 
 echo "==> Environment stabilized for ${API_HOST}"
