@@ -33,6 +33,7 @@ function articleSchema(headline, description, datePublished) {
 }
 
 function homeJsonLd() {
+  const github = "https://github.com/Lunarcolony/VoltChess";
   return [
     {
       "@context": "https://schema.org",
@@ -42,6 +43,7 @@ function homeJsonLd() {
       description:
         "Free chess game review and analysis powered by Stockfish. Import Chess.com or Lichess games, find blunders, check accuracy, and improve your play.",
       url: `${SITE_URL}/`,
+      codeRepository: github,
       operatingSystem: "Any",
       browserRequirements: "Requires JavaScript. Requires HTML5.",
       offers: {
@@ -52,7 +54,9 @@ function homeJsonLd() {
       creator: {
         "@type": "Organization",
         name: "VoltChess",
+        url: SITE_URL,
         logo: `${SITE_URL}/logo-512.png`,
+        sameAs: [github],
       },
       featureList: [
         "Free chess game review",
@@ -72,6 +76,7 @@ function homeJsonLd() {
       name: "VoltChess",
       url: SITE_URL,
       logo: `${SITE_URL}/logo-512.png`,
+      sameAs: [github],
     },
     {
       "@context": "https://schema.org",
@@ -80,7 +85,24 @@ function homeJsonLd() {
       url: `${SITE_URL}/`,
       description:
         "Free unlimited chess game analysis and review powered by Stockfish.",
-      publisher: { "@type": "Organization", name: "VoltChess" },
+      publisher: {
+        "@type": "Organization",
+        name: "VoltChess",
+        sameAs: [github],
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareSourceCode",
+      name: "VoltChess",
+      description:
+        "Open-source VoltChess — free Stockfish chess game analysis for Chess.com and Lichess.",
+      url: github,
+      codeRepository: github,
+      programmingLanguage: ["TypeScript", "Python"],
+      runtimePlatform: "Web browser",
+      license: "https://www.gnu.org/licenses/agpl-3.0.html",
+      isPartOf: { "@type": "WebApplication", name: "VoltChess", url: SITE_URL },
     },
     {
       "@context": "https://schema.org",
@@ -110,6 +132,12 @@ function homeJsonLd() {
           position: 4,
           name: "Game Analysis",
           url: `${SITE_URL}/analysis`,
+        },
+        {
+          "@type": "SiteNavigationElement",
+          position: 5,
+          name: "VoltChess on GitHub",
+          url: github,
         },
       ],
     },

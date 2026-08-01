@@ -1,11 +1,16 @@
 # VoltChess
 
-Free chess analysis powered by Stockfish — upload a PGN, review blunders, and improve your game. No sign-up required.
+**VoltChess** is free Stockfish chess game analysis for Chess.com and Lichess — open source on GitHub.
 
-**Live:** [voltchess.vercel.app](https://voltchess.vercel.app)  
-**Domain notice:** [voltchess.me expired — we moved](https://voltchess.vercel.app/moved)
+| | |
+|---|---|
+| **Live app** | [voltchess.vercel.app](https://voltchess.vercel.app) |
+| **Source (this repo)** | [github.com/Lunarcolony/VoltChess](https://github.com/Lunarcolony/VoltChess) |
+| **Domain notice** | [voltchess.me expired — we moved](https://voltchess.vercel.app/moved) |
 
 > **VoltChess moved.** `voltchess.me` expired — the free analyzer is now at **https://voltchess.vercel.app** (same app, no sign-up). Please update bookmarks.
+
+Upload a PGN, review blunders, and improve your game. No sign-up required.
 
 ## Features
 

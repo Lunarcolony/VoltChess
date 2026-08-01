@@ -63,7 +63,16 @@ export default function Moved() {
             {SITE_URL}
           </Typography>
           <Typography variant="body2" sx={{ color: "text.secondary", mb: 4 }}>
-            Please update bookmarks. Sorry for the downtime.
+            Please update bookmarks. Sorry for the downtime. Source code:{" "}
+            <Box
+              component="a"
+              href="https://github.com/Lunarcolony/VoltChess"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ color: palette.accent }}
+            >
+              github.com/Lunarcolony/VoltChess
+            </Box>
           </Typography>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}>
             <Button
@@ -82,6 +91,15 @@ export default function Moved() {
               startIcon={<Icon icon="mdi:chess-king" />}
             >
               Open analyzer
+            </Button>
+            <Button
+              href="https://github.com/Lunarcolony/VoltChess"
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="outlined"
+              startIcon={<Icon icon="mdi:github" />}
+            >
+              GitHub
             </Button>
           </Box>
         </Container>

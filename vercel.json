@@ -4,6 +4,11 @@
   "trailingSlash": false,
   "redirects": [
     {
+      "source": "/github",
+      "destination": "https://github.com/Lunarcolony/VoltChess",
+      "permanent": false
+    },
+    {
       "source": "/reanalysis",
       "destination": "/free-chess-game-analysis",
       "permanent": true

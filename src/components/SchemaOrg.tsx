@@ -30,6 +30,8 @@ export const SchemaOrg: React.FC<SchemaOrgProps> = ({ data }) => {
   return null;
 };
 
+const GITHUB_REPO_URL = "https://github.com/Lunarcolony/VoltChess";
+
 export const chessSoftwareSchema = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
@@ -39,6 +41,7 @@ export const chessSoftwareSchema = {
   description:
     "Free chess game review and analysis powered by Stockfish. Upload PGN files, import Chess.com and Lichess games, find blunders, and improve your chess.",
   url: `${SITE_URL}/`,
+  codeRepository: GITHUB_REPO_URL,
   screenshot: OG_IMAGE,
   operatingSystem: "Any",
   browserRequirements: "Requires JavaScript. Requires HTML5.",
@@ -51,9 +54,12 @@ export const chessSoftwareSchema = {
   creator: {
     "@type": "Organization",
     name: "VoltChess",
+    url: SITE_URL,
     logo: `${SITE_URL}/logo-512.png`,
+    sameAs: [GITHUB_REPO_URL],
   },
   keywords: [
+    "VoltChess",
     "chess game review",
     "chess analysis",
     "stockfish",
