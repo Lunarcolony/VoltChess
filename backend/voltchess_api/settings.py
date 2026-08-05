@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "annotations",
     "coaching",
     "sync",
+    "telemetry",
 ]
 
 MIDDLEWARE = [

@@ -38,6 +38,7 @@ import NavLink from "@/components/NavLink";
 import { ENGINE_DEFAULTS } from "@/constants/engineDefaults";
 import { preloadEngine } from "@/lib/engine/sharedEngine";
 import { track } from "@vercel/analytics";
+import { recordGameLoaded, recordOnboardingComplete } from "@/lib/telemetry";
 
 function Home() {
   const palette = usePalette();
@@ -81,7 +82,9 @@ function Home() {
       resetAndSetGamePgn(pgn);
       setEvaluationProgress(0);
       prepareNewAnalysisSession(pgn, boardOrientation);
-      track("game_loaded", { source: fromOnboarding ? "onboarding" : "home" });
+      const source = fromOnboarding ? "onboarding" : "home";
+      track("game_loaded", { source });
+      recordGameLoaded(source);
       setNavigating(true);
       await router.push("/analysis");
     },
@@ -93,6 +96,7 @@ function Home() {
       setShowOnboarding(false);
       markOnboardingComplete();
       track("onboarding_complete");
+      recordOnboardingComplete();
       void startAnalysis(loadedGame, boardOrientation, true);
     },
     [startAnalysis]

@@ -49,6 +49,13 @@ function navForRole(
       href: "/coach",
     });
   }
+  if (role === UserRole.Admin) {
+    items.splice(1, 0, {
+      label: "Ops",
+      icon: "mdi:chart-box-outline",
+      href: "/ops",
+    });
+  }
   if (role === UserRole.Student) {
     items.splice(1, 0, {
       label: "My Hub",

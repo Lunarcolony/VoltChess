@@ -13,6 +13,11 @@ import {
   releaseGameAnalysis,
 } from "@/lib/api/sync";
 import { debug } from "@/lib/debug";
+import {
+  markAnalysisStart,
+  recordGameAnalyzed,
+  recordQueueEvent,
+} from "@/lib/telemetry";
 
 export type QueuePhase =
   | "idle"
@@ -118,6 +123,8 @@ async function analyzeOne(game: ServerGameDetail): Promise<void> {
   chess.loadPgn(game.pgn);
   const params = getEvaluateGameParams(chess);
 
+  markAnalysisStart();
+
   const evalResult = await eng.evaluateGame({
     ...params,
     depth: SYNC_ANALYSIS_DEFAULTS.depth,
@@ -138,6 +145,20 @@ async function analyzeOne(game: ServerGameDetail): Promise<void> {
     estimated_elo: evalResult.estimatedElo ?? null,
     settings: evalResult.settings as unknown as Record<string, unknown>,
   });
+
+  recordGameAnalyzed({
+    engine: "Stockfish17",
+    depth: SYNC_ANALYSIS_DEFAULTS.depth,
+    multiPv: SYNC_ANALYSIS_DEFAULTS.multiPv,
+    workers: SYNC_ANALYSIS_DEFAULTS.workers,
+    nbPositions: params.fens.length,
+    accuracy: evalResult.accuracy ?? null,
+    estimatedElo: evalResult.estimatedElo ?? null,
+    source: "queue",
+    serverGameId: game.id,
+    reanalyze: false,
+  });
+  recordQueueEvent("queue_game_complete", { gameId: game.id });
 
   debug.log("queue", "analyzeOne complete", { gameId: game.id, label });
 }
@@ -211,6 +232,8 @@ export async function runAnalysisQueue(
     priorityId,
   });
 
+  recordQueueEvent("queue_started", { maxGames, priorityId });
+
   patch({
     running: true,
     error: null,
@@ -252,6 +275,8 @@ export async function runAnalysisQueue(
       gamesDone,
       message,
     });
+
+    recordQueueEvent("queue_done", { gamesDone });
 
     patch({
       phase: gamesDone > 0 ? "done" : "idle",

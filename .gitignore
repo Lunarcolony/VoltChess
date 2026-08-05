@@ -10,6 +10,8 @@ node_modules
 **/__pycache__/
 *.py[cod]
 backend/db.sqlite3
+.venv/
+backend/.venv/
 
 # Local API override (use public/api-config.example.json as template)
 public/api-config.local.json
@@ -65,3 +67,5 @@ cdk.context.json
 .vs/VoltChess/FileContentIndex/0a2eaaff-5a66-4520-b8fc-519078a194f5.vsidx
 .vs/VoltChess/config/applicationhost.config
 .vs/VoltChess/FileContentIndex/7fc01e27-0d99-4f40-b05f-738d7beed0e3.vsidx
+.vercel
+.env*

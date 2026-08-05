@@ -29,6 +29,7 @@ import {
 } from "../states";
 import { useChessActions } from "@/hooks/useChessActions";
 import { logAnalyticsEvent } from "@/lib/firebase";
+import { recordPlayGame } from "@/lib/telemetry";
 import { useEffect, useState } from "react";
 import { isEngineSupported } from "@/lib/engine/shared";
 import { Stockfish16_1 } from "@/lib/engine/stockfish16_1";
@@ -95,6 +96,11 @@ export default function GameSettingsDialog({ open, onClose }: Props) {
     handleClose();
 
     logAnalyticsEvent("play_game", {
+      engine: engineName,
+      engineElo,
+      playerColor,
+    });
+    recordPlayGame({
       engine: engineName,
       engineElo,
       playerColor,

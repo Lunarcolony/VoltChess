@@ -6,6 +6,7 @@ import RequireAcademyAuth from "@/components/RequireAcademyAuth";
 import RoleRoute from "@/components/RoleRoute";
 import { LoadingSpinner } from "@/components/Loading";
 import RouteAnalytics from "@/components/RouteAnalytics";
+import TelemetryProvider from "@/components/TelemetryProvider";
 import { Analytics } from "@vercel/analytics/react";
 import { UserRole } from "@/types/user";
 import { LANDING_PAGES } from "@/data/landingPages";
@@ -33,12 +34,14 @@ const CoachPlans = lazy(() => import("@/pages/coach/plans"));
 const CoachAnalytics = lazy(() => import("@/pages/coach/analytics"));
 const CoachStudentDetail = lazy(() => import("@/pages/coach/student-detail"));
 const StudentHome = lazy(() => import("@/pages/student/index"));
+const OpsDashboard = lazy(() => import("@/pages/ops/index"));
 
 function App() {
   return (
     <ErrorBoundary>
       <Analytics />
       <RouteAnalytics />
+      <TelemetryProvider />
       <Layout>
         <Suspense
           fallback={
@@ -149,6 +152,14 @@ function App() {
                 element={
                   <RoleRoute allowed={[UserRole.Student]}>
                     <StudentHome />
+                  </RoleRoute>
+                }
+              />
+              <Route
+                path="/ops"
+                element={
+                  <RoleRoute allowed={[UserRole.Admin]}>
+                    <OpsDashboard />
                   </RoleRoute>
                 }
               />

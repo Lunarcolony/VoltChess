@@ -7,6 +7,7 @@ import { usePlayersData } from "@/hooks/usePlayersData";
 import { logAnalyticsEvent } from "@/lib/firebase";
 import { syncAnalysisResult } from "@/lib/gameSync";
 import { debug } from "@/lib/debug";
+import { markAnalysisStart, recordGameAnalyzed } from "@/lib/telemetry";
 import { SavedEvals } from "@/types/eval";
 import {
   engineDepthAtom,
@@ -66,6 +67,14 @@ export function useAnalyzeGame() {
         localGameId: gameFromUrl?.id,
       });
 
+      const source = serverGameFromUrl?.serverId
+        ? "server"
+        : gameFromUrl?.id
+          ? "local_db"
+          : "session";
+
+      markAnalysisStart();
+
       try {
         const newGameEval = await engine.evaluateGame({
           ...params,
@@ -109,6 +118,19 @@ export function useAnalyzeGame() {
           ...gameSavedEvals,
         }));
 
+        recordGameAnalyzed({
+          engine: engineName,
+          depth: engineDepth,
+          multiPv: engineMultiPv,
+          workers: engineWorkersNb,
+          nbPositions: params.fens.length,
+          accuracy: newGameEval.accuracy ?? null,
+          estimatedElo: newGameEval.estimatedElo ?? null,
+          source,
+          serverGameId: serverGameFromUrl?.serverId ?? null,
+          localGameId: gameFromUrl?.id ?? null,
+          reanalyze: force,
+        });
         logAnalyticsEvent("analyze_game", {
           engine: engineName,
           depth: engineDepth,

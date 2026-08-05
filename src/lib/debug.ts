@@ -17,7 +17,8 @@ export type DebugCategory =
   | "idb"
   | "route"
   | "bootstrap"
-  | "query";
+  | "query"
+  | "telemetry";
 
 const STORAGE_KEY = "voltchess_debug";
 

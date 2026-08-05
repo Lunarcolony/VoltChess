@@ -14,3 +14,4 @@ export * from "./classrooms";
 export * from "./coaching";
 export * from "./games";
 export * from "./sync";
+export * from "./telemetry";

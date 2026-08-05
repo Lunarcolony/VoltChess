@@ -13,4 +13,5 @@ urlpatterns = [
     path("api/", include("annotations.urls")),
     path("api/", include("coaching.urls")),
     path("api/", include("sync.urls")),
+    path("api/", include("telemetry.urls")),
 ]
