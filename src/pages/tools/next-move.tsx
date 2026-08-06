@@ -1,16 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Box,
   Typography,
   TextField,
   Button,
-  Grid2 as Grid,
   Chip,
-  LinearProgress,
-  Alert,
   MenuItem,
   Select,
   CircularProgress,
+  Alert,
   type SelectChangeEvent,
 } from "@mui/material";
 import { Icon } from "@iconify/react";
@@ -21,35 +19,21 @@ import type {
   Arrow,
   Square as BoardSquare,
 } from "react-chessboard/dist/chessboard/types";
-import { atom, useAtomValue } from "jotai";
-import { PageTitle } from "@/components/pageTitle";
-import PageContainer from "@/components/PageContainer";
-import { useCardSx, usePalette } from "@/hooks/usePalette";
+import ToolsShell, {
+  ToolPrimaryButton,
+  ToolStat,
+} from "@/sections/tools/ToolsShell";
+import { usePalette } from "@/hooks/usePalette";
 import { useRouter } from "@/hooks/useRouter";
-import { useChessActions } from "@/hooks/useChessActions";
-import { useEngine } from "@/hooks/useEngine";
+import { getSharedEngine } from "@/lib/engine/sharedEngine";
+import { waitForEngineReady } from "@/lib/engine/waitForEngine";
 import { EngineName } from "@/types/enums";
-import { PositionEval } from "@/types/eval";
+import { LineEval, PositionEval } from "@/types/eval";
 import { formatEvalScore } from "@/lib/formatEval";
-import { uciMoveParams } from "@/lib/chess";
+import { moveLineUciToSan, uciMoveParams } from "@/lib/chess";
 
-const nextMoveGameAtom = atom(new Chess());
-
-const DEPTH_OPTIONS = [10, 14, 16, 18, 20] as const;
-
-function sanPvFromFen(fen: string, pv: string[], limit = 8): string {
-  const chess = new Chess(fen);
-  const sanMoves: string[] = [];
-  for (const uci of pv.slice(0, limit)) {
-    try {
-      const move = chess.move(uciMoveParams(uci));
-      sanMoves.push(move.san);
-    } catch {
-      break;
-    }
-  }
-  return sanMoves.join(" ");
-}
+const DEPTH_OPTIONS = [12, 16, 20] as const;
+const MULTI_PV = 3;
 
 function sanFromUci(fen: string, uci: string): string | null {
   try {
@@ -61,19 +45,100 @@ function sanFromUci(fen: string, uci: string): string | null {
   }
 }
 
+function pvToSan(fen: string, pv: string[], limit = 6): string[] {
+  const toSan = moveLineUciToSan(fen);
+  return pv.slice(0, limit).map((uci) => toSan(uci));
+}
+
+function PvLineRow({
+  line,
+  fen,
+  rank,
+  onClick,
+}: {
+  line: LineEval;
+  fen: string;
+  rank: number;
+  onClick: () => void;
+}) {
+  const palette = usePalette();
+  const sanMoves = useMemo(() => pvToSan(fen, line.pv, 6), [fen, line.pv]);
+  const isBest = rank === 1;
+
+  return (
+    <Box
+      role="button"
+      onClick={onClick}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+        p: 1,
+        borderRadius: 1.5,
+        cursor: sanMoves.length ? "pointer" : "default",
+        mt: 0.75,
+        border: `1px solid ${
+          isBest ? alpha(palette.accent, 0.3) : palette.borderSubtle
+        }`,
+        bgcolor: isBest ? alpha(palette.accent, 0.06) : "transparent",
+        transition: "border-color 0.15s ease, background-color 0.15s ease",
+        "&:hover": {
+          borderColor: alpha(palette.accent, 0.5),
+          bgcolor: alpha(palette.accent, 0.08),
+        },
+      }}
+    >
+      <Typography
+        sx={{
+          width: 18,
+          textAlign: "center",
+          fontSize: "0.68rem",
+          color: palette.textMuted,
+          flexShrink: 0,
+        }}
+      >
+        {rank}
+      </Typography>
+      <Typography
+        sx={{
+          minWidth: 52,
+          fontWeight: 700,
+          fontSize: "0.9rem",
+          fontFamily: "ui-monospace, monospace",
+          color: isBest ? palette.accent : palette.text,
+          flexShrink: 0,
+        }}
+      >
+        {formatEvalScore(line)}
+      </Typography>
+      <Typography
+        noWrap
+        sx={{
+          fontSize: "0.82rem",
+          color: palette.textMuted,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        {sanMoves.join(" ") || "…"}
+      </Typography>
+    </Box>
+  );
+}
+
 export default function NextMoveTool() {
   const palette = usePalette();
-  const cardSx = useCardSx();
   const router = useRouter();
-  const engine = useEngine(EngineName.Stockfish17Lite);
-  const game = useAtomValue(nextMoveGameAtom);
-  const { reset, playMove, undoMove } = useChessActions(nextMoveGameAtom);
 
+  const [game, setGame] = useState<Chess>(() => new Chess());
+  const [fenHistory, setFenHistory] = useState<string[]>([]);
   const fen = game.fen();
 
   const [fenInput, setFenInput] = useState(fen);
   const [fenError, setFenError] = useState<string | null>(null);
   const [depth, setDepth] = useState<number>(16);
+  const [manualFlip, setManualFlip] = useState(false);
+  const [engineReady, setEngineReady] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
   const [evaluation, setEvaluation] = useState<PositionEval | null>(null);
   const [thinkError, setThinkError] = useState<string | null>(null);
@@ -89,72 +154,101 @@ export default function NextMoveTool() {
   }, [fen]);
 
   useEffect(() => {
+    let cancelled = false;
+    waitForEngineReady(EngineName.Stockfish17Lite)
+      .then(() => {
+        if (!cancelled) setEngineReady(true);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      getSharedEngine()?.stopAllCurrentJobs();
+    };
+  }, []);
+
+  useEffect(() => {
     if (appliedUrlFenRef.current) return;
     appliedUrlFenRef.current = true;
 
     const fenParam = router.query.fen;
-    const rawFen = Array.isArray(fenParam) ? fenParam[0] : fenParam;
-    if (!rawFen) return;
+    const raw = Array.isArray(fenParam) ? fenParam[0] : fenParam;
+    if (!raw) return;
 
     try {
-      const decoded = decodeURIComponent(rawFen);
-      new Chess(decoded);
-      reset({ fen: decoded, noHeaders: true });
+      const decoded = decodeURIComponent(raw);
+      const loaded = new Chess(decoded);
+      setGame(loaded);
+      setFenHistory([]);
     } catch {
       /* ignore invalid fen in URL */
     }
-  }, [router.query.fen, reset]);
+  }, [router.query.fen]);
 
-  useEffect(() => {
-    return () => {
-      engine?.stopAllCurrentJobs();
-    };
-  }, [engine]);
+  const attemptMove = useCallback(
+    (from: string, to: string, promotion?: string): boolean => {
+      const next = new Chess(game.fen());
+      try {
+        next.move({ from, to, promotion: promotion || "q" });
+      } catch {
+        return false;
+      }
+      setFenHistory((prev) => [...prev, game.fen()]);
+      setGame(next);
+      return true;
+    },
+    [game]
+  );
+
+  const playUci = useCallback(
+    (uci: string) => {
+      if (uci.length < 4) return;
+      const { from, to, promotion } = uciMoveParams(uci);
+      attemptMove(from, to, promotion);
+    },
+    [attemptMove]
+  );
 
   const onDrop = (
     source: BoardSquare,
     target: BoardSquare,
     piece: string
-  ): boolean => {
-    const move = playMove({
-      from: source,
-      to: target,
-      promotion: piece[1]?.toLowerCase() ?? "q",
+  ): boolean => attemptMove(source, target, piece[1]?.toLowerCase());
+
+  const handleReset = () => {
+    setFenError(null);
+    setGame(new Chess());
+    setFenHistory([]);
+  };
+
+  const handleUndo = () => {
+    setFenHistory((prev) => {
+      if (prev.length === 0) return prev;
+      const last = prev[prev.length - 1];
+      setGame(new Chess(last));
+      return prev.slice(0, -1);
     });
-    return !!move;
   };
 
   const handleLoadFen = () => {
     const trimmed = fenInput.trim();
     try {
-      new Chess(trimmed);
+      const loaded = new Chess(trimmed);
       setFenError(null);
-      reset({ fen: trimmed, noHeaders: true });
+      setGame(loaded);
+      setFenHistory([]);
     } catch {
       setFenError("Invalid FEN — check piece placement and fields.");
     }
   };
 
-  const handleReset = () => {
-    setFenError(null);
-    reset();
-  };
-
-  const handleUndo = () => {
-    undoMove();
-  };
-
   const handleFindBestMove = async () => {
     setThinkError(null);
 
-    if (!engine) {
-      setThinkError("Engine is still loading — try again in a moment.");
-      return;
-    }
-    if (!engine.getIsReady()) {
-      setThinkError("Engine is busy — try again in a moment.");
-      return;
-    }
     if (game.isGameOver()) {
       setThinkError("This position is already over — no moves to find.");
       return;
@@ -162,10 +256,12 @@ export default function NextMoveTool() {
 
     setIsThinking(true);
     try {
+      const engine = await waitForEngineReady(EngineName.Stockfish17Lite);
+      setEngineReady(true);
       const result = await engine.evaluatePositionWithUpdate({
         fen,
         depth,
-        multiPv: 1,
+        multiPv: MULTI_PV,
         setPartialEval: setEvaluation,
       });
       setEvaluation(result);
@@ -176,15 +272,12 @@ export default function NextMoveTool() {
     }
   };
 
-  const bestLine = evaluation?.lines?.[0];
+  const lines = evaluation?.lines ?? [];
+  const bestLine = lines[0];
   const bestMoveUci = evaluation?.bestMove || bestLine?.pv?.[0];
   const bestMoveSan = useMemo(
     () => (bestMoveUci ? sanFromUci(fen, bestMoveUci) : null),
     [fen, bestMoveUci]
-  );
-  const pvSan = useMemo(
-    () => (bestLine?.pv?.length ? sanPvFromFen(fen, bestLine.pv) : ""),
-    [fen, bestLine]
   );
 
   const boardArrows: Arrow[] = useMemo(() => {
@@ -198,329 +291,294 @@ export default function NextMoveTool() {
     ];
   }, [bestMoveUci, palette.accent]);
 
-  const turnLabel = game.turn() === "w" ? "White to move" : "Black to move";
-  const isGameOver = game.isGameOver();
+  const autoOrientation: "white" | "black" =
+    game.turn() === "b" ? "black" : "white";
+  const orientation: "white" | "black" = manualFlip
+    ? autoOrientation === "white"
+      ? "black"
+      : "white"
+    : autoOrientation;
 
-  const openInEditor = () =>
-    router.push(`/tools/editor?fen=${encodeURIComponent(fen)}`);
-  const analyzePosition = () =>
-    router.push(`/analysis?fen=${encodeURIComponent(fen)}`);
+  const isGameOver = game.isGameOver();
+  const turnLabel = game.turn() === "w" ? "White to move" : "Black to move";
+
+  const engineStatusLabel = isThinking
+    ? "Thinking…"
+    : engineReady
+      ? "Ready"
+      : "Loading…";
+  const engineStatusIcon = isThinking
+    ? "mdi:cog-clockwise"
+    : engineReady
+      ? "mdi:check-circle-outline"
+      : "mdi:progress-clock";
+
+  const handlePlayLine = (line: LineEval) => {
+    if (line.pv[0]) playUci(line.pv[0]);
+  };
+
+  const board = (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Chip
+          label={turnLabel}
+          size="small"
+          variant="outlined"
+          icon={
+            <Icon
+              icon={game.turn() === "w" ? "mdi:circle-outline" : "mdi:circle"}
+              width={14}
+            />
+          }
+        />
+        {isGameOver && <Chip label="Game over" size="small" color="warning" />}
+      </Box>
+
+      <Box sx={{ width: "100%", maxWidth: 560, mx: "auto" }}>
+        <Chessboard
+          position={fen}
+          onPieceDrop={onDrop}
+          boardOrientation={orientation}
+          customArrows={boardArrows}
+          customBoardStyle={{
+            borderRadius: "8px",
+            boxShadow: "0 8px 30px rgba(0, 0, 0, 0.35)",
+          }}
+        />
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          gap: 1,
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
+      >
+        <Button
+          size="small"
+          variant="outlined"
+          startIcon={<Icon icon="mdi:restart" width={16} />}
+          onClick={handleReset}
+        >
+          Reset
+        </Button>
+        <Button
+          size="small"
+          variant="outlined"
+          startIcon={<Icon icon="mdi:undo" width={16} />}
+          onClick={handleUndo}
+          disabled={fenHistory.length === 0}
+        >
+          Undo
+        </Button>
+        <Button
+          size="small"
+          variant="outlined"
+          startIcon={<Icon icon="mdi:swap-vertical" width={16} />}
+          onClick={() => setManualFlip((v) => !v)}
+        >
+          Flip board
+        </Button>
+      </Box>
+
+      <Box sx={{ display: "flex", gap: 1, mt: 0.5 }}>
+        <TextField
+          fullWidth
+          size="small"
+          value={fenInput}
+          onChange={(e) => setFenInput(e.target.value)}
+          placeholder={DEFAULT_POSITION}
+          error={!!fenError}
+          helperText={fenError || " "}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              bgcolor: palette.bg,
+              fontFamily: "ui-monospace, monospace",
+              fontSize: "0.78rem",
+            },
+          }}
+        />
+        <Button
+          variant="outlined"
+          onClick={handleLoadFen}
+          sx={{ flexShrink: 0, borderColor: alpha(palette.accent, 0.35) }}
+        >
+          Load
+        </Button>
+      </Box>
+    </Box>
+  );
+
+  const panel = (
+    <>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Typography
+          variant="overline"
+          sx={{
+            color: palette.textMuted,
+            letterSpacing: "0.1em",
+            fontSize: "0.66rem",
+          }}
+        >
+          Engine
+        </Typography>
+        <Chip
+          size="small"
+          label={engineStatusLabel}
+          icon={
+            isThinking ? (
+              <CircularProgress size={12} sx={{ ml: 0.5 }} />
+            ) : (
+              <Icon icon={engineStatusIcon} width={14} />
+            )
+          }
+          sx={{
+            color: engineReady ? palette.accent : palette.textMuted,
+            borderColor: alpha(
+              engineReady ? palette.accent : palette.textMuted,
+              0.35
+            ),
+          }}
+          variant="outlined"
+        />
+      </Box>
+
+      <ToolPrimaryButton
+        onClick={handleFindBestMove}
+        loading={isThinking}
+        disabled={isThinking || isGameOver}
+        startIcon={<Icon icon="mdi:chess-queen" width={18} />}
+      >
+        Find best move
+      </ToolPrimaryButton>
+
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 1,
+        }}
+      >
+        <Typography variant="body2" sx={{ color: palette.textMuted }}>
+          Search depth
+        </Typography>
+        <Select
+          size="small"
+          value={depth}
+          disabled={isThinking}
+          onChange={(e: SelectChangeEvent<number>) =>
+            setDepth(Number(e.target.value))
+          }
+          sx={{ minWidth: 110 }}
+        >
+          {DEPTH_OPTIONS.map((d) => (
+            <MenuItem key={d} value={d}>
+              Depth {d}
+            </MenuItem>
+          ))}
+        </Select>
+      </Box>
+
+      {thinkError && <Alert severity="warning">{thinkError}</Alert>}
+
+      {evaluation && bestLine ? (
+        <>
+          <Box sx={{ textAlign: "center", py: 0.5 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: palette.textMuted,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                fontSize: "0.65rem",
+              }}
+            >
+              Best move
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: "2.35rem",
+                fontWeight: 800,
+                letterSpacing: "-0.01em",
+                color: palette.accent,
+                lineHeight: 1.15,
+              }}
+            >
+              {bestMoveSan ?? bestMoveUci ?? "—"}
+            </Typography>
+          </Box>
+
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <ToolStat
+              label="Eval"
+              value={formatEvalScore(bestLine)}
+              emphasize
+            />
+            <ToolStat label="Depth" value={bestLine.depth} />
+          </Box>
+
+          <Box>
+            <Typography
+              variant="caption"
+              sx={{
+                color: palette.textMuted,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                fontSize: "0.65rem",
+              }}
+            >
+              Top {MULTI_PV} lines
+            </Typography>
+            {lines.map((line, idx) => (
+              <PvLineRow
+                key={line.multiPv}
+                line={line}
+                fen={fen}
+                rank={idx + 1}
+                onClick={() => handlePlayLine(line)}
+              />
+            ))}
+          </Box>
+        </>
+      ) : (
+        !isThinking && (
+          <Typography variant="body2" sx={{ color: palette.textMuted }}>
+            Set up a position on the board or load a FEN, then click &quot;Find
+            best move&quot; to see Stockfish&apos;s top {MULTI_PV} lines.
+          </Typography>
+        )
+      )}
+    </>
+  );
 
   return (
-    <>
-      <PageTitle
-        title="Next Move Calculator — VoltChess"
-        description="Paste a FEN or play moves on the board and let Stockfish find the best next move instantly, free and unlimited."
-      />
-
-      <PageContainer
-        title="Next Move Calculator"
-        subtitle="Play a position or paste a FEN — Stockfish suggests the best move, with eval, depth, and the full line."
-      >
-        <Grid container spacing={2.5}>
-          <Grid size={{ xs: 12, md: 7 }}>
-            <Box sx={{ ...cardSx, display: "flex", justifyContent: "center" }}>
-              <Box sx={{ width: "100%", maxWidth: 480 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 1.5,
-                  }}
-                >
-                  <Chip
-                    label={turnLabel}
-                    size="small"
-                    variant="outlined"
-                    icon={
-                      <Icon
-                        icon={
-                          game.turn() === "w"
-                            ? "mdi:circle-outline"
-                            : "mdi:circle"
-                        }
-                        width={14}
-                      />
-                    }
-                  />
-                  {isGameOver && (
-                    <Chip label="Game over" size="small" color="warning" />
-                  )}
-                </Box>
-                <Chessboard
-                  position={fen}
-                  onPieceDrop={onDrop}
-                  customArrows={boardArrows}
-                  customBoardStyle={{
-                    borderRadius: "6px",
-                    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.35)",
-                  }}
-                />
-                <Box
-                  sx={{
-                    display: "flex",
-                    gap: 1,
-                    flexWrap: "wrap",
-                    mt: 1.5,
-                  }}
-                >
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    startIcon={<Icon icon="mdi:restart" width={16} />}
-                    onClick={handleReset}
-                  >
-                    Reset
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    startIcon={<Icon icon="mdi:undo" width={16} />}
-                    onClick={handleUndo}
-                    disabled={game.history().length === 0}
-                  >
-                    Undo
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    startIcon={<Icon icon="mdi:pencil-ruler" width={16} />}
-                    onClick={openInEditor}
-                  >
-                    Open in editor
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="contained"
-                    startIcon={
-                      <Icon icon="mdi:chart-timeline-variant" width={16} />
-                    }
-                    onClick={analyzePosition}
-                  >
-                    Analyze
-                  </Button>
-                </Box>
-              </Box>
-            </Box>
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 5 }}>
-            <Box sx={{ ...cardSx, mb: 2.5 }}>
-              <Typography variant="h3" sx={{ fontSize: "1rem", mb: 1.5 }}>
-                Position (FEN)
-              </Typography>
-              <TextField
-                fullWidth
-                multiline
-                minRows={2}
-                value={fenInput}
-                onChange={(e) => setFenInput(e.target.value)}
-                placeholder={DEFAULT_POSITION}
-                error={!!fenError}
-                helperText={fenError || " "}
-                sx={{
-                  mb: 1,
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                    bgcolor: palette.bg,
-                    fontFamily: "monospace",
-                    fontSize: "0.8rem",
-                  },
-                }}
-              />
-              <Button
-                variant="outlined"
-                startIcon={<Icon icon="mdi:tray-arrow-down" width={18} />}
-                onClick={handleLoadFen}
-                sx={{
-                  borderRadius: 2,
-                  borderColor: alpha(palette.accent, 0.35),
-                  color: palette.text,
-                }}
-              >
-                Load position
-              </Button>
-            </Box>
-
-            <Box sx={cardSx}>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  mb: 2,
-                  gap: 1,
-                  flexWrap: "wrap",
-                }}
-              >
-                <Typography variant="h3" sx={{ fontSize: "1rem" }}>
-                  Best move
-                </Typography>
-                <Select
-                  size="small"
-                  value={depth}
-                  onChange={(e: SelectChangeEvent<number>) =>
-                    setDepth(Number(e.target.value))
-                  }
-                  disabled={isThinking}
-                  sx={{ minWidth: 110 }}
-                >
-                  {DEPTH_OPTIONS.map((d) => (
-                    <MenuItem key={d} value={d}>
-                      Depth {d}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </Box>
-
-              <Button
-                fullWidth
-                variant="contained"
-                size="large"
-                startIcon={
-                  isThinking ? (
-                    <CircularProgress size={16} color="inherit" />
-                  ) : (
-                    <Icon icon="mdi:chess-queen" width={18} />
-                  )
-                }
-                onClick={handleFindBestMove}
-                disabled={isThinking || isGameOver}
-                sx={{ mb: 2 }}
-              >
-                {isThinking ? "Thinking…" : "Find best move"}
-              </Button>
-
-              {isThinking && (
-                <LinearProgress
-                  sx={{
-                    mb: 2,
-                    height: 4,
-                    borderRadius: 2,
-                    bgcolor: palette.surface,
-                    "& .MuiLinearProgress-bar": { bgcolor: palette.accent },
-                  }}
-                />
-              )}
-
-              {!engine && (
-                <Alert severity="info" sx={{ mb: 2 }}>
-                  Loading Stockfish in your browser…
-                </Alert>
-              )}
-
-              {thinkError && (
-                <Alert severity="warning" sx={{ mb: 2 }}>
-                  {thinkError}
-                </Alert>
-              )}
-
-              {evaluation && bestLine && (
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 1.25,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      p: 1.5,
-                      borderRadius: 1.5,
-                      bgcolor: palette.surface,
-                      border: `1px solid ${palette.borderSubtle}`,
-                    }}
-                  >
-                    <Box>
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        display="block"
-                      >
-                        Best move
-                      </Typography>
-                      <Typography
-                        variant="h3"
-                        sx={{ fontSize: "1.4rem", color: palette.accent }}
-                      >
-                        {bestMoveSan ?? bestMoveUci ?? "—"}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ textAlign: "right" }}>
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        display="block"
-                      >
-                        Eval
-                      </Typography>
-                      <Typography variant="h3" sx={{ fontSize: "1.4rem" }}>
-                        {formatEvalScore(bestLine)}
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  <Box sx={{ display: "flex", gap: 0.75, flexWrap: "wrap" }}>
-                    <Chip
-                      size="small"
-                      variant="outlined"
-                      label={`Depth ${bestLine.depth}`}
-                    />
-                    {typeof bestLine.nodes === "number" && (
-                      <Chip
-                        size="small"
-                        variant="outlined"
-                        label={`${bestLine.nodes.toLocaleString()} nodes`}
-                      />
-                    )}
-                    <Chip
-                      size="small"
-                      variant="outlined"
-                      label={EngineName.Stockfish17Lite.replace(/_/g, " ")}
-                    />
-                  </Box>
-
-                  {pvSan && (
-                    <Box>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mb: 0.5 }}
-                      >
-                        Principal line
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontFamily: "monospace",
-                          bgcolor: palette.surface,
-                          p: 1,
-                          borderRadius: 1,
-                          border: `1px solid ${palette.borderSubtle}`,
-                        }}
-                      >
-                        {pvSan}
-                      </Typography>
-                    </Box>
-                  )}
-                </Box>
-              )}
-
-              {!evaluation && !isThinking && !thinkError && (
-                <Typography variant="body2" color="text.secondary">
-                  Set up a position on the board or load a FEN, then click
-                  &quot;Find best move&quot; to get Stockfish&apos;s
-                  recommendation.
-                </Typography>
-              )}
-            </Box>
-          </Grid>
-        </Grid>
-      </PageContainer>
-    </>
+    <ToolsShell
+      title="Next Move Calculator"
+      subtitle="Play a position or paste a FEN — Stockfish suggests the best move, with eval, depth, and the top lines."
+      seoTitle="Next Move Calculator — VoltChess"
+      seoDescription="Paste a FEN or play moves on the board and let Stockfish find the best next move instantly, free and unlimited."
+      board={board}
+      panel={panel}
+      related={[
+        { href: "/tools/editor", label: "Board editor" },
+        { href: "/analysis", label: "Full analysis" },
+        { href: "/openings", label: "Opening trainer" },
+        { href: "/tools/elo-calculator", label: "Elo calculator" },
+      ]}
+    />
   );
 }
