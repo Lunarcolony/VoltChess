@@ -1,3 +1,6 @@
+/* global Chess */
+import { Chess } from "./vendor-chess.js";
+
 const DEFAULT_ANALYZER_URL = "https://voltchess.vercel.app";
 
 async function getAnalyzerBase() {
@@ -26,14 +29,33 @@ async function openAnalysisWithPgn(pgn, orientation) {
   await chrome.tabs.create({ url: `${base}/analysis?${params.toString()}` });
 }
 
-async function openAnalysisWithChessComId(gameId, gameType, orientation) {
-  const base = await getAnalyzerBase();
-  const params = new URLSearchParams({
-    chesscomGame: gameId,
-    chesscomType: gameType === "daily" ? "daily" : "live",
-  });
-  if (orientation === "black") params.set("orientation", "black");
-  await chrome.tabs.create({ url: `${base}/analysis?${params.toString()}` });
+function uciMoveParams(uci) {
+  const move = {
+    from: uci.slice(0, 2),
+    to: uci.slice(2, 4),
+  };
+  if (uci.length > 4) move.promotion = uci[4].toLowerCase();
+  return move;
+}
+
+function pgnFromMoveList(moveList, headers = {}) {
+  const chess = new Chess();
+  const tokens = moveList.match(/[a-h][1-8][a-h][1-8][qrbn]?/gi) || [];
+  for (const uci of tokens) {
+    try {
+      chess.move(uciMoveParams(uci));
+    } catch {
+      break;
+    }
+  }
+  for (const [k, v] of Object.entries(headers)) {
+    if (v !== undefined && v !== null && `${v}`.length > 0) {
+      chess.setHeader(k, String(v));
+    }
+  }
+  if (!chess.getHeaders().Event) chess.setHeader("Event", "Chess.com Game");
+  if (!chess.getHeaders().Site) chess.setHeader("Site", "Chess.com");
+  return chess.pgn();
 }
 
 function buildPgnFromCallback(payload) {
@@ -42,30 +64,49 @@ function buildPgnFromCallback(payload) {
     return game.pgn;
   }
 
-  const headers = game.pgnHeaders || game.headers || {};
-  const lines = [];
-  const put = (k, v) => {
-    if (v !== undefined && v !== null && `${v}`.length) {
-      lines.push(`[${k} "${String(v).replace(/"/g, "")}"]`);
-    }
+  const rawHeaders = game.pgnHeaders || game.headers || {};
+  const headers = {
+    Event: rawHeaders.Event || "Chess.com Game",
+    Site: rawHeaders.Site || "Chess.com",
+    Date: rawHeaders.Date || "????.??.??",
+    White: rawHeaders.White || game.whiteUsername || "White",
+    Black: rawHeaders.Black || game.blackUsername || "Black",
+    Result: rawHeaders.Result || "*",
+    WhiteElo: rawHeaders.WhiteElo || game.whiteRating,
+    BlackElo: rawHeaders.BlackElo || game.blackRating,
+    TimeControl: rawHeaders.TimeControl || game.timeControl,
+    ECO: rawHeaders.ECO,
+    Opening: rawHeaders.Opening,
+    ...rawHeaders,
   };
 
-  put("Event", headers.Event || "Chess.com Game");
-  put("Site", headers.Site || "Chess.com");
-  put("Date", headers.Date || "????.??.??");
-  put("White", headers.White || game.whiteUsername || "White");
-  put("Black", headers.Black || game.blackUsername || "Black");
-  put("Result", headers.Result || "*");
-  put("WhiteElo", headers.WhiteElo || game.whiteRating);
-  put("BlackElo", headers.BlackElo || game.blackRating);
-  put("TimeControl", headers.TimeControl || game.timeControl);
-  put("ECO", headers.ECO);
-  put("Opening", headers.Opening);
+  if (typeof game.moveList === "string" && game.moveList.length >= 4) {
+    return pgnFromMoveList(game.moveList, headers);
+  }
 
-  // Prefer letting the web app parse moveList via chesscomGame param.
-  // If we already have a SAN/PGN body, use it.
   if (typeof game.pgn === "string" && game.pgn.trim()) {
-    return `${lines.join("\n")}\n\n${game.pgn}\n`;
+    const chess = new Chess();
+    try {
+      chess.loadPgn(
+        Object.entries(headers)
+          .filter(([, v]) => v !== undefined && v !== null && `${v}`.length)
+          .map(([k, v]) => `[${k} "${String(v).replace(/"/g, "")}"]`)
+          .join("\n") +
+          "\n\n" +
+          game.pgn
+      );
+      return chess.pgn();
+    } catch {
+      return (
+        Object.entries(headers)
+          .filter(([, v]) => v !== undefined && v !== null && `${v}`.length)
+          .map(([k, v]) => `[${k} "${String(v).replace(/"/g, "")}"]`)
+          .join("\n") +
+        "\n\n" +
+        game.pgn +
+        "\n"
+      );
+    }
   }
 
   return null;
@@ -79,21 +120,26 @@ async function fetchChessComGamePgn(gameId, gameType) {
     `https://www.chess.com/callback/daily/game/${gameId}`,
   ];
 
+  let lastError;
   for (const url of endpoints) {
     try {
       const res = await fetch(url, {
         credentials: "include",
         headers: { Accept: "application/json" },
       });
-      if (!res.ok) continue;
+      if (!res.ok) {
+        lastError = new Error(`HTTP ${res.status}`);
+        continue;
+      }
       const data = await res.json();
       const pgn = buildPgnFromCallback(data);
       if (pgn) return pgn;
-    } catch {
-      /* try next */
+      lastError = new Error("Empty PGN from Chess.com callback");
+    } catch (err) {
+      lastError = err;
     }
   }
-  return null;
+  throw lastError || new Error("Could not fetch Chess.com game");
 }
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
@@ -104,16 +150,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
           message.gameId,
           message.gameType
         );
-        if (pgn) {
-          await openAnalysisWithPgn(pgn, message.orientation);
-        } else {
-          // Fallback: web app fetches + converts moveList with chess.js
-          await openAnalysisWithChessComId(
-            message.gameId,
-            message.gameType,
-            message.orientation
-          );
-        }
+        await openAnalysisWithPgn(pgn, message.orientation);
         sendResponse({ ok: true });
         return;
       }

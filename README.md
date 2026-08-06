@@ -14,12 +14,19 @@ Upload a PGN, review blunders, and improve your game. No sign-up required.
 
 ## Features
 
-- Stockfish engine analysis (multiple versions, including lite builds)
-- Move classification, accuracy scores, and evaluation graph
-- PGN upload, Chess.com / Lichess import
-- Tactical puzzles
-- Interactive onboarding tour
+- Unlimited Stockfish game review (Chess.com, Lichess, PGN, FEN)
+- Move classification, accuracy scores, eval graph, best-move arrows
+- Next-move calculator, board editor, and Elo calculator (`/tools`)
+- Interactive opening trainer with repertoire drills
+- Elo-rated puzzles (local bank + Lichess daily)
+- AI training coach that builds a plan from your recent games
+- Play vs engine
+- Browser extension: one-click Analyze on Chess.com (`extension/`)
 - Dark UI with selectable color themes
+
+## Browser extension
+
+Chess It Up–style Chrome/Edge extension lives in [`extension/`](extension/). Load it unpacked from `chrome://extensions` (Developer mode). It adds **Analyze** buttons on Chess.com game history and opens VoltChess with the game loaded.
 
 ## Development
 
