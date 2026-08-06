@@ -1,192 +1,435 @@
-import { useState, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Box,
   Typography,
   TextField,
   Grid2 as Grid,
   Chip,
-  Card,
-  CardContent,
-  InputAdornment,
   Button,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
+  InputAdornment,
+  LinearProgress,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { Icon } from "@iconify/react";
+import { alpha } from "@mui/material/styles";
+import { Chess } from "chess.js";
+import { Chessboard } from "react-chessboard";
 import { PageTitle } from "@/components/pageTitle";
 import PageContainer from "@/components/PageContainer";
 import { useCardSx, usePalette } from "@/hooks/usePalette";
+import {
+  OPENING_COURSES,
+  type OpeningCourse,
+  type OpeningLine,
+} from "@/data/openingCourses";
 
-interface OpeningData {
-  name: string;
-  eco: string;
-  moves: string;
-  description: string;
-  difficulty: "beginner" | "intermediate" | "advanced";
-  popularity: number;
-  themes: string[];
-  famousGames?: string[];
+const PROGRESS_KEY = "voltchess-opening-progress";
+
+function readProgress(): Record<string, boolean> {
+  try {
+    const raw = localStorage.getItem(PROGRESS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
 }
 
-const openingsDatabase: OpeningData[] = [
-  {
-    name: "Italian Game",
-    eco: "C50-C59",
-    moves: "1.e4 e5 2.Nf3 Nc6 3.Bc4",
-    description:
-      "One of the oldest chess openings, focusing on rapid development and central control.",
-    difficulty: "beginner",
-    popularity: 95,
-    themes: ["development", "center control", "king safety"],
-    famousGames: [
-      "Morphy vs. Duke of Brunswick (1858)",
-      "Kasparov vs. Anand (1995)",
-    ],
-  },
-  {
-    name: "Ruy Lopez",
-    eco: "C60-C99",
-    moves: "1.e4 e5 2.Nf3 Nc6 3.Bb5",
-    description:
-      "The Spanish Opening, one of the most analyzed and strategic openings in chess.",
-    difficulty: "intermediate",
-    popularity: 90,
-    themes: ["pressure", "positional play", "long-term planning"],
-    famousGames: [
-      "Fischer vs. Spassky (1972)",
-      "Capablanca vs. Marshall (1909)",
-    ],
-  },
-  {
-    name: "Sicilian Defense",
-    eco: "B20-B99",
-    moves: "1.e4 c5",
-    description:
-      "The most popular defense against 1.e4, leading to sharp tactical games.",
-    difficulty: "advanced",
-    popularity: 85,
-    themes: ["counterplay", "tactical complexity", "asymmetrical structure"],
-    famousGames: [
-      "Kasparov vs. Topalov (1999)",
-      "Fischer vs. Reshevsky (1958)",
-    ],
-  },
-  {
-    name: "Queen's Gambit",
-    eco: "D06-D69",
-    moves: "1.d4 d5 2.c4",
-    description:
-      "A positional opening offering a pawn to gain central control and piece activity.",
-    difficulty: "intermediate",
-    popularity: 80,
-    themes: ["central control", "piece activity", "positional advantage"],
-    famousGames: ["Alekhine vs. Capablanca (1927)", "Kramnik vs. Leko (2004)"],
-  },
-  {
-    name: "King's Indian Defense",
-    eco: "E60-E99",
-    moves: "1.d4 Nf6 2.c4 g6 3.Nc3 Bg7",
-    description:
-      "A hypermodern defense allowing White central control while preparing counterattack.",
-    difficulty: "advanced",
-    popularity: 75,
-    themes: ["hypermodern", "kingside attack", "central counterplay"],
-    famousGames: ["Fischer vs. Petrosian (1971)", "Kasparov vs. Karpov (1986)"],
-  },
-  {
-    name: "French Defense",
-    eco: "C00-C19",
-    moves: "1.e4 e6",
-    description:
-      "A solid defense creating a compact pawn structure with strategic complexity.",
-    difficulty: "intermediate",
-    popularity: 70,
-    themes: ["solid structure", "strategic complexity", "space advantage"],
-    famousGames: [
-      "Morphy vs. Harrwitz (1858)",
-      "Botvinnik vs. Capablanca (1938)",
-    ],
-  },
-  {
-    name: "Caro-Kann Defense",
-    eco: "B10-B19",
-    moves: "1.e4 c6",
-    description:
-      "A reliable defense similar to French but avoiding the light-squared bishop problem.",
-    difficulty: "beginner",
-    popularity: 65,
-    themes: ["solid play", "easy development", "endgame advantages"],
-    famousGames: [
-      "Capablanca vs. Kann (1909)",
-      "Petrosian vs. Botvinnik (1963)",
-    ],
-  },
-  {
-    name: "English Opening",
-    eco: "A10-A39",
-    moves: "1.c4",
-    description:
-      "A flexible opening controlling the center from the side and allowing transpositions.",
-    difficulty: "intermediate",
-    popularity: 60,
-    themes: ["flexibility", "transposition", "positional control"],
-    famousGames: [
-      "Botvinnik vs. Smyslov (1957)",
-      "Kramnik vs. Kasparov (2000)",
-    ],
-  },
-];
+function writeProgress(progress: Record<string, boolean>) {
+  try {
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
+  } catch {
+    /* localStorage unavailable — ignore */
+  }
+}
 
-function OpeningsDatabase() {
+function difficultyColor(
+  difficulty: OpeningCourse["difficulty"]
+): "success" | "warning" | "error" {
+  if (difficulty === "beginner") return "success";
+  if (difficulty === "intermediate") return "warning";
+  return "error";
+}
+
+const AUTO_REPLY_DELAY_MS = 450;
+
+export default function OpeningTrainer() {
   const palette = usePalette();
   const cardSx = useCardSx();
+
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(
-    null
+  const [sideFilter, setSideFilter] = useState<"all" | "white" | "black">(
+    "all"
   );
-  const [expandedOpening, setExpandedOpening] = useState<string | null>(null);
+  const [progress, setProgress] = useState<Record<string, boolean>>(() =>
+    readProgress()
+  );
 
-  const filteredOpenings = useMemo(() => {
-    return openingsDatabase.filter((opening) => {
+  const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
+  const [activeLineId, setActiveLineId] = useState<string | null>(null);
+
+  const [chess, setChess] = useState(new Chess());
+  const [moveIndex, setMoveIndex] = useState(0);
+  const [flashError, setFlashError] = useState(false);
+  const [feedback, setFeedback] = useState<{
+    show: boolean;
+    message: string;
+    type: "success" | "error" | "info";
+  }>({ show: false, message: "", type: "info" });
+
+  const activeCourse = useMemo(
+    () => OPENING_COURSES.find((c) => c.id === activeCourseId) ?? null,
+    [activeCourseId]
+  );
+  const activeLine = useMemo(
+    () => activeCourse?.lines.find((l) => l.id === activeLineId) ?? null,
+    [activeCourse, activeLineId]
+  );
+
+  const isLineComplete = !!activeLine && moveIndex >= activeLine.moves.length;
+
+  const filteredCourses = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    return OPENING_COURSES.filter((course) => {
+      const matchesSide = sideFilter === "all" || course.side === sideFilter;
       const matchesSearch =
-        opening.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        opening.eco.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        opening.moves.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        opening.themes.some((theme) =>
-          theme.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-
-      const matchesDifficulty =
-        !selectedDifficulty || opening.difficulty === selectedDifficulty;
-
-      return matchesSearch && matchesDifficulty;
+        !term ||
+        course.name.toLowerCase().includes(term) ||
+        course.eco.toLowerCase().includes(term) ||
+        course.themes.some((t) => t.toLowerCase().includes(term));
+      return matchesSide && matchesSearch;
     });
-  }, [searchTerm, selectedDifficulty]);
+  }, [searchTerm, sideFilter]);
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case "beginner":
-        return "success";
-      case "intermediate":
-        return "warning";
-      case "advanced":
-        return "error";
-      default:
-        return "default";
+  const startLine = useCallback((course: OpeningCourse, line: OpeningLine) => {
+    setActiveCourseId(course.id);
+    setActiveLineId(line.id);
+    setChess(new Chess());
+    setMoveIndex(0);
+  }, []);
+
+  const handleOpenCourse = (course: OpeningCourse) => {
+    const firstIncomplete = course.lines.find((l) => !progress[l.id]);
+    startLine(course, firstIncomplete ?? course.lines[0]);
+  };
+
+  const handleBackToCourses = () => {
+    setActiveCourseId(null);
+    setActiveLineId(null);
+  };
+
+  const markLineComplete = useCallback((lineId: string) => {
+    setProgress((prev) => {
+      if (prev[lineId]) return prev;
+      const next = { ...prev, [lineId]: true };
+      writeProgress(next);
+      return next;
+    });
+  }, []);
+
+  // Auto-play the opponent's replies whenever it's not the trainee's turn.
+  useEffect(() => {
+    if (!activeLine || isLineComplete) return;
+    const isUserTurn = chess.turn() === activeLine.playAs;
+    if (isUserTurn) return;
+
+    const timer = setTimeout(() => {
+      const copy = new Chess(chess.fen());
+      try {
+        copy.move(activeLine.moves[moveIndex]);
+      } catch {
+        return;
+      }
+      setChess(copy);
+      setMoveIndex((i) => i + 1);
+    }, AUTO_REPLY_DELAY_MS);
+
+    return () => clearTimeout(timer);
+  }, [activeLine, chess, moveIndex, isLineComplete]);
+
+  useEffect(() => {
+    if (activeLine && isLineComplete) {
+      markLineComplete(activeLine.id);
+    }
+  }, [activeLine, isLineComplete, markLineComplete]);
+
+  const onDrop = (source: string, target: string, piece: string): boolean => {
+    if (!activeLine || isLineComplete) return false;
+    if (chess.turn() !== activeLine.playAs) return false;
+
+    const expectedSan = activeLine.moves[moveIndex];
+    const copy = new Chess(chess.fen());
+
+    let move;
+    try {
+      move = copy.move({
+        from: source,
+        to: target,
+        promotion: piece[1]?.toLowerCase() ?? "q",
+      });
+    } catch {
+      return false;
+    }
+    if (!move) return false;
+
+    if (move.san !== expectedSan) {
+      setFlashError(true);
+      setTimeout(() => setFlashError(false), 500);
+      setFeedback({
+        show: true,
+        message: "Not quite — the line continues differently. Try again.",
+        type: "error",
+      });
+      return false;
+    }
+
+    setChess(copy);
+    setMoveIndex((i) => i + 1);
+    setFeedback({
+      show: true,
+      message: "Correct!",
+      type: "success",
+    });
+    return true;
+  };
+
+  const handleNextLine = () => {
+    if (!activeCourse) return;
+    const nextIncomplete = activeCourse.lines.find(
+      (l) => l.id !== activeLine?.id && !progress[l.id]
+    );
+    if (nextIncomplete) {
+      startLine(activeCourse, nextIncomplete);
+    } else {
+      handleBackToCourses();
     }
   };
+
+  const handleRestartLine = () => {
+    if (!activeCourse || !activeLine) return;
+    startLine(activeCourse, activeLine);
+  };
+
+  if (activeCourse && activeLine) {
+    const completedInCourse = activeCourse.lines.filter(
+      (l) => progress[l.id]
+    ).length;
+    const humanColorLabel = activeLine.playAs === "w" ? "White" : "Black";
+    const boardOrientation = activeLine.playAs === "w" ? "white" : "black";
+    const isUserTurn = !isLineComplete && chess.turn() === activeLine.playAs;
+
+    return (
+      <>
+        <PageTitle
+          title={`${activeCourse.name} — Opening Trainer — VoltChess`}
+          description={`Drill the ${activeCourse.name} move by move. ${activeCourse.description}`}
+        />
+
+        <PageContainer
+          title={activeCourse.name}
+          subtitle={`${activeCourse.eco} · Playing as ${humanColorLabel} · ${completedInCourse}/${activeCourse.lines.length} lines learned`}
+          action={
+            <Button
+              variant="outlined"
+              startIcon={<Icon icon="mdi:arrow-left" width={16} />}
+              onClick={handleBackToCourses}
+            >
+              Back to courses
+            </Button>
+          }
+        >
+          <Grid container spacing={2.5}>
+            <Grid size={{ xs: 12, md: 7 }}>
+              <Box
+                sx={{
+                  ...cardSx,
+                  display: "flex",
+                  justifyContent: "center",
+                  border: flashError ? "1px solid #ef4444" : cardSx.border,
+                  transition: "border-color 0.2s ease",
+                }}
+              >
+                <Box sx={{ width: "100%", maxWidth: 480 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      mb: 1.5,
+                    }}
+                  >
+                    <Chip
+                      size="small"
+                      variant="outlined"
+                      label={
+                        isLineComplete
+                          ? "Line complete"
+                          : isUserTurn
+                            ? `Your move (${humanColorLabel})`
+                            : "Opponent replying…"
+                      }
+                      color={isLineComplete ? "success" : "default"}
+                    />
+                    <Chip
+                      size="small"
+                      variant="outlined"
+                      label={`Move ${Math.min(
+                        moveIndex,
+                        activeLine.moves.length
+                      )}/${activeLine.moves.length}`}
+                    />
+                  </Box>
+                  <Chessboard
+                    position={chess.fen()}
+                    onPieceDrop={onDrop}
+                    boardOrientation={boardOrientation}
+                    arePiecesDraggable={isUserTurn}
+                    customBoardStyle={{ borderRadius: "6px" }}
+                  />
+                  <LinearProgress
+                    variant="determinate"
+                    value={(moveIndex / activeLine.moves.length) * 100}
+                    sx={{
+                      mt: 1.5,
+                      height: 6,
+                      borderRadius: 3,
+                      bgcolor: palette.surface,
+                      "& .MuiLinearProgress-bar": { bgcolor: palette.accent },
+                    }}
+                  />
+                  <Box
+                    sx={{ display: "flex", gap: 1, mt: 1.5, flexWrap: "wrap" }}
+                  >
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<Icon icon="mdi:restart" width={16} />}
+                      onClick={handleRestartLine}
+                    >
+                      Restart line
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={handleNextLine}
+                      disabled={!isLineComplete}
+                    >
+                      Next line
+                    </Button>
+                  </Box>
+                </Box>
+              </Box>
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 5 }}>
+              <Box sx={{ ...cardSx, mb: 2.5 }}>
+                <Typography variant="h3" sx={{ fontSize: "1rem", mb: 1 }}>
+                  {activeLine.name}
+                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 1,
+                    p: 1.5,
+                    borderRadius: 1.5,
+                    bgcolor: alpha(palette.accent, 0.08),
+                    border: `1px solid ${alpha(palette.accent, 0.25)}`,
+                  }}
+                >
+                  <Icon
+                    icon="mdi:lightbulb-on-outline"
+                    width={20}
+                    color={palette.accent}
+                    style={{ flexShrink: 0, marginTop: 2 }}
+                  />
+                  <Typography variant="body2">{activeLine.idea}</Typography>
+                </Box>
+              </Box>
+
+              <Box sx={cardSx}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 1 }}
+                >
+                  Lines in this course
+                </Typography>
+                <Box
+                  sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}
+                >
+                  {activeCourse.lines.map((line) => (
+                    <Box
+                      key={line.id}
+                      role="button"
+                      onClick={() => startLine(activeCourse, line)}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        p: 1,
+                        borderRadius: 1,
+                        cursor: "pointer",
+                        bgcolor:
+                          line.id === activeLine.id
+                            ? alpha(palette.accent, 0.1)
+                            : "transparent",
+                        "&:hover": { bgcolor: palette.surfaceRaised },
+                      }}
+                    >
+                      <Icon
+                        icon={
+                          progress[line.id]
+                            ? "mdi:check-circle"
+                            : "mdi:circle-outline"
+                        }
+                        width={16}
+                        color={
+                          progress[line.id] ? palette.accent : palette.textMuted
+                        }
+                      />
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: line.id === activeLine.id ? 600 : 400,
+                        }}
+                      >
+                        {line.name}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
+        </PageContainer>
+
+        <Snackbar
+          open={feedback.show}
+          autoHideDuration={2000}
+          onClose={() => setFeedback({ ...feedback, show: false })}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert
+            severity={feedback.type}
+            onClose={() => setFeedback({ ...feedback, show: false })}
+          >
+            {feedback.message}
+          </Alert>
+        </Snackbar>
+      </>
+    );
+  }
 
   return (
     <>
       <PageTitle
-        title="Chess Openings — VoltChess"
-        description="Explore popular chess openings with ECO codes and strategic themes."
+        title="Opening Trainer — VoltChess"
+        description="Drill chess opening repertoire lines move by move. The board plays the opponent's replies automatically — free and unlimited."
       />
 
       <PageContainer
-        title="Openings"
-        subtitle="Browse openings by name, ECO code, or theme."
+        title="Opening Trainer"
+        subtitle="Pick a repertoire and drill it move by move — the board plays the other side."
       >
         <Box sx={{ ...cardSx, mb: 3 }}>
           <Grid container spacing={2} alignItems="center">
@@ -205,10 +448,9 @@ function OpeningsDatabase() {
                     ),
                   },
                 }}
-                placeholder="Name, ECO, moves, or themes"
+                placeholder="Name, ECO, or theme"
               />
             </Grid>
-
             <Grid size={{ xs: 12, md: 6 }}>
               <Box
                 sx={{
@@ -219,25 +461,15 @@ function OpeningsDatabase() {
                 }}
               >
                 <Typography variant="body2" color="text.secondary">
-                  Difficulty:
+                  Side:
                 </Typography>
-                {["beginner", "intermediate", "advanced"].map((difficulty) => (
+                {(["all", "white", "black"] as const).map((side) => (
                   <Chip
-                    key={difficulty}
-                    label={difficulty}
-                    onClick={() =>
-                      setSelectedDifficulty(
-                        selectedDifficulty === difficulty ? null : difficulty
-                      )
-                    }
-                    color={
-                      selectedDifficulty === difficulty
-                        ? getDifficultyColor(difficulty)
-                        : "default"
-                    }
-                    variant={
-                      selectedDifficulty === difficulty ? "filled" : "outlined"
-                    }
+                    key={side}
+                    label={side === "all" ? "All" : side}
+                    onClick={() => setSideFilter(side)}
+                    color={sideFilter === side ? "primary" : "default"}
+                    variant={sideFilter === side ? "filled" : "outlined"}
                     sx={{ textTransform: "capitalize" }}
                   />
                 ))}
@@ -247,23 +479,23 @@ function OpeningsDatabase() {
         </Box>
 
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {filteredOpenings.length} opening
-          {filteredOpenings.length !== 1 ? "s" : ""} found
+          {filteredCourses.length} course
+          {filteredCourses.length !== 1 ? "s" : ""} found
         </Typography>
 
         <Grid container spacing={2}>
-          {filteredOpenings.map((opening) => (
-            <Grid key={opening.name} size={{ xs: 12, md: 6, lg: 4 }}>
-              <Card
-                elevation={0}
-                sx={{
-                  ...cardSx,
-                  height: "100%",
-                  p: 0,
-                  "&:hover": { borderColor: palette.accent },
-                }}
-              >
-                <CardContent sx={{ p: 2.5 }}>
+          {filteredCourses.map((course) => {
+            const completed = course.lines.filter((l) => progress[l.id]).length;
+            return (
+              <Grid key={course.id} size={{ xs: 12, md: 6, lg: 4 }}>
+                <Box
+                  sx={{
+                    ...cardSx,
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
                   <Box
                     sx={{
                       display: "flex",
@@ -272,30 +504,18 @@ function OpeningsDatabase() {
                       mb: 1.5,
                     }}
                   >
-                    <Typography variant="h3">{opening.name}</Typography>
-                    <Chip label={opening.eco} size="small" variant="outlined" />
+                    <Typography variant="h3" sx={{ fontSize: "1.05rem" }}>
+                      {course.name}
+                    </Typography>
+                    <Chip label={course.eco} size="small" variant="outlined" />
                   </Box>
 
                   <Typography
                     variant="body2"
-                    sx={{
-                      fontFamily: "monospace",
-                      bgcolor: palette.surface,
-                      p: 1,
-                      borderRadius: 1,
-                      mb: 1.5,
-                      border: `1px solid ${palette.borderSubtle}`,
-                    }}
-                  >
-                    {opening.moves}
-                  </Typography>
-
-                  <Typography
-                    variant="body2"
                     color="text.secondary"
-                    sx={{ mb: 2, lineHeight: 1.5 }}
+                    sx={{ mb: 1.5, lineHeight: 1.5, flex: 1 }}
                   >
-                    {opening.description}
+                    {course.description}
                   </Typography>
 
                   <Box
@@ -307,25 +527,23 @@ function OpeningsDatabase() {
                     }}
                   >
                     <Chip
-                      label={opening.difficulty}
+                      label={course.difficulty}
                       size="small"
-                      color={getDifficultyColor(opening.difficulty)}
+                      color={difficultyColor(course.difficulty)}
                       sx={{ textTransform: "capitalize" }}
                     />
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
-                    >
-                      <Icon icon="mdi:star" color={palette.accent} width={14} />
-                      <Typography variant="caption" color="text.secondary">
-                        {opening.popularity}%
-                      </Typography>
-                    </Box>
+                    <Chip
+                      label={course.side}
+                      size="small"
+                      variant="outlined"
+                      sx={{ textTransform: "capitalize" }}
+                    />
                   </Box>
 
                   <Box
-                    sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mb: 1 }}
+                    sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mb: 2 }}
                   >
-                    {opening.themes.map((theme) => (
+                    {course.themes.map((theme) => (
                       <Chip
                         key={theme}
                         label={theme}
@@ -335,50 +553,47 @@ function OpeningsDatabase() {
                     ))}
                   </Box>
 
-                  {opening.famousGames && (
-                    <Accordion
-                      expanded={expandedOpening === opening.name}
-                      onChange={() =>
-                        setExpandedOpening(
-                          expandedOpening === opening.name ? null : opening.name
-                        )
-                      }
+                  <Box sx={{ mb: 1.5 }}>
+                    <Box
                       sx={{
-                        bgcolor: "transparent",
-                        boxShadow: "none",
-                        "&:before": { display: "none" },
+                        display: "flex",
+                        justifyContent: "space-between",
+                        mb: 0.5,
                       }}
                     >
-                      <AccordionSummary sx={{ p: 0, minHeight: "auto" }}>
-                        <Button
-                          size="small"
-                          startIcon={<Icon icon="mdi:chess-king" />}
-                        >
-                          Famous games ({opening.famousGames.length})
-                        </Button>
-                      </AccordionSummary>
-                      <AccordionDetails sx={{ p: 0, pt: 1 }}>
-                        {opening.famousGames.map((game, index) => (
-                          <Typography
-                            key={index}
-                            variant="caption"
-                            display="block"
-                            color="text.secondary"
-                            sx={{ mb: 0.5 }}
-                          >
-                            {game}
-                          </Typography>
-                        ))}
-                      </AccordionDetails>
-                    </Accordion>
-                  )}
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
+                      <Typography variant="caption" color="text.secondary">
+                        Progress
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {completed}/{course.lines.length}
+                      </Typography>
+                    </Box>
+                    <LinearProgress
+                      variant="determinate"
+                      value={(completed / course.lines.length) * 100}
+                      sx={{
+                        height: 5,
+                        borderRadius: 3,
+                        bgcolor: palette.surface,
+                        "& .MuiLinearProgress-bar": { bgcolor: palette.accent },
+                      }}
+                    />
+                  </Box>
+
+                  <Button
+                    variant="contained"
+                    startIcon={<Icon icon="mdi:play" width={16} />}
+                    onClick={() => handleOpenCourse(course)}
+                  >
+                    {completed > 0 ? "Continue training" : "Start training"}
+                  </Button>
+                </Box>
+              </Grid>
+            );
+          })}
         </Grid>
 
-        {filteredOpenings.length === 0 && (
+        {filteredCourses.length === 0 && (
           <Box sx={{ textAlign: "center", py: 6 }}>
             <Icon
               icon="mdi:book-open-variant"
@@ -397,5 +612,3 @@ function OpeningsDatabase() {
     </>
   );
 }
-
-export default OpeningsDatabase;
