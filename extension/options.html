@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>VoltChess Extension Settings</title>
+    <style>
+      body {
+        font: 14px/1.45 system-ui, -apple-system, Segoe UI, sans-serif;
+        margin: 16px;
+        color: #1a1508;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+      input {
+        width: 100%;
+        max-width: 420px;
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-sizing: border-box;
+      }
+      button {
+        margin-top: 12px;
+        padding: 8px 14px;
+        border: none;
+        border-radius: 8px;
+        background: #e8b923;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .hint {
+        color: #666;
+        font-size: 12px;
+        margin-top: 6px;
+      }
+      #status {
+        margin-top: 10px;
+        color: #0a7a2f;
+        min-height: 1.2em;
+      }
+    </style>
+  </head>
+  <body>
+    <label for="analyzerUrl">Analyzer URL</label>
+    <input
+      id="analyzerUrl"
+      type="url"
+      placeholder="https://voltchess.vercel.app"
+    />
+    <p class="hint">
+      Default is the public VoltChess site. Point this at a local dev server
+      (http://localhost:3000) while developing.
+    </p>
+    <button id="save">Save</button>
+    <div id="status"></div>
+    <script src="options.js"></script>
+  </body>
+</html>

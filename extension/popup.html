@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>VoltChess</title>
+    <style>
+      body {
+        margin: 0;
+        font: 13px/1.45 system-ui, -apple-system, Segoe UI, sans-serif;
+        color: #f2efe6;
+        background: #14120e;
+        width: 280px;
+      }
+      .wrap {
+        padding: 14px;
+      }
+      h1 {
+        font-size: 15px;
+        margin: 0 0 6px;
+      }
+      p {
+        margin: 0 0 12px;
+        color: #b8b2a2;
+      }
+      a,
+      button {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 8px;
+        padding: 9px 12px;
+        margin-top: 8px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      a.primary,
+      button.primary {
+        background: #e8b923;
+        color: #1a1508;
+        border: none;
+      }
+      a.secondary {
+        background: transparent;
+        color: #f2efe6;
+        border: 1px solid rgba(242, 239, 230, 0.2);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>VoltChess</h1>
+      <p>
+        On Chess.com, click <strong>Analyze</strong> next to any game — or use
+        the floating button on a game page.
+      </p>
+      <a class="primary" id="open-analyzer" href="#" target="_blank"
+        >Open analyzer</a
+      >
+      <a class="secondary" id="open-options" href="#">Extension settings</a>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>

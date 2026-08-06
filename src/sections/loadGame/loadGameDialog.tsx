@@ -20,6 +20,7 @@ import { setContext as setSentryContext } from "@sentry/react";
 import { Chess } from "chess.js";
 import { useRef, useState } from "react";
 import GamePgnInput from "./gamePgnInput";
+import GameFenInput, { fenToPgn } from "./gameFenInput";
 import ChessComInput from "./chessComInput";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import LichessInput from "./lichessInput";
@@ -34,6 +35,7 @@ interface Props {
 
 export default function NewGameDialog({ open, onClose, setGame }: Props) {
   const [pgn, setPgn] = useState("");
+  const [fen, setFen] = useState("");
   const [gameOrigin, setGameOrigin] = useLocalStorage(
     "preferred-game-origin",
     GameOrigin.ChessCom
@@ -79,6 +81,7 @@ export default function NewGameDialog({ open, onClose, setGame }: Props) {
 
   const handleClose = () => {
     setPgn("");
+    setFen("");
     setParsingError("");
     if (parsingErrorTimeout.current) {
       clearTimeout(parsingErrorTimeout.current);
@@ -139,6 +142,10 @@ export default function NewGameDialog({ open, onClose, setGame }: Props) {
             <GamePgnInput pgn={pgn} setPgn={setPgn} />
           )}
 
+          {gameOrigin === GameOrigin.Fen && (
+            <GameFenInput fen={fen} setFen={setFen} />
+          )}
+
           {gameOrigin === GameOrigin.ChessCom && (
             <ChessComInput onSelect={handleAddGame} variant="dialog" />
           )}
@@ -174,6 +181,26 @@ export default function NewGameDialog({ open, onClose, setGame }: Props) {
             Add
           </Button>
         )}
+        {gameOrigin === GameOrigin.Fen && (
+          <Button
+            variant="contained"
+            sx={{ marginLeft: 2 }}
+            disabled={!fen.trim()}
+            onClick={() => {
+              try {
+                handleAddGame(fenToPgn(fen.trim()));
+              } catch (error) {
+                setParsingError(
+                  error instanceof Error
+                    ? `${error.message} !`
+                    : "Invalid FEN !"
+                );
+              }
+            }}
+          >
+            Analyze position
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );
@@ -183,4 +210,5 @@ const gameOriginLabel: Record<GameOrigin, string> = {
   [GameOrigin.ChessCom]: "Chess.com",
   [GameOrigin.Lichess]: "Lichess.org",
   [GameOrigin.Pgn]: "PGN",
+  [GameOrigin.Fen]: "FEN",
 };

@@ -1,0 +1,44 @@
+.voltchess-analyze-btn {
+  appearance: none;
+  border: 1px solid rgba(232, 185, 35, 0.55);
+  background: linear-gradient(180deg, #2a2618 0%, #1a1810 100%);
+  color: #f3e6b0;
+  font: 600 12px/1.2 system-ui, -apple-system, Segoe UI, sans-serif;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: 6px;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.voltchess-analyze-btn:hover:not(:disabled) {
+  border-color: #e8b923;
+  background: linear-gradient(180deg, #3a3218 0%, #241e10 100%);
+}
+
+.voltchess-analyze-btn:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.voltchess-analyze-btn--large {
+  font-size: 13px;
+  padding: 8px 14px;
+  margin: 8px;
+}
+
+#voltchess-floating-bar {
+  position: fixed;
+  z-index: 2147483646;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  gap: 8px;
+  pointer-events: none;
+}
+
+#voltchess-floating-bar .voltchess-analyze-btn {
+  pointer-events: auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}

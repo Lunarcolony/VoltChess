@@ -4,7 +4,9 @@ import { Chess } from "chess.js";
 import { useChessActions } from "@/hooks/useChessActions";
 import { useGameDatabase } from "@/hooks/useGameDatabase";
 import { useRouter } from "@/hooks/useRouter";
-import { decodeBase64 } from "@/lib/helpers";
+import { decodeBase64, decodeBase64Utf8 } from "@/lib/helpers";
+import { fenToPgn } from "@/sections/loadGame/gameFenInput";
+import { fetchChessComGamePgn } from "@/lib/chessComGame";
 import type { Game } from "@/types/game";
 import type { GameEval } from "@/types/eval";
 import {
@@ -32,7 +34,9 @@ export function saveAnalysisSession(
   try {
     const chess = new Chess();
     chess.loadPgn(pgn);
-    if (chess.history().length === 0) {
+    const hasSetup =
+      chess.getHeaders().SetUp === "1" || Boolean(chess.getHeaders().FEN);
+    if (chess.history().length === 0 && !hasSetup) {
       sessionStorage.removeItem(SESSION_KEY);
       return;
     }
@@ -111,10 +115,19 @@ export function useAnalysisSession() {
     }
   }, [applyGame, setEvaluationProgress]);
 
-  // Load from URL ?gameId= or ?pgn=
-  const { pgn: pgnParam, orientation: orientationParam } = router.query;
+  // Load from URL ?gameId= / ?pgn= / ?pgnText= / ?fen= / ?chesscomGame=
+  const {
+    pgn: pgnParam,
+    pgnText: pgnTextParam,
+    fen: fenParam,
+    chesscomGame: chesscomGameParam,
+    chesscomType: chesscomTypeParam,
+    orientation: orientationParam,
+  } = router.query;
 
   useEffect(() => {
+    let cancelled = false;
+
     const loadGameFromIdParam = (gameUrl: Game) => {
       const fromDb = new Chess();
       fromDb.loadPgn(gameUrl.pgn);
@@ -127,10 +140,7 @@ export function useAnalysisSession() {
       );
     };
 
-    const loadGameFromPgnParam = (encodedPgn: string) => {
-      const decodedPgn = decodeBase64(encodedPgn);
-      if (!decodedPgn) return;
-
+    const loadGameFromPgnString = (decodedPgn: string) => {
       const parsed = new Chess();
       parsed.loadPgn(decodedPgn);
       if (game.history().join() === parsed.history().join() && gameEval) return;
@@ -138,31 +148,81 @@ export function useAnalysisSession() {
       applyGame(decodedPgn, undefined, orientationParam !== "black");
     };
 
-    if (gameFromUrl) {
-      loadGameFromIdParam(gameFromUrl);
-    } else if (serverGameFromUrl) {
-      const fromServer = new Chess();
-      fromServer.loadPgn(serverGameFromUrl.pgn);
-      if (game.history().join() === fromServer.history().join() && gameEval)
-        return;
+    const loadGameFromPgnParam = (encodedPgn: string) => {
+      const decodedPgn =
+        decodeBase64Utf8(encodedPgn) ?? decodeBase64(encodedPgn);
+      if (!decodedPgn) return;
+      loadGameFromPgnString(decodedPgn);
+    };
 
-      applyGame(
-        serverGameFromUrl.pgn,
-        serverGameFromUrl.eval,
-        !(
-          serverGameFromUrl.black.name === "You" &&
-          [SITE_HOST, ...LEGACY_SITE_HOSTS].some((host) =>
-            serverGameFromUrl.pgn.includes(host)
+    const run = async () => {
+      if (gameFromUrl) {
+        loadGameFromIdParam(gameFromUrl);
+        return;
+      }
+      if (serverGameFromUrl) {
+        const fromServer = new Chess();
+        fromServer.loadPgn(serverGameFromUrl.pgn);
+        if (game.history().join() === fromServer.history().join() && gameEval)
+          return;
+
+        applyGame(
+          serverGameFromUrl.pgn,
+          serverGameFromUrl.eval,
+          !(
+            serverGameFromUrl.black.name === "You" &&
+            [SITE_HOST, ...LEGACY_SITE_HOSTS].some((host) =>
+              serverGameFromUrl.pgn.includes(host)
+            )
           )
-        )
-      );
-    } else if (typeof pgnParam === "string") {
-      loadGameFromPgnParam(pgnParam);
-    }
+        );
+        return;
+      }
+      if (typeof chesscomGameParam === "string" && chesscomGameParam.length) {
+        try {
+          const type =
+            chesscomTypeParam === "daily" ? "daily" : ("live" as const);
+          const pgn = await fetchChessComGamePgn(chesscomGameParam, type);
+          if (!cancelled) loadGameFromPgnString(pgn);
+        } catch (err) {
+          console.warn("[voltchess] chesscomGame URL load failed", err);
+        }
+        return;
+      }
+      if (typeof pgnTextParam === "string" && pgnTextParam.length > 0) {
+        try {
+          loadGameFromPgnString(decodeURIComponent(pgnTextParam));
+        } catch {
+          loadGameFromPgnString(pgnTextParam);
+        }
+        return;
+      }
+      if (typeof fenParam === "string" && fenParam.length > 0) {
+        try {
+          const fen = decodeURIComponent(fenParam);
+          loadGameFromPgnString(fenToPgn(fen));
+        } catch {
+          /* invalid fen in URL — ignore */
+        }
+        return;
+      }
+      if (typeof pgnParam === "string") {
+        loadGameFromPgnParam(pgnParam);
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
   }, [
     gameFromUrl,
     serverGameFromUrl,
     pgnParam,
+    pgnTextParam,
+    fenParam,
+    chesscomGameParam,
+    chesscomTypeParam,
     orientationParam,
     game,
     gameEval,
@@ -171,7 +231,9 @@ export function useAnalysisSession() {
 
   // Persist session whenever game or eval changes
   useEffect(() => {
-    if (game.history().length === 0) return;
+    const hasSetup =
+      game.getHeaders().SetUp === "1" || Boolean(game.getHeaders().FEN);
+    if (game.history().length === 0 && !hasSetup) return;
     saveAnalysisSession(game.pgn(), gameEval, boardOrientation);
   }, [game, gameEval, boardOrientation]);
 }
