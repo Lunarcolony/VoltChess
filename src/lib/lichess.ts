@@ -1,6 +1,8 @@
+import { Chess, DEFAULT_POSITION } from "chess.js";
 import { LineEval, PositionEval } from "@/types/eval";
 import { sortLines } from "./engine/helpers/parseResults";
 import {
+  LichessDailyPuzzleResponse,
   LichessError,
   LichessEvalBody,
   LichessGame,
@@ -9,6 +11,56 @@ import {
 import { logErrorToSentry } from "./sentry";
 import { formatUciPv } from "./chess";
 import { LoadedGame } from "@/types/game";
+
+export interface DailyPuzzle {
+  id: string;
+  fen: string;
+  rating: number;
+  themes: string[];
+  /** UCI moves: player move, opponent reply, player move, … */
+  solution: string[];
+  description: string;
+}
+
+/** Fetch Lichess's puzzle of the day and resolve it to a starting FEN + solution. */
+export const fetchLichessDailyPuzzle = async (
+  signal?: AbortSignal
+): Promise<DailyPuzzle | null> => {
+  try {
+    const res = await fetch("https://lichess.org/api/puzzle/daily", {
+      method: "GET",
+      signal,
+    });
+    if (!res.ok) return null;
+
+    const data: LichessDailyPuzzleResponse = await res.json();
+    if (!data?.puzzle?.solution?.length || !data.game?.pgn) return null;
+
+    const chess = new Chess();
+    chess.loadPgn(data.game.pgn);
+    const history = chess.history({ verbose: true });
+
+    const initialPly = data.puzzle.initialPly;
+    const fen =
+      initialPly > 0 && history[initialPly - 1]
+        ? history[initialPly - 1].after
+        : DEFAULT_POSITION;
+
+    return {
+      id: `lichess-daily-${data.puzzle.id}`,
+      fen,
+      rating: data.puzzle.rating,
+      themes: data.puzzle.themes,
+      solution: data.puzzle.solution,
+      description: `Lichess Puzzle of the Day${
+        data.puzzle.themes.length ? ` — ${data.puzzle.themes[0]}` : ""
+      }`,
+    };
+  } catch (error) {
+    logErrorToSentry(error, { source: "fetchLichessDailyPuzzle" });
+    return null;
+  }
+};
 
 export const getLichessEval = async (
   fen: string,
