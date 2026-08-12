@@ -36,15 +36,25 @@ export const fetchLichessDailyPuzzle = async (
     const data: LichessDailyPuzzleResponse = await res.json();
     if (!data?.puzzle?.solution?.length || !data.game?.pgn) return null;
 
+    // The API's game.pgn ends exactly at the puzzle position: the player to
+    // move plays solution[0]. (Deriving the FEN from initialPly lands one ply
+    // early and makes the solution illegal.)
     const chess = new Chess();
     chess.loadPgn(data.game.pgn);
-    const history = chess.history({ verbose: true });
+    const fen = chess.history().length > 0 ? chess.fen() : DEFAULT_POSITION;
 
-    const initialPly = data.puzzle.initialPly;
-    const fen =
-      initialPly > 0 && history[initialPly - 1]
-        ? history[initialPly - 1].after
-        : DEFAULT_POSITION;
+    // Sanity check: the first solution move must be legal from this position.
+    const probe = new Chess(fen);
+    try {
+      const uci = data.puzzle.solution[0];
+      probe.move({
+        from: uci.slice(0, 2),
+        to: uci.slice(2, 4),
+        promotion: uci[4]?.toLowerCase(),
+      });
+    } catch {
+      return null;
+    }
 
     return {
       id: `lichess-daily-${data.puzzle.id}`,
@@ -112,8 +122,9 @@ export const getLichessUserRecentGames = async (
   username: string,
   signal?: AbortSignal
 ): Promise<LoadedGame[]> => {
+  const usernameParam = encodeURIComponent(username.trim());
   const res = await fetch(
-    `https://lichess.org/api/games/user/${username}?until=${Date.now()}&max=50&pgnInJson=true&sort=dateDesc&clocks=true`,
+    `https://lichess.org/api/games/user/${usernameParam}?until=${Date.now()}&max=50&pgnInJson=true&sort=dateDesc&clocks=true`,
     { method: "GET", headers: { accept: "application/x-ndjson" }, signal }
   );
 

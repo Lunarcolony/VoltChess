@@ -66,8 +66,8 @@ const GROUPS: ToolGroup[] = [
       },
       {
         href: "/training",
-        icon: "mdi:robot-happy-outline",
-        title: "AI Training Coach",
+        icon: "mdi:school-outline",
+        title: "Training Coach",
         description:
           "Import recent games and get a training plan from your patterns.",
       },

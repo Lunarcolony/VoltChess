@@ -37,7 +37,7 @@ const BASE_NAV: NavItem[] = [
   { label: "Puzzles", icon: "mdi:puzzle-outline", href: "/puzzles" },
   {
     label: "Training",
-    icon: "mdi:robot-happy-outline",
+    icon: "mdi:school-outline",
     href: "/training",
   },
   {

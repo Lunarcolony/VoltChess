@@ -1,59 +1,73 @@
 import { useMemo, useState } from "react";
 import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Grid2 as Grid,
-  Chip,
-  LinearProgress,
   Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  LinearProgress,
+  TextField,
   ToggleButton,
   ToggleButtonGroup,
-  CircularProgress,
-  Divider,
+  Typography,
 } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { alpha } from "@mui/material/styles";
 import { Chess } from "chess.js";
 import { PageTitle } from "@/components/pageTitle";
-import PageContainer from "@/components/PageContainer";
 import NavLink from "@/components/NavLink";
-import { useCardSx, usePalette } from "@/hooks/usePalette";
-import { useGameDatabase } from "@/hooks/useGameDatabase";
+import { ToolPrimaryButton, ToolStat } from "@/sections/tools/ToolsShell";
+import { usePalette } from "@/hooks/usePalette";
+import { useRouter } from "@/hooks/useRouter";
+import { prepareNewAnalysisSession } from "@/hooks/useAnalysisSession";
 import { getLichessUserRecentGames } from "@/lib/lichess";
 import { getChessComUserRecentGames } from "@/lib/chessCom";
-import { MoveClassification } from "@/types/enums";
+import { OPENING_COURSES, type OpeningCourse } from "@/data/openingCourses";
 import type { LoadedGame } from "@/types/game";
 
 type Platform = "chesscom" | "lichess";
 type Outcome = "win" | "loss" | "draw" | "unknown";
 
+const PLATFORM_LABELS: Record<Platform, string> = {
+  chesscom: "Chess.com",
+  lichess: "Lichess",
+};
+
 interface OpeningPattern {
   key: string;
   sanLine: string;
+  moves: string[];
   count: number;
   wins: number;
   losses: number;
   draws: number;
+  /** (wins + 0.5 × draws) / games with a known result, null when none known */
+  score: number | null;
 }
 
 interface RecentLoss {
   pgn: string;
   opponent: string;
+  userIsWhite: boolean;
   date?: string;
-  url?: string;
 }
 
 interface GameStats {
   totalGames: number;
-  decidedGames: number;
+  /** Games where the user's result is known (win, loss, or draw) */
+  scoredGames: number;
   wins: number;
   losses: number;
   draws: number;
+  /** (wins + 0.5 × draws) / scoredGames, null when no result is known */
+  score: number | null;
   gamesAsWhite: number;
   gamesAsBlack: number;
+  decidedAsWhite: number;
+  decidedAsBlack: number;
+  /** wins / decided games as White (draws excluded), null when none decided */
   winRateAsWhite: number | null;
+  /** wins / decided games as Black (draws excluded), null when none decided */
   winRateAsBlack: number | null;
   timeClassCounts: Record<string, number>;
   openingPatterns: OpeningPattern[];
@@ -80,13 +94,13 @@ function outcomeForColor(
   return "unknown";
 }
 
-function openingKeyFromPgn(pgn: string, plies = 6): string | null {
+function openingMovesFromPgn(pgn: string, plies = 6): string[] | null {
   try {
     const chess = new Chess();
     chess.loadPgn(pgn);
     const history = chess.history();
     if (history.length < 2) return null;
-    return history.slice(0, plies).join(" ");
+    return history.slice(0, plies);
   } catch {
     return null;
   }
@@ -105,7 +119,13 @@ function computeStats(games: LoadedGame[], username: string): GameStats {
   const timeClassCounts: Record<string, number> = {};
   const openingMap = new Map<
     string,
-    { count: number; wins: number; losses: number; draws: number }
+    {
+      moves: string[];
+      count: number;
+      wins: number;
+      losses: number;
+      draws: number;
+    }
   >();
   const recentLosses: RecentLoss[] = [];
 
@@ -134,9 +154,11 @@ function computeStats(games: LoadedGame[], username: string): GameStats {
       }
     }
 
-    const openingKey = openingKeyFromPgn(game.pgn);
-    if (openingKey) {
-      const entry = openingMap.get(openingKey) || {
+    const openingMoves = openingMovesFromPgn(game.pgn);
+    if (openingMoves) {
+      const key = openingMoves.join(" ");
+      const entry = openingMap.get(key) ?? {
+        moves: openingMoves,
         count: 0,
         wins: 0,
         losses: 0,
@@ -146,33 +168,51 @@ function computeStats(games: LoadedGame[], username: string): GameStats {
       if (outcome === "win") entry.wins++;
       else if (outcome === "loss") entry.losses++;
       else if (outcome === "draw") entry.draws++;
-      openingMap.set(openingKey, entry);
+      openingMap.set(key, entry);
     }
 
+    // Games arrive newest-first from both platforms, so the first losses we
+    // encounter are the most recent ones.
     if (outcome === "loss" && recentLosses.length < 3) {
-      const opponent = color === "w" ? game.black.name : game.white.name;
       recentLosses.push({
         pgn: game.pgn,
-        opponent,
+        opponent: color === "w" ? game.black.name : game.white.name,
+        userIsWhite: color === "w",
         date: game.date,
-        url: game.url,
       });
     }
   }
 
   const openingPatterns: OpeningPattern[] = Array.from(openingMap.entries())
-    .map(([key, value]) => ({ key, sanLine: key, ...value }))
+    .map(([key, entry]) => {
+      const scored = entry.wins + entry.losses + entry.draws;
+      return {
+        key,
+        sanLine: key,
+        moves: entry.moves,
+        count: entry.count,
+        wins: entry.wins,
+        losses: entry.losses,
+        draws: entry.draws,
+        score: scored > 0 ? (entry.wins + 0.5 * entry.draws) / scored : null,
+      };
+    })
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
 
+  const scoredGames = wins + losses + draws;
+
   return {
     totalGames: games.length,
-    decidedGames: wins + losses + draws,
+    scoredGames,
     wins,
     losses,
     draws,
+    score: scoredGames > 0 ? (wins + 0.5 * draws) / scoredGames : null,
     gamesAsWhite,
     gamesAsBlack,
+    decidedAsWhite,
+    decidedAsBlack,
     winRateAsWhite: decidedAsWhite > 0 ? winsAsWhite / decidedAsWhite : null,
     winRateAsBlack: decidedAsBlack > 0 ? winsAsBlack / decidedAsBlack : null,
     timeClassCounts,
@@ -181,46 +221,66 @@ function computeStats(games: LoadedGame[], username: string): GameStats {
   };
 }
 
+/**
+ * Find a trainer course whose lines start with the same moves as the pattern,
+ * comparing the first 2–4 plies and preferring the deepest match.
+ */
+function findDrillCourse(moves: string[]): OpeningCourse | undefined {
+  let best: { course: OpeningCourse; depth: number } | undefined;
+  for (const course of OPENING_COURSES) {
+    for (const line of course.lines) {
+      const maxDepth = Math.min(4, moves.length, line.moves.length);
+      let depth = 0;
+      while (depth < maxDepth && line.moves[depth] === moves[depth]) depth++;
+      if (depth >= 2 && (!best || depth > best.depth)) {
+        best = { course, depth };
+      }
+    }
+  }
+  return best?.course;
+}
+
 interface TrainingModule {
   id: string;
   icon: string;
   title: string;
   description: string;
   ctaLabel: string;
-  href: string;
+  href?: string;
+  /** When set, the CTA hands the game to /analysis via the session helper */
+  reviewLoss?: RecentLoss;
 }
 
 function buildTrainingModules(stats: GameStats): TrainingModule[] {
-  const modules: TrainingModule[] = [
-    {
-      id: "tactics",
-      icon: "mdi:puzzle",
-      title: "Practice tactics",
-      description:
-        "Sharpen your calculation with Elo-rated puzzles that adapt to your rating.",
-      ctaLabel: "Solve puzzles",
-      href: "/puzzles",
-    },
-  ];
+  const modules: TrainingModule[] = [];
+
+  const scorePct = stats.score !== null ? Math.round(stats.score * 100) : null;
+  modules.push({
+    id: "tactics",
+    icon: "mdi:puzzle",
+    title: "Sharpen your tactics",
+    description:
+      scorePct !== null
+        ? `You scored ${scorePct}% over your last ${stats.totalGames} games — rated puzzles are the most direct way to win more of the close ones.`
+        : "Rated puzzles matched to your level are the most direct way to win more of the close games.",
+    ctaLabel: "Solve puzzles",
+    href: "/puzzles",
+  });
 
   const topOpening = stats.openingPatterns[0];
   if (topOpening) {
-    const winRate =
-      topOpening.wins + topOpening.losses + topOpening.draws > 0
-        ? Math.round(
-            (topOpening.wins /
-              (topOpening.wins + topOpening.losses + topOpening.draws)) *
-              100
-          )
-        : null;
+    const openingPct =
+      topOpening.score !== null ? Math.round(topOpening.score * 100) : null;
     modules.push({
       id: "opening-drill",
       icon: "mdi:book-open-page-variant",
-      title: "Drill your most-played opening",
-      description: `You played "${topOpening.sanLine}" in ${topOpening.count} recent game${
+      title: "Drill your most played opening",
+      description: `You reached "${topOpening.sanLine}" in ${topOpening.count} recent game${
         topOpening.count === 1 ? "" : "s"
-      }${winRate !== null ? ` (${winRate}% score)` : ""}. Train the theory until it's automatic.`,
-      ctaLabel: "Open the opening trainer",
+      }${
+        openingPct !== null ? ` and scored ${openingPct}% from it` : ""
+      }. Drill the line until the moves are automatic.`,
+      ctaLabel: "Open trainer",
       href: "/openings",
     });
   }
@@ -228,61 +288,81 @@ function buildTrainingModules(stats: GameStats): TrainingModule[] {
   if (stats.recentLosses.length > 0) {
     const loss = stats.recentLosses[0];
     modules.push({
-      id: "review-losses",
+      id: "review-loss",
       icon: "mdi:magnify-scan",
       title: "Review your last loss",
-      description: `Find out what went wrong against ${loss.opponent}${
+      description: `Replay your loss with ${
+        loss.userIsWhite ? "White" : "Black"
+      } against ${loss.opponent}${
         loss.date ? ` (${loss.date})` : ""
-      } with a full Stockfish breakdown.`,
-      ctaLabel: "Analyze that game",
-      href: `/analysis?pgnText=${encodeURIComponent(loss.pgn)}`,
+      } move by move and find where it slipped.`,
+      ctaLabel: "Review that loss",
+      reviewLoss: loss,
+    });
+  } else {
+    modules.push({
+      id: "engine-review",
+      icon: "mdi:chart-timeline-variant",
+      title: "Deep-dive a recent game",
+      description:
+        "Run any of your games through a full Stockfish review — accuracy, mistakes, and the moves you missed.",
+      ctaLabel: "Open analysis",
+      href: "/analysis",
     });
   }
 
-  const bulletCount = stats.timeClassCounts.bullet || 0;
-  const totalTimed = Object.values(stats.timeClassCounts).reduce(
-    (a, b) => a + b,
-    0
-  );
-  if (totalTimed > 0 && bulletCount / totalTimed > 0.5) {
+  const colorCandidates: {
+    color: "White" | "Black";
+    rate: number | null;
+    decided: number;
+  }[] = [
+    {
+      color: "White",
+      rate: stats.winRateAsWhite,
+      decided: stats.decidedAsWhite,
+    },
+    {
+      color: "Black",
+      rate: stats.winRateAsBlack,
+      decided: stats.decidedAsBlack,
+    },
+  ];
+  const weakest = colorCandidates
+    .filter((candidate) => candidate.rate !== null && candidate.decided >= 3)
+    .sort((a, b) => (a.rate ?? 0) - (b.rate ?? 0))[0];
+  if (weakest && weakest.rate !== null && weakest.rate < 0.45) {
+    const pct = Math.round(weakest.rate * 100);
     modules.push({
-      id: "time-management",
-      icon: "mdi:clock-alert-outline",
-      title: "Work on time management",
-      description: `${Math.round(
-        (bulletCount / totalTimed) * 100
-      )}% of your recent games were bullet. Drill patterns until they're instinctive so you don't run low on the clock.`,
-      ctaLabel: "Practice puzzles",
-      href: "/puzzles",
-    });
-  }
-
-  if (
-    stats.gamesAsBlack > 0 &&
-    stats.winRateAsBlack !== null &&
-    stats.winRateAsBlack < 0.4
-  ) {
-    modules.push({
-      id: "black-repertoire",
+      id: "color-repertoire",
       icon: "mdi:chess-pawn",
-      title: "Shore up your Black repertoire",
-      description: `Your score as Black is ${Math.round(
-        stats.winRateAsBlack * 100
-      )}% — lower than as White. A solid, well-drilled defense will help.`,
-      ctaLabel: "Train Black openings",
+      title: `Shore up your ${weakest.color} repertoire`,
+      description:
+        weakest.color === "Black"
+          ? `You scored ${pct}% in decided games as Black — drill a defense line until it holds up under pressure.`
+          : `You scored ${pct}% in decided games as White — drill an opening line until it's second nature.`,
+      ctaLabel:
+        weakest.color === "Black" ? "Train a defense" : "Train an opening",
       href: "/openings",
     });
   }
 
-  modules.push({
-    id: "full-review",
-    icon: "mdi:chart-timeline-variant",
-    title: "Deep dive with engine analysis",
-    description:
-      "Load any of your games for a full move-by-move Stockfish review with accuracy and blunder detection.",
-    ctaLabel: "Open analysis",
-    href: "/analysis",
-  });
+  const totalTimed = Object.values(stats.timeClassCounts).reduce(
+    (a, b) => a + b,
+    0
+  );
+  const bulletCount = stats.timeClassCounts.bullet ?? 0;
+  if (totalTimed > 0 && bulletCount / totalTimed > 0.5) {
+    modules.push({
+      id: "time-management",
+      icon: "mdi:clock-alert-outline",
+      title: "Train faster pattern recognition",
+      description: `${Math.round(
+        (bulletCount / totalTimed) * 100
+      )}% of your recent games were bullet — pattern drills help you find good moves before the clock decides for you.`,
+      ctaLabel: "Practice puzzles",
+      href: "/puzzles",
+    });
+  }
 
   return modules;
 }
@@ -294,7 +374,7 @@ function formatPercent(value: number | null): string {
 
 export default function Training() {
   const palette = usePalette();
-  const cardSx = useCardSx();
+  const router = useRouter();
 
   const [username, setUsername] = useState("");
   const [platform, setPlatform] = useState<Platform>("chesscom");
@@ -302,35 +382,8 @@ export default function Training() {
   const [error, setError] = useState<string | null>(null);
   const [games, setGames] = useState<LoadedGame[] | null>(null);
   const [analyzedUsername, setAnalyzedUsername] = useState("");
-
-  const { games: localGames, isReady: isLocalDbReady } = useGameDatabase(true);
-
-  const blunderStats = useMemo(() => {
-    const analyzedGames = localGames.filter((g) => g.eval);
-    if (analyzedGames.length === 0) return null;
-
-    let totalBlunders = 0;
-    let totalMistakes = 0;
-    let totalMoves = 0;
-    for (const g of analyzedGames) {
-      const positions = g.eval?.positions || [];
-      totalMoves += positions.length;
-      for (const p of positions) {
-        if (p.moveClassification === MoveClassification.Blunder) {
-          totalBlunders++;
-        } else if (p.moveClassification === MoveClassification.Mistake) {
-          totalMistakes++;
-        }
-      }
-    }
-
-    return {
-      gamesAnalyzed: analyzedGames.length,
-      totalBlunders,
-      totalMistakes,
-      totalMoves,
-    };
-  }, [localGames]);
+  const [analyzedPlatform, setAnalyzedPlatform] =
+    useState<Platform>("chesscom");
 
   const stats = useMemo(
     () => (games ? computeStats(games, analyzedUsername) : null),
@@ -342,12 +395,9 @@ export default function Training() {
     [stats]
   );
 
-  const handleAnalyze = async () => {
+  const handleBuildPlan = async () => {
     const trimmed = username.trim();
-    if (!trimmed) {
-      setError("Enter a username first.");
-      return;
-    }
+    if (!trimmed || isLoading) return;
 
     setIsLoading(true);
     setError(null);
@@ -359,7 +409,7 @@ export default function Training() {
 
       if (fetched.length === 0) {
         setError(
-          "No recent games found for that username. Double-check the spelling and platform."
+          `No recent games found for "${trimmed}" on ${PLATFORM_LABELS[platform]} — check the spelling and try again.`
         );
         setGames(null);
         return;
@@ -367,11 +417,10 @@ export default function Training() {
 
       setGames(fetched);
       setAnalyzedUsername(trimmed);
+      setAnalyzedPlatform(platform);
     } catch {
       setError(
-        `Couldn't fetch games from ${
-          platform === "chesscom" ? "Chess.com" : "Lichess"
-        }. Check the username and try again.`
+        "Couldn't load games for that username — check the spelling and try again."
       );
       setGames(null);
     } finally {
@@ -379,392 +428,507 @@ export default function Training() {
     }
   };
 
-  const overallWinRate =
-    stats && stats.decidedGames > 0 ? stats.wins / stats.decidedGames : null;
+  const handleReviewLoss = (loss: RecentLoss) => {
+    prepareNewAnalysisSession(loss.pgn, loss.userIsWhite);
+    router.push("/analysis");
+  };
+
+  const sectionLabelSx = {
+    color: palette.textMuted,
+    letterSpacing: "0.1em",
+    fontSize: "0.66rem",
+  } as const;
+
+  const ctaButtonSx = {
+    borderColor: alpha(palette.accent, 0.35),
+    color: palette.text,
+    "&:hover": {
+      borderColor: palette.accent,
+      bgcolor: alpha(palette.accent, 0.08),
+    },
+  } as const;
 
   return (
     <>
       <PageTitle
-        title="AI Training Coach — VoltChess"
-        description="Import your recent Chess.com or Lichess games and get a personalized training plan based on your openings, win rate, and time controls."
+        title="Training Coach — VoltChess"
+        description="Import your recent Chess.com or Lichess games and get a training plan built from your openings, results by color, and time controls."
       />
 
-      <PageContainer
-        title="AI Training Coach"
-        subtitle="Import your recent games and get a training plan tailored to your patterns — free, no engine review required."
+      <Box
+        sx={{
+          maxWidth: stats ? 1120 : 560,
+          mx: "auto",
+          width: "100%",
+          px: { xs: 0.5, sm: 0 },
+        }}
       >
-        <Box sx={{ ...cardSx, mb: 2.5 }}>
-          <Typography variant="h3" sx={{ fontSize: "1rem", mb: 2 }}>
-            Import your games
+        <Box sx={{ mb: { xs: 2.5, md: 3.5 }, maxWidth: 640 }}>
+          <Typography
+            variant="overline"
+            sx={{
+              color: palette.textMuted,
+              letterSpacing: "0.14em",
+              fontSize: "0.68rem",
+              display: "block",
+              mb: 0.75,
+            }}
+          >
+            VoltChess
           </Typography>
-          <Grid container spacing={2} alignItems="flex-end">
-            <Grid size={{ xs: 12, sm: 5 }}>
-              <TextField
-                fullWidth
-                label="Username"
-                placeholder={
-                  platform === "chesscom" ? "e.g. hikaru" : "e.g. DrNykterstein"
-                }
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleAnalyze();
-                }}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <Icon
-                        icon="mdi:account-search"
-                        width={18}
-                        color={palette.textMuted}
-                        style={{ marginRight: 8 }}
-                      />
-                    ),
-                  },
-                }}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 4 }}>
-              <ToggleButtonGroup
-                exclusive
-                fullWidth
-                value={platform}
-                onChange={(_, value) => value && setPlatform(value)}
-              >
-                <ToggleButton value="chesscom">
-                  <Icon
-                    icon="simple-icons:chessdotcom"
-                    width={16}
-                    style={{ marginRight: 6 }}
-                  />
-                  Chess.com
-                </ToggleButton>
-                <ToggleButton value="lichess">
-                  <Icon
-                    icon="simple-icons:lichess"
-                    width={16}
-                    style={{ marginRight: 6 }}
-                  />
-                  Lichess
-                </ToggleButton>
-              </ToggleButtonGroup>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 3 }}>
-              <Button
-                fullWidth
-                size="large"
-                variant="contained"
-                onClick={handleAnalyze}
-                disabled={isLoading}
-                startIcon={
-                  isLoading ? (
-                    <CircularProgress size={16} color="inherit" />
-                  ) : (
-                    <Icon icon="mdi:robot-happy-outline" width={18} />
-                  )
-                }
-              >
-                {isLoading ? "Analyzing…" : "Analyze"}
-              </Button>
-            </Grid>
-          </Grid>
+          <Typography
+            variant="h1"
+            sx={{
+              fontSize: { xs: "1.55rem", md: "1.85rem" },
+              fontWeight: 700,
+              letterSpacing: "-0.02em",
+              lineHeight: 1.2,
+              mb: 0.75,
+            }}
+          >
+            Training Coach
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              color: palette.textMuted,
+              fontSize: "0.95rem",
+              lineHeight: 1.55,
+              maxWidth: 520,
+            }}
+          >
+            A training plan built from your recent games — import from Chess.com
+            or Lichess to see what to work on next.
+          </Typography>
+        </Box>
 
-          {error && (
-            <Alert severity="warning" sx={{ mt: 2 }}>
-              {error}
-            </Alert>
-          )}
+        <Box
+          sx={{
+            maxWidth: 560,
+            borderRadius: 2.5,
+            border: `1px solid ${palette.border}`,
+            bgcolor: palette.surfaceRaised,
+            p: { xs: 2, sm: 3 },
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+          }}
+        >
+          <Box>
+            <Typography
+              variant="caption"
+              sx={{
+                ...sectionLabelSx,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                fontSize: "0.65rem",
+                display: "block",
+                mb: 0.75,
+              }}
+            >
+              Platform
+            </Typography>
+            <ToggleButtonGroup
+              exclusive
+              fullWidth
+              value={platform}
+              onChange={(_, value) => value && setPlatform(value)}
+            >
+              <ToggleButton value="chesscom">
+                <Icon
+                  icon="simple-icons:chessdotcom"
+                  width={16}
+                  style={{ marginRight: 6 }}
+                />
+                Chess.com
+              </ToggleButton>
+              <ToggleButton value="lichess">
+                <Icon
+                  icon="simple-icons:lichess"
+                  width={16}
+                  style={{ marginRight: 6 }}
+                />
+                Lichess
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
+          <TextField
+            fullWidth
+            label="Username"
+            placeholder={
+              platform === "chesscom" ? "e.g. hikaru" : "e.g. DrNykterstein"
+            }
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") void handleBuildPlan();
+            }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <Icon
+                    icon="mdi:account-search"
+                    width={18}
+                    color={palette.textMuted}
+                    style={{ marginRight: 8 }}
+                  />
+                ),
+              },
+            }}
+          />
+
+          <ToolPrimaryButton
+            onClick={handleBuildPlan}
+            loading={isLoading}
+            disabled={!username.trim()}
+            startIcon={
+              isLoading ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                <Icon icon="mdi:format-list-checks" width={18} />
+              )
+            }
+          >
+            Build my training plan
+          </ToolPrimaryButton>
+
+          {error && <Alert severity="warning">{error}</Alert>}
         </Box>
 
         {!stats && !isLoading && (
-          <Box
+          <Typography
+            variant="caption"
             sx={{
-              ...cardSx,
-              textAlign: "center",
-              py: 6,
               color: palette.textMuted,
+              display: "block",
+              textAlign: "center",
+              mt: 1.5,
             }}
           >
-            <Icon icon="mdi:chart-box-outline" width={40} />
-            <Typography variant="body1" sx={{ mt: 1.5 }}>
-              Import your recent games to get a personalized training plan.
-            </Typography>
+            Uses the public games on your profile — openings, results by color,
+            and time controls.
+          </Typography>
+        )}
+
+        {isLoading && !stats && (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+            <CircularProgress size={28} sx={{ color: palette.accent }} />
           </Box>
         )}
 
         {stats && modules && (
-          <>
-            <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <Box sx={{ ...cardSx, height: "100%" }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Games analyzed
-                  </Typography>
-                  <Typography
-                    variant="h3"
-                    sx={{ fontSize: "2rem", color: palette.accent }}
-                  >
-                    {stats.totalGames}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    for {analyzedUsername} on{" "}
-                    {platform === "chesscom" ? "Chess.com" : "Lichess"}
-                  </Typography>
-                </Box>
-              </Grid>
+          <Box
+            sx={{
+              mt: 3.5,
+              display: "flex",
+              flexDirection: "column",
+              gap: 3.5,
+            }}
+          >
+            <Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: 1,
+                  mb: 1.25,
+                }}
+              >
+                <Typography variant="overline" sx={sectionLabelSx}>
+                  Recent form
+                </Typography>
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  label={`${stats.wins}W · ${stats.losses}L · ${stats.draws}D`}
+                  sx={{
+                    color: palette.textMuted,
+                    borderColor: palette.border,
+                    fontFamily: "ui-monospace, monospace",
+                  }}
+                />
+              </Box>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "repeat(2, 1fr)",
+                    md: "repeat(4, 1fr)",
+                  },
+                  gap: 1,
+                }}
+              >
+                <ToolStat label="Games" value={stats.totalGames} />
+                <ToolStat
+                  label="Score"
+                  value={formatPercent(stats.score)}
+                  emphasize
+                />
+                <ToolStat
+                  label="Win rate as White (decided)"
+                  value={formatPercent(stats.winRateAsWhite)}
+                />
+                <ToolStat
+                  label="Win rate as Black (decided)"
+                  value={formatPercent(stats.winRateAsBlack)}
+                />
+              </Box>
+              <Typography
+                variant="caption"
+                sx={{ color: palette.textMuted, display: "block", mt: 1 }}
+              >
+                Built from {stats.totalGames} recent games for{" "}
+                {analyzedUsername} on {PLATFORM_LABELS[analyzedPlatform]}. Score
+                counts draws as half a point; win rates count decided games
+                only.
+              </Typography>
+            </Box>
 
-              <Grid size={{ xs: 12, md: 4 }}>
-                <Box sx={{ ...cardSx, height: "100%" }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Overall score
-                  </Typography>
-                  <Typography
-                    variant="h3"
-                    sx={{ fontSize: "2rem", color: palette.accent }}
-                  >
-                    {formatPercent(overallWinRate)}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {stats.wins}W / {stats.losses}L / {stats.draws}D
-                  </Typography>
-                </Box>
-              </Grid>
-
-              <Grid size={{ xs: 12, md: 4 }}>
-                <Box sx={{ ...cardSx, height: "100%" }}>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mb: 1 }}
-                  >
-                    Score by color
-                  </Typography>
-                  <Box sx={{ mb: 1 }}>
-                    <Box
-                      sx={{ display: "flex", justifyContent: "space-between" }}
-                    >
-                      <Typography variant="caption">
-                        White ({stats.gamesAsWhite})
-                      </Typography>
-                      <Typography variant="caption">
-                        {formatPercent(stats.winRateAsWhite)}
-                      </Typography>
-                    </Box>
-                    <LinearProgress
-                      variant="determinate"
-                      value={(stats.winRateAsWhite ?? 0) * 100}
+            <Box>
+              <Typography
+                variant="overline"
+                sx={{ ...sectionLabelSx, display: "block", mb: 1.25 }}
+              >
+                Time controls
+              </Typography>
+              <Box sx={{ display: "flex", gap: 0.75, flexWrap: "wrap" }}>
+                {Object.entries(stats.timeClassCounts)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([timeClass, count]) => (
+                    <Chip
+                      key={timeClass}
+                      size="small"
+                      variant="outlined"
+                      label={`${timeClass} · ${count}`}
                       sx={{
-                        height: 5,
-                        borderRadius: 3,
-                        bgcolor: palette.surface,
-                        "& .MuiLinearProgress-bar": { bgcolor: palette.accent },
+                        color: palette.textMuted,
+                        borderColor: palette.border,
+                        bgcolor: alpha(palette.bg, 0.4),
                       }}
                     />
-                  </Box>
-                  <Box>
-                    <Box
-                      sx={{ display: "flex", justifyContent: "space-between" }}
-                    >
-                      <Typography variant="caption">
-                        Black ({stats.gamesAsBlack})
-                      </Typography>
-                      <Typography variant="caption">
-                        {formatPercent(stats.winRateAsBlack)}
-                      </Typography>
-                    </Box>
-                    <LinearProgress
-                      variant="determinate"
-                      value={(stats.winRateAsBlack ?? 0) * 100}
-                      sx={{
-                        height: 5,
-                        borderRadius: 3,
-                        bgcolor: palette.surface,
-                        "& .MuiLinearProgress-bar": {
-                          bgcolor: palette.textMuted,
-                        },
-                      }}
-                    />
-                  </Box>
-                </Box>
-              </Grid>
-            </Grid>
+                  ))}
+              </Box>
+            </Box>
 
-            <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Box sx={{ ...cardSx, height: "100%" }}>
-                  <Typography variant="h3" sx={{ fontSize: "1rem", mb: 1.5 }}>
-                    Your most-played openings
-                  </Typography>
-                  {stats.openingPatterns.length === 0 ? (
-                    <Typography variant="body2" color="text.secondary">
-                      Not enough game data to detect a pattern yet.
-                    </Typography>
-                  ) : (
-                    <Box
-                      sx={{ display: "flex", flexDirection: "column", gap: 1 }}
-                    >
-                      {stats.openingPatterns.map((pattern) => (
+            <Box>
+              <Typography
+                variant="overline"
+                sx={{ ...sectionLabelSx, display: "block", mb: 1.25 }}
+              >
+                Your most played openings
+              </Typography>
+              {stats.openingPatterns.length === 0 ? (
+                <Typography variant="body2" sx={{ color: palette.textMuted }}>
+                  Not enough moves in these games to spot a repeated opening
+                  yet.
+                </Typography>
+              ) : (
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                  {stats.openingPatterns.map((pattern) => {
+                    const course = findDrillCourse(pattern.moves);
+                    return (
+                      <Box
+                        key={pattern.key}
+                        sx={{
+                          p: 1.5,
+                          borderRadius: 1.5,
+                          border: `1px solid ${palette.borderSubtle}`,
+                          bgcolor: alpha(palette.bg, 0.55),
+                        }}
+                      >
                         <Box
-                          key={pattern.key}
                           sx={{
                             display: "flex",
-                            justifyContent: "space-between",
                             alignItems: "center",
-                            p: 1.25,
-                            borderRadius: 1.5,
-                            bgcolor: palette.surface,
-                            border: `1px solid ${palette.borderSubtle}`,
-                            gap: 1,
+                            gap: 1.5,
                           }}
                         >
                           <Typography
-                            variant="body2"
                             sx={{
-                              fontFamily: "monospace",
-                              fontSize: "0.78rem",
+                              flex: 1,
+                              minWidth: 0,
+                              fontFamily: "ui-monospace, monospace",
+                              fontSize: "0.8rem",
                               overflow: "hidden",
                               textOverflow: "ellipsis",
                               whiteSpace: "nowrap",
+                              color: palette.text,
                             }}
                           >
                             {pattern.sanLine}
                           </Typography>
-                          <Chip
-                            size="small"
-                            variant="outlined"
-                            label={`×${pattern.count}`}
-                          />
+                          <Typography
+                            variant="caption"
+                            sx={{ color: palette.textMuted, flexShrink: 0 }}
+                          >
+                            {pattern.count} game{pattern.count === 1 ? "" : "s"}
+                          </Typography>
+                          {course && (
+                            <NavLink href="/openings" fullWidth={false}>
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                title={`Matches the ${course.name} course`}
+                                sx={{
+                                  ...ctaButtonSx,
+                                  flexShrink: 0,
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                Open trainer
+                              </Button>
+                            </NavLink>
+                          )}
                         </Box>
-                      ))}
-                    </Box>
-                  )}
-                </Box>
-              </Grid>
-
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Box sx={{ ...cardSx, height: "100%" }}>
-                  <Typography variant="h3" sx={{ fontSize: "1rem", mb: 1.5 }}>
-                    Time controls played
-                  </Typography>
-                  <Box sx={{ display: "flex", gap: 0.75, flexWrap: "wrap" }}>
-                    {Object.entries(stats.timeClassCounts)
-                      .sort((a, b) => b[1] - a[1])
-                      .map(([timeClass, count]) => (
-                        <Chip
-                          key={timeClass}
-                          label={`${timeClass} · ${count}`}
-                          variant="outlined"
-                          size="small"
-                        />
-                      ))}
-                  </Box>
-
-                  {blunderStats && (
-                    <>
-                      <Divider sx={{ my: 2 }} />
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mb: 1 }}
-                      >
-                        From {blunderStats.gamesAnalyzed} locally analyzed game
-                        {blunderStats.gamesAnalyzed === 1 ? "" : "s"}
-                      </Typography>
-                      <Box
-                        sx={{ display: "flex", gap: 0.75, flexWrap: "wrap" }}
-                      >
-                        <Chip
-                          icon={
-                            <Icon icon="mdi:alert-octagon-outline" width={14} />
-                          }
-                          label={`${blunderStats.totalBlunders} blunders`}
-                          size="small"
-                          color={
-                            blunderStats.totalBlunders > 0 ? "error" : "success"
-                          }
-                          variant="outlined"
-                        />
-                        <Chip
-                          icon={<Icon icon="mdi:alert-outline" width={14} />}
-                          label={`${blunderStats.totalMistakes} mistakes`}
-                          size="small"
-                          color="warning"
-                          variant="outlined"
-                        />
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1.25,
+                            mt: 1,
+                          }}
+                        >
+                          <LinearProgress
+                            variant="determinate"
+                            value={(pattern.score ?? 0) * 100}
+                            sx={{
+                              flex: 1,
+                              height: 4,
+                              borderRadius: 2,
+                              bgcolor: alpha(palette.bg, 0.8),
+                              "& .MuiLinearProgress-bar": {
+                                bgcolor: palette.accent,
+                                borderRadius: 2,
+                              },
+                            }}
+                          />
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: palette.textMuted,
+                              fontFamily: "ui-monospace, monospace",
+                              minWidth: 40,
+                              textAlign: "right",
+                            }}
+                          >
+                            {formatPercent(pattern.score)}
+                          </Typography>
+                        </Box>
                       </Box>
-                    </>
-                  )}
-                  {!blunderStats && isLocalDbReady && (
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ display: "block", mt: 2 }}
-                    >
-                      Run a game through Analysis to see blunder counts here.
-                    </Typography>
-                  )}
+                    );
+                  })}
                 </Box>
-              </Grid>
-            </Grid>
+              )}
+            </Box>
 
-            <Typography variant="h3" sx={{ fontSize: "1.1rem", mb: 2 }}>
-              Your training plan
-            </Typography>
-            <Grid container spacing={2}>
-              {modules.map((module) => (
-                <Grid key={module.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Box
-                    sx={{
-                      ...cardSx,
-                      height: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 1.5,
-                    }}
-                  >
+            <Box>
+              <Typography
+                variant="overline"
+                sx={{ ...sectionLabelSx, display: "block", mb: 1.25 }}
+              >
+                Training plan
+              </Typography>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    sm: "repeat(2, 1fr)",
+                    md: "repeat(3, 1fr)",
+                  },
+                  gap: 2,
+                }}
+              >
+                {modules.map((module) => {
+                  const reviewLoss = module.reviewLoss;
+                  return (
                     <Box
+                      key={module.id}
                       sx={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 2,
-                        display: "grid",
-                        placeItems: "center",
-                        bgcolor: alpha(palette.accent, 0.12),
-                        color: palette.accent,
+                        borderRadius: 2.5,
+                        border: `1px solid ${palette.border}`,
+                        bgcolor: palette.surfaceRaised,
+                        p: 2.5,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 1.5,
+                        transition: "border-color 0.15s ease",
+                        "&:hover": {
+                          borderColor: alpha(palette.accent, 0.35),
+                        },
                       }}
                     >
-                      <Icon icon={module.icon} width={22} />
-                    </Box>
-                    <Typography variant="h3" sx={{ fontSize: "1.05rem" }}>
-                      {module.title}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ flex: 1 }}
-                    >
-                      {module.description}
-                    </Typography>
-                    <NavLink href={module.href}>
-                      <Button
-                        size="small"
-                        variant="outlined"
+                      <Box
                         sx={{
-                          alignSelf: "flex-start",
-                          borderColor: alpha(palette.accent, 0.35),
-                          color: palette.text,
+                          width: 40,
+                          height: 40,
+                          borderRadius: 2,
+                          display: "grid",
+                          placeItems: "center",
+                          bgcolor: alpha(palette.accent, 0.12),
+                          color: palette.accent,
                         }}
                       >
-                        {module.ctaLabel}
-                      </Button>
-                    </NavLink>
-                  </Box>
-                </Grid>
-              ))}
-            </Grid>
-          </>
+                        <Icon icon={module.icon} width={22} />
+                      </Box>
+                      <Typography
+                        sx={{
+                          fontSize: "1rem",
+                          fontWeight: 650,
+                          lineHeight: 1.3,
+                        }}
+                      >
+                        {module.title}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: palette.textMuted,
+                          lineHeight: 1.55,
+                          flex: 1,
+                        }}
+                      >
+                        {module.description}
+                      </Typography>
+                      {reviewLoss ? (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => handleReviewLoss(reviewLoss)}
+                          endIcon={<Icon icon="mdi:arrow-right" width={14} />}
+                          sx={{ ...ctaButtonSx, alignSelf: "flex-start" }}
+                        >
+                          {module.ctaLabel}
+                        </Button>
+                      ) : (
+                        module.href && (
+                          <Box>
+                            <NavLink href={module.href} fullWidth={false}>
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                endIcon={
+                                  <Icon icon="mdi:arrow-right" width={14} />
+                                }
+                                sx={ctaButtonSx}
+                              >
+                                {module.ctaLabel}
+                              </Button>
+                            </NavLink>
+                          </Box>
+                        )
+                      )}
+                    </Box>
+                  );
+                })}
+              </Box>
+            </Box>
+          </Box>
         )}
-      </PageContainer>
+      </Box>
     </>
   );
 }
