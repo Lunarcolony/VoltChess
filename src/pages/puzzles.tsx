@@ -1,361 +1,631 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Box,
   Typography,
   Button,
-  Grid2 as Grid,
   Chip,
   LinearProgress,
   Alert,
   Snackbar,
 } from "@mui/material";
+import { Icon } from "@iconify/react";
+import { alpha } from "@mui/material/styles";
 import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
-import { PageTitle } from "@/components/pageTitle";
-import PageContainer from "@/components/PageContainer";
-import { useCardSx, usePalette } from "@/hooks/usePalette";
+import type {
+  CustomSquareStyles,
+  Square,
+} from "react-chessboard/dist/chessboard/types";
+import ToolsShell, {
+  ToolPrimaryButton,
+  ToolStat,
+} from "@/sections/tools/ToolsShell";
+import { usePalette } from "@/hooks/usePalette";
 import { uciMoveParams } from "@/lib/chess";
+import { updatePuzzleElo } from "@/lib/elo";
+import { fetchLichessDailyPuzzle, type DailyPuzzle } from "@/lib/lichess";
+import { PUZZLE_BANK, type PuzzleData } from "@/data/puzzles/bank";
 
-interface PuzzleData {
-  id: string;
-  fen: string;
-  rating: number;
-  themes: string[];
-  /** UCI moves: player move, opponent reply, player move, … */
-  solution: string[];
-  description: string;
+const ELO_STORAGE_KEY = "voltchess-puzzle-elo";
+const STREAK_STORAGE_KEY = "voltchess-puzzle-streak";
+const SOLVED_STORAGE_KEY = "voltchess-puzzle-solved-count";
+const DEFAULT_ELO = 1200;
+const REPLY_DELAY_MS = 450;
+
+function readStoredNumber(key: string, fallback: number): number {
+  try {
+    const raw = localStorage.getItem(key);
+    const parsed = raw ? Number(raw) : NaN;
+    return Number.isFinite(parsed) ? parsed : fallback;
+  } catch {
+    return fallback;
+  }
 }
 
-const puzzles: PuzzleData[] = [
-  {
-    id: "mate1",
-    fen: "6k1/5ppp/8/8/8/8/5PPP/4R2K w - - 0 1",
-    rating: 800,
-    themes: ["mate", "back rank"],
-    solution: ["e1e8"],
-    description: "Back-rank mate in one.",
-  },
-  {
-    id: "mate2",
-    fen: "7k/5Q2/6P1/8/8/8/8/6K1 w - - 0 1",
-    rating: 900,
-    themes: ["mate"],
-    solution: ["f7f8"],
-    description: "Deliver checkmate with the queen.",
-  },
-  {
-    id: "fork",
-    fen: "4r1k1/8/8/5N2/8/8/8/4K3 w - - 0 1",
-    rating: 1100,
-    themes: ["fork", "knight"],
-    solution: ["f5e7"],
-    description: "Knight fork — win the rook with a double attack on the king.",
-  },
-  {
-    id: "pin",
-    fen: "r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/3P1N2/PPP2PPP/RNBQK2R w KQkq - 4 5",
-    rating: 1200,
-    themes: ["pin", "tactics"],
-    solution: ["c4f7", "e8f7", "f3g5"],
-    description: "Exploit the pinned f7 pawn.",
-  },
-];
-
-function moveToUci(chess: Chess, from: string, to: string, promotion?: string) {
-  const move = chess.move({ from, to, promotion: promotion || "q" });
-  return move ? move.from + move.to + (move.promotion || "") : null;
+function writeStoredNumber(key: string, value: number) {
+  try {
+    localStorage.setItem(key, String(Math.round(value)));
+  } catch {
+    /* localStorage unavailable — ignore */
+  }
 }
 
-function Puzzles() {
+function pickPuzzleNearElo(elo: number, excludeIds: Set<string>): PuzzleData {
+  const pool = PUZZLE_BANK.filter((p) => !excludeIds.has(p.id));
+  const candidates = pool.length > 0 ? pool : PUZZLE_BANK;
+  const sorted = [...candidates].sort(
+    (a, b) => Math.abs(a.rating - elo) - Math.abs(b.rating - elo)
+  );
+  const topPicks = sorted.slice(0, Math.min(5, sorted.length));
+  return topPicks[Math.floor(Math.random() * topPicks.length)];
+}
+
+type ActivePuzzle = PuzzleData | DailyPuzzle;
+
+export default function Puzzles() {
   const palette = usePalette();
-  const cardSx = useCardSx();
-  const [currentPuzzleIndex, setCurrentPuzzleIndex] = useState(0);
-  const [game, setGame] = useState(new Chess());
-  const [gamePosition, setGamePosition] = useState("");
+
+  const [userElo, setUserElo] = useState<number>(() =>
+    readStoredNumber(ELO_STORAGE_KEY, DEFAULT_ELO)
+  );
+  const [streak, setStreak] = useState<number>(() =>
+    readStoredNumber(STREAK_STORAGE_KEY, 0)
+  );
+  const [solvedCount, setSolvedCount] = useState<number>(() =>
+    readStoredNumber(SOLVED_STORAGE_KEY, 0)
+  );
+  const [dailyPuzzle, setDailyPuzzle] = useState<DailyPuzzle | null>(null);
+  const [dailyLoading, setDailyLoading] = useState(true);
+  const [solvedIds, setSolvedIds] = useState<Set<string>>(new Set());
+  const [currentPuzzle, setCurrentPuzzle] = useState<PuzzleData>(() =>
+    pickPuzzleNearElo(readStoredNumber(ELO_STORAGE_KEY, DEFAULT_ELO), new Set())
+  );
+  const [isDailyActive, setIsDailyActive] = useState(false);
+
+  const [game, setGame] = useState(() => new Chess());
   const [solutionIndex, setSolutionIndex] = useState(0);
+  const [awaitingReply, setAwaitingReply] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [hasMistake, setHasMistake] = useState(false);
   const [showHint, setShowHint] = useState(false);
-  const [score, setScore] = useState(0);
+  const [eloDelta, setEloDelta] = useState<number | null>(null);
+  const [lastMove, setLastMove] = useState<{
+    from: Square;
+    to: Square;
+  } | null>(null);
+  const [wrongSquare, setWrongSquare] = useState<Square | null>(null);
   const [feedback, setFeedback] = useState<{
     show: boolean;
     message: string;
     type: "success" | "error" | "info";
   }>({ show: false, message: "", type: "info" });
 
-  const currentPuzzle = puzzles[currentPuzzleIndex];
+  const replyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrongFlashRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const initializePuzzle = useCallback(() => {
-    const newGame = new Chess();
-    newGame.load(currentPuzzle.fen);
-    setGame(newGame);
-    setGamePosition(newGame.fen());
-    setSolutionIndex(0);
-    setIsCompleted(false);
-    setShowHint(false);
-  }, [currentPuzzle]);
+  const activePuzzle: ActivePuzzle =
+    isDailyActive && dailyPuzzle ? dailyPuzzle : currentPuzzle;
 
   useEffect(() => {
-    initializePuzzle();
-  }, [initializePuzzle]);
+    writeStoredNumber(ELO_STORAGE_KEY, userElo);
+  }, [userElo]);
+  useEffect(() => {
+    writeStoredNumber(STREAK_STORAGE_KEY, streak);
+  }, [streak]);
+  useEffect(() => {
+    writeStoredNumber(SOLVED_STORAGE_KEY, solvedCount);
+  }, [solvedCount]);
 
-  const playOpponentReplies = useCallback(
-    (
-      gameCopy: Chess,
-      startIndex: number
-    ): { game: Chess; nextIndex: number } => {
-      let idx = startIndex;
-      while (idx < currentPuzzle.solution.length) {
-        const uci = currentPuzzle.solution[idx];
-        try {
-          gameCopy.move(uciMoveParams(uci));
-          idx++;
-        } catch {
-          break;
-        }
-      }
-      return { game: gameCopy, nextIndex: idx };
+  useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+
+    fetchLichessDailyPuzzle(controller.signal)
+      .then((puzzle) => {
+        if (!cancelled) setDailyPuzzle(puzzle);
+      })
+      .finally(() => {
+        if (!cancelled) setDailyLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, []);
+
+  const clearTimers = useCallback(() => {
+    if (replyTimeoutRef.current) {
+      clearTimeout(replyTimeoutRef.current);
+      replyTimeoutRef.current = null;
+    }
+    if (wrongFlashRef.current) {
+      clearTimeout(wrongFlashRef.current);
+      wrongFlashRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => clearTimers, [clearTimers]);
+
+  const initializePuzzle = useCallback(
+    (puzzle: ActivePuzzle) => {
+      clearTimers();
+      const newGame = new Chess();
+      newGame.load(puzzle.fen);
+      setGame(newGame);
+      setSolutionIndex(0);
+      setAwaitingReply(false);
+      setIsCompleted(false);
+      setHasMistake(false);
+      setShowHint(false);
+      setEloDelta(null);
+      setLastMove(null);
+      setWrongSquare(null);
     },
-    [currentPuzzle.solution]
+    [clearTimers]
   );
 
-  const onDrop = (sourceSquare: string, targetSquare: string) => {
-    if (isCompleted) return false;
+  useEffect(() => {
+    initializePuzzle(
+      isDailyActive && dailyPuzzle ? dailyPuzzle : currentPuzzle
+    );
+  }, [currentPuzzle, dailyPuzzle, isDailyActive, initializePuzzle]);
 
-    const expectedUci = currentPuzzle.solution[solutionIndex];
+  const finishPuzzle = useCallback(
+    (solvedCleanly: boolean) => {
+      setIsCompleted(true);
+      const nextElo = updatePuzzleElo(
+        userElo,
+        activePuzzle.rating,
+        solvedCleanly
+      );
+      setEloDelta(Math.round(nextElo - userElo));
+      setUserElo(nextElo);
+      if (solvedCleanly) {
+        setStreak((s) => s + 1);
+        setSolvedCount((c) => c + 1);
+      } else {
+        setStreak(0);
+      }
+      if (!isDailyActive) {
+        setSolvedIds((prev) => new Set(prev).add(activePuzzle.id));
+      }
+    },
+    [activePuzzle, isDailyActive, userElo]
+  );
+
+  /** Play exactly one opponent reply from the solution, after a beat. */
+  const scheduleOpponentReply = useCallback(
+    (fromFen: string, replyIndex: number) => {
+      const uci = activePuzzle.solution[replyIndex];
+      if (!uci) return;
+
+      setAwaitingReply(true);
+      replyTimeoutRef.current = setTimeout(() => {
+        replyTimeoutRef.current = null;
+        const copy = new Chess(fromFen);
+        try {
+          const reply = copy.move(uciMoveParams(uci));
+          setLastMove({ from: reply.from, to: reply.to });
+        } catch {
+          /* malformed solution data — end the puzzle gracefully */
+          setAwaitingReply(false);
+          return;
+        }
+        setGame(copy);
+        setAwaitingReply(false);
+        setSolutionIndex(replyIndex + 1);
+      }, REPLY_DELAY_MS);
+    },
+    [activePuzzle.solution]
+  );
+
+  const onDrop = (
+    sourceSquare: Square,
+    targetSquare: Square,
+    piece: string
+  ): boolean => {
+    if (isCompleted || awaitingReply) return false;
+
+    const expectedUci = activePuzzle.solution[solutionIndex];
     if (!expectedUci) return false;
 
-    const gameCopy = new Chess(game.fen());
-
+    const copy = new Chess(game.fen());
+    let move;
     try {
-      const playedUci = moveToUci(gameCopy, sourceSquare, targetSquare);
-      if (!playedUci) return false;
-
-      if (playedUci !== expectedUci) {
-        setFeedback({
-          show: true,
-          message: "That's not the best move. Try again.",
-          type: "error",
-        });
-        return false;
-      }
-
-      let nextIndex = solutionIndex + 1;
-      const afterReplies = playOpponentReplies(gameCopy, nextIndex);
-      setGame(afterReplies.game);
-      setGamePosition(afterReplies.game.fen());
-      nextIndex = afterReplies.nextIndex;
-
-      if (nextIndex >= currentPuzzle.solution.length) {
-        setIsCompleted(true);
-        setScore((s) => s + Math.round(currentPuzzle.rating / 100));
-        setFeedback({
-          show: true,
-          message: "Correct! Puzzle solved.",
-          type: "success",
-        });
-      } else {
-        setSolutionIndex(nextIndex);
-        setFeedback({
-          show: true,
-          message: "Good move. Keep going.",
-          type: "success",
-        });
-      }
-
-      return true;
+      move = copy.move({
+        from: sourceSquare,
+        to: targetSquare,
+        promotion: piece[1]?.toLowerCase() ?? "q",
+      });
     } catch {
+      return false;
+    }
+    if (!move) return false;
+
+    const playedUci = move.from + move.to + (move.promotion ?? "");
+    const isLastSolutionMove =
+      solutionIndex === activePuzzle.solution.length - 1;
+    // Lichess convention: any immediate checkmate on the final move counts.
+    const altCheckmate =
+      playedUci !== expectedUci && isLastSolutionMove && copy.isCheckmate();
+
+    if (playedUci !== expectedUci && !altCheckmate) {
+      setHasMistake(true);
+      setWrongSquare(targetSquare);
+      if (wrongFlashRef.current) clearTimeout(wrongFlashRef.current);
+      wrongFlashRef.current = setTimeout(() => setWrongSquare(null), 600);
       setFeedback({
         show: true,
-        message: "Invalid move.",
+        message: "That's not it — look for a stronger idea.",
         type: "error",
       });
       return false;
     }
+
+    setGame(copy);
+    setLastMove({ from: move.from, to: move.to });
+    setShowHint(false);
+
+    const nextIndex = solutionIndex + 1;
+    setSolutionIndex(nextIndex);
+
+    if (nextIndex >= activePuzzle.solution.length || altCheckmate) {
+      finishPuzzle(!hasMistake);
+      setFeedback({
+        show: true,
+        message: hasMistake
+          ? "Solved — keep it clean next time for full credit."
+          : "Correct! Puzzle solved.",
+        type: "success",
+      });
+    } else {
+      scheduleOpponentReply(copy.fen(), nextIndex);
+      setFeedback({
+        show: true,
+        message: "Good move — keep going.",
+        type: "success",
+      });
+    }
+
+    return true;
   };
 
-  const nextPuzzle = () => {
-    setCurrentPuzzleIndex((i) => (i < puzzles.length - 1 ? i + 1 : 0));
+  const handleShowSolution = () => {
+    if (isCompleted) return;
+    clearTimers();
+    setHasMistake(true);
+
+    const copy = new Chess(game.fen());
+    let lastPlayed: { from: Square; to: Square } | null = null;
+    for (let i = solutionIndex; i < activePuzzle.solution.length; i++) {
+      try {
+        const m = copy.move(uciMoveParams(activePuzzle.solution[i]));
+        lastPlayed = { from: m.from, to: m.to };
+      } catch {
+        break;
+      }
+    }
+    setGame(copy);
+    if (lastPlayed) setLastMove(lastPlayed);
+    setSolutionIndex(activePuzzle.solution.length);
+    setAwaitingReply(false);
+    finishPuzzle(false);
+    setFeedback({
+      show: true,
+      message: "Study the line, then try the next one.",
+      type: "info",
+    });
   };
 
-  const getDifficultyColor = (rating: number) => {
-    if (rating < 1000) return "success";
-    if (rating < 1300) return "warning";
-    return "error";
+  const handleNextPuzzle = () => {
+    clearTimers();
+    setIsDailyActive(false);
+    setCurrentPuzzle(pickPuzzleNearElo(userElo, solvedIds));
   };
 
-  const boardOrientation =
-    currentPuzzle.fen.split(" ")[1] === "b" ? "black" : "white";
+  const handlePlayDaily = () => {
+    if (!dailyPuzzle) return;
+    clearTimers();
+    setIsDailyActive(true);
+    // Re-initialize even if daily was already active earlier
+    initializePuzzle(dailyPuzzle);
+  };
+
+  const playerColor: "white" | "black" =
+    activePuzzle.fen.split(" ")[1] === "b" ? "black" : "white";
+
+  const hintSquare = useMemo<Square | null>(() => {
+    if (!showHint || isCompleted) return null;
+    const uci = activePuzzle.solution[solutionIndex];
+    return uci ? (uci.slice(0, 2) as Square) : null;
+  }, [showHint, isCompleted, activePuzzle.solution, solutionIndex]);
+
+  const squareStyles: CustomSquareStyles = useMemo(() => {
+    const styles: CustomSquareStyles = {};
+    if (lastMove) {
+      styles[lastMove.from] = {
+        backgroundColor: alpha(palette.accent, 0.18),
+      };
+      styles[lastMove.to] = {
+        backgroundColor: alpha(palette.accent, 0.28),
+      };
+    }
+    if (hintSquare) {
+      styles[hintSquare] = {
+        ...styles[hintSquare],
+        boxShadow: `inset 0 0 0 3px ${alpha(palette.accent, 0.85)}`,
+      };
+    }
+    if (wrongSquare) {
+      styles[wrongSquare] = {
+        ...styles[wrongSquare],
+        boxShadow: "inset 0 0 0 3px rgba(220, 60, 60, 0.85)",
+      };
+    }
+    return styles;
+  }, [lastMove, hintSquare, wrongSquare, palette.accent]);
+
+  const totalMoves = activePuzzle.solution.length;
+  const progressValue =
+    (Math.min(solutionIndex, totalMoves) / Math.max(totalMoves, 1)) * 100;
+
+  const board = (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 1,
+        }}
+      >
+        <Chip
+          size="small"
+          variant="outlined"
+          icon={
+            <Icon
+              icon={
+                playerColor === "white" ? "mdi:circle-outline" : "mdi:circle"
+              }
+              width={14}
+            />
+          }
+          label={`${playerColor === "white" ? "White" : "Black"} to move`}
+        />
+        <Box sx={{ display: "flex", gap: 1 }}>
+          {isDailyActive && (
+            <Chip
+              size="small"
+              variant="outlined"
+              icon={<Icon icon="mdi:calendar-star" width={14} />}
+              label="Puzzle of the day"
+              sx={{
+                color: palette.accent,
+                borderColor: alpha(palette.accent, 0.4),
+              }}
+            />
+          )}
+          <Chip
+            size="small"
+            variant="outlined"
+            label={`Puzzle ${activePuzzle.rating}`}
+          />
+        </Box>
+      </Box>
+
+      <Box sx={{ width: "100%", maxWidth: 560, mx: "auto" }}>
+        <Chessboard
+          position={game.fen()}
+          onPieceDrop={onDrop}
+          boardOrientation={playerColor}
+          customSquareStyles={squareStyles}
+          arePiecesDraggable={!isCompleted}
+          customBoardStyle={{
+            borderRadius: "8px",
+            boxShadow: "0 8px 30px rgba(0, 0, 0, 0.35)",
+          }}
+        />
+      </Box>
+
+      <Typography
+        variant="body2"
+        sx={{ color: palette.textMuted, textAlign: "center" }}
+      >
+        {activePuzzle.description}
+      </Typography>
+    </Box>
+  );
+
+  const panel = (
+    <>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Typography
+          variant="overline"
+          sx={{
+            color: palette.textMuted,
+            letterSpacing: "0.1em",
+            fontSize: "0.66rem",
+          }}
+        >
+          Tactics
+        </Typography>
+        <Chip
+          size="small"
+          variant="outlined"
+          icon={<Icon icon="mdi:fire" width={14} />}
+          label={`Streak ${streak}`}
+          sx={{
+            color: streak > 0 ? palette.accent : palette.textMuted,
+            borderColor: alpha(
+              streak > 0 ? palette.accent : palette.textMuted,
+              0.35
+            ),
+          }}
+        />
+      </Box>
+
+      <Box sx={{ display: "flex", gap: 1 }}>
+        <ToolStat label="Your rating" value={Math.round(userElo)} emphasize />
+        <ToolStat label="Solved" value={solvedCount} />
+      </Box>
+
+      <Box>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            mb: 0.5,
+          }}
+        >
+          <Typography
+            variant="caption"
+            sx={{
+              color: palette.textMuted,
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              fontSize: "0.65rem",
+            }}
+          >
+            Progress
+          </Typography>
+          <Typography variant="caption" sx={{ color: palette.textMuted }}>
+            {Math.min(solutionIndex, totalMoves)} / {totalMoves} moves
+          </Typography>
+        </Box>
+        <LinearProgress
+          variant="determinate"
+          value={progressValue}
+          sx={{
+            height: 6,
+            borderRadius: 3,
+            bgcolor: alpha(palette.bg, 0.7),
+            "& .MuiLinearProgress-bar": {
+              bgcolor: palette.accent,
+              borderRadius: 3,
+            },
+          }}
+        />
+      </Box>
+
+      <Box sx={{ display: "flex", gap: 0.75, flexWrap: "wrap" }}>
+        {activePuzzle.themes.slice(0, 5).map((theme) => (
+          <Chip key={theme} label={theme} size="small" variant="outlined" />
+        ))}
+      </Box>
+
+      {isCompleted ? (
+        <>
+          <Alert
+            severity={hasMistake ? "info" : "success"}
+            icon={
+              <Icon
+                icon={hasMistake ? "mdi:school-outline" : "mdi:trophy-outline"}
+                width={20}
+              />
+            }
+          >
+            {hasMistake ? "Solved with help." : "Solved cleanly!"}{" "}
+            {eloDelta !== null && (
+              <strong>
+                Rating {eloDelta >= 0 ? "+" : ""}
+                {eloDelta}
+              </strong>
+            )}
+          </Alert>
+          <ToolPrimaryButton
+            onClick={handleNextPuzzle}
+            startIcon={<Icon icon="mdi:arrow-right" width={18} />}
+          >
+            Next puzzle
+          </ToolPrimaryButton>
+        </>
+      ) : (
+        <>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button
+              fullWidth
+              variant="outlined"
+              size="small"
+              startIcon={<Icon icon="mdi:lightbulb-outline" width={16} />}
+              onClick={() => setShowHint(true)}
+              disabled={showHint}
+            >
+              Hint
+            </Button>
+            <Button
+              fullWidth
+              variant="outlined"
+              size="small"
+              startIcon={<Icon icon="mdi:eye-outline" width={16} />}
+              onClick={handleShowSolution}
+            >
+              Solution
+            </Button>
+          </Box>
+          <Button
+            fullWidth
+            variant="text"
+            size="small"
+            onClick={handleNextPuzzle}
+            sx={{ color: palette.textMuted }}
+          >
+            Skip this puzzle
+          </Button>
+        </>
+      )}
+
+      {!isDailyActive && !dailyLoading && dailyPuzzle && (
+        <Button
+          fullWidth
+          variant="outlined"
+          size="small"
+          startIcon={<Icon icon="mdi:calendar-star" width={16} />}
+          onClick={handlePlayDaily}
+          sx={{
+            borderColor: alpha(palette.accent, 0.35),
+            color: palette.text,
+          }}
+        >
+          Play today&apos;s Lichess puzzle
+        </Button>
+      )}
+    </>
+  );
 
   return (
     <>
-      <PageTitle title="Puzzles — VoltChess" />
-
-      <Alert severity="warning" sx={{ mb: 2 }} onClose={() => {}}>
-        This puzzles page is still under development — puzzles, hints and
-        scoring may change.
-      </Alert>
-
-      <PageContainer
+      <ToolsShell
         title="Tactical Puzzles"
-        subtitle={currentPuzzle.description}
-        action={
-          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-            <Chip
-              label={`Score ${Math.round(score)}`}
-              variant="outlined"
-              size="small"
-            />
-            <Chip
-              label={`${currentPuzzleIndex + 1} / ${puzzles.length}`}
-              variant="outlined"
-              size="small"
-            />
-            <Chip
-              label={`${currentPuzzle.rating}`}
-              color={getDifficultyColor(currentPuzzle.rating)}
-              variant="outlined"
-              size="small"
-            />
-          </Box>
-        }
-      >
-        <Grid container spacing={2.5}>
-          <Grid size={{ xs: 12, md: 7 }}>
-            <Box sx={{ ...cardSx, display: "flex", justifyContent: "center" }}>
-              <Box sx={{ width: "100%", maxWidth: 480 }}>
-                <Chessboard
-                  position={gamePosition}
-                  onPieceDrop={onDrop}
-                  boardOrientation={boardOrientation}
-                  customBoardStyle={{ borderRadius: "6px" }}
-                />
-              </Box>
-            </Box>
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 5 }}>
-            <Box sx={cardSx}>
-              <Typography variant="h3" sx={{ mb: 2 }}>
-                {isCompleted ? "Puzzle solved" : "Find the best move"}
-              </Typography>
-
-              <Box sx={{ mb: 2 }}>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mb: 1 }}
-                >
-                  Themes
-                </Typography>
-                <Box sx={{ display: "flex", gap: 0.75, flexWrap: "wrap" }}>
-                  {currentPuzzle.themes.map((theme) => (
-                    <Chip
-                      key={theme}
-                      label={theme}
-                      size="small"
-                      variant="outlined"
-                    />
-                  ))}
-                </Box>
-              </Box>
-
-              <Box sx={{ mb: 3 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    mb: 0.75,
-                  }}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    Progress
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {Math.min(solutionIndex, currentPuzzle.solution.length)} /{" "}
-                    {currentPuzzle.solution.length}
-                  </Typography>
-                </Box>
-                <LinearProgress
-                  variant="determinate"
-                  value={
-                    (Math.min(solutionIndex, currentPuzzle.solution.length) /
-                      currentPuzzle.solution.length) *
-                    100
-                  }
-                  sx={{
-                    height: 6,
-                    borderRadius: 3,
-                    bgcolor: palette.surface,
-                    "& .MuiLinearProgress-bar": { bgcolor: palette.accent },
-                  }}
-                />
-              </Box>
-
-              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => {
-                    setShowHint(true);
-                    const hintMove = currentPuzzle.solution[solutionIndex];
-                    const hintGame = new Chess(game.fen());
-                    try {
-                      const m = hintGame.move(uciMoveParams(hintMove));
-                      setFeedback({
-                        show: true,
-                        message: m
-                          ? `Hint: try ${m.san}`
-                          : "Look for a forcing move.",
-                        type: "info",
-                      });
-                    } catch {
-                      setFeedback({
-                        show: true,
-                        message: "Look for a forcing tactical move.",
-                        type: "info",
-                      });
-                    }
-                  }}
-                  disabled={showHint || isCompleted}
-                >
-                  Hint
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={initializePuzzle}
-                >
-                  Reset
-                </Button>
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={nextPuzzle}
-                  disabled={!isCompleted}
-                >
-                  Next puzzle
-                </Button>
-              </Box>
-
-              {isCompleted && (
-                <Alert severity="success" sx={{ mt: 2 }}>
-                  Well done. +{Math.round(currentPuzzle.rating / 100)} points.
-                </Alert>
-              )}
-            </Box>
-          </Grid>
-        </Grid>
-      </PageContainer>
+        subtitle="Rated tactics matched to your level — solve, build a streak, and watch your puzzle rating climb. Free and unlimited."
+        seoTitle="Free Chess Puzzles — Elo-Rated Tactics | VoltChess"
+        seoDescription="Unlimited Elo-rated chess tactics puzzles, free forever. Solve, track your rating, and drill your weaknesses — no daily cap, no paywall."
+        board={board}
+        panel={panel}
+        related={[
+          { href: "/analysis", label: "Full game analysis" },
+          { href: "/openings", label: "Opening trainer" },
+          { href: "/tools/next-move", label: "Next move calculator" },
+          { href: "/training", label: "Training coach" },
+        ]}
+      />
 
       <Snackbar
         open={feedback.show}
-        autoHideDuration={3000}
-        onClose={() => setFeedback({ ...feedback, show: false })}
+        autoHideDuration={2500}
+        onClose={() => setFeedback((f) => ({ ...f, show: false }))}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
           severity={feedback.type}
-          onClose={() => setFeedback({ ...feedback, show: false })}
+          onClose={() => setFeedback((f) => ({ ...f, show: false }))}
         >
           {feedback.message}
         </Alert>
@@ -363,5 +633,3 @@ function Puzzles() {
     </>
   );
 }
-
-export default Puzzles;

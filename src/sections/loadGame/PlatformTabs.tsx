@@ -14,6 +14,7 @@ const TABS: {
   { value: GameOrigin.ChessCom, label: "Chess.com", icon: "mdi:chess-pawn" },
   { value: GameOrigin.Lichess, label: "Lichess", icon: "mdi:horse" },
   { value: GameOrigin.Pgn, label: "PGN", icon: "mdi:file-document-outline" },
+  { value: GameOrigin.Fen, label: "FEN", icon: "mdi:chess-board" },
 ];
 
 interface Props {

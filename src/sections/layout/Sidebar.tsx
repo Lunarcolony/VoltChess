@@ -28,9 +28,21 @@ type NavItem = { label: string; icon: string; href: string };
 const BASE_NAV: NavItem[] = [
   { label: "Home", icon: "mdi:home-outline", href: "/" },
   { label: "Analysis", icon: "mdi:magnify", href: "/analysis" },
+  { label: "Tools", icon: "mdi:toolbox-outline", href: "/tools" },
+  {
+    label: "Openings",
+    icon: "mdi:book-open-page-variant-outline",
+    href: "/openings",
+  },
+  { label: "Puzzles", icon: "mdi:puzzle-outline", href: "/puzzles" },
+  {
+    label: "Training",
+    icon: "mdi:school-outline",
+    href: "/training",
+  },
   {
     label: "Guides",
-    icon: "mdi:book-open-page-variant-outline",
+    icon: "mdi:notebook-outline",
     href: "/blog",
   },
 ];

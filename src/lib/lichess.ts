@@ -1,6 +1,8 @@
+import { Chess, DEFAULT_POSITION } from "chess.js";
 import { LineEval, PositionEval } from "@/types/eval";
 import { sortLines } from "./engine/helpers/parseResults";
 import {
+  LichessDailyPuzzleResponse,
   LichessError,
   LichessEvalBody,
   LichessGame,
@@ -9,6 +11,66 @@ import {
 import { logErrorToSentry } from "./sentry";
 import { formatUciPv } from "./chess";
 import { LoadedGame } from "@/types/game";
+
+export interface DailyPuzzle {
+  id: string;
+  fen: string;
+  rating: number;
+  themes: string[];
+  /** UCI moves: player move, opponent reply, player move, … */
+  solution: string[];
+  description: string;
+}
+
+/** Fetch Lichess's puzzle of the day and resolve it to a starting FEN + solution. */
+export const fetchLichessDailyPuzzle = async (
+  signal?: AbortSignal
+): Promise<DailyPuzzle | null> => {
+  try {
+    const res = await fetch("https://lichess.org/api/puzzle/daily", {
+      method: "GET",
+      signal,
+    });
+    if (!res.ok) return null;
+
+    const data: LichessDailyPuzzleResponse = await res.json();
+    if (!data?.puzzle?.solution?.length || !data.game?.pgn) return null;
+
+    // The API's game.pgn ends exactly at the puzzle position: the player to
+    // move plays solution[0]. (Deriving the FEN from initialPly lands one ply
+    // early and makes the solution illegal.)
+    const chess = new Chess();
+    chess.loadPgn(data.game.pgn);
+    const fen = chess.history().length > 0 ? chess.fen() : DEFAULT_POSITION;
+
+    // Sanity check: the first solution move must be legal from this position.
+    const probe = new Chess(fen);
+    try {
+      const uci = data.puzzle.solution[0];
+      probe.move({
+        from: uci.slice(0, 2),
+        to: uci.slice(2, 4),
+        promotion: uci[4]?.toLowerCase(),
+      });
+    } catch {
+      return null;
+    }
+
+    return {
+      id: `lichess-daily-${data.puzzle.id}`,
+      fen,
+      rating: data.puzzle.rating,
+      themes: data.puzzle.themes,
+      solution: data.puzzle.solution,
+      description: `Lichess Puzzle of the Day${
+        data.puzzle.themes.length ? ` — ${data.puzzle.themes[0]}` : ""
+      }`,
+    };
+  } catch (error) {
+    logErrorToSentry(error, { source: "fetchLichessDailyPuzzle" });
+    return null;
+  }
+};
 
 export const getLichessEval = async (
   fen: string,
@@ -60,8 +122,9 @@ export const getLichessUserRecentGames = async (
   username: string,
   signal?: AbortSignal
 ): Promise<LoadedGame[]> => {
+  const usernameParam = encodeURIComponent(username.trim());
   const res = await fetch(
-    `https://lichess.org/api/games/user/${username}?until=${Date.now()}&max=50&pgnInJson=true&sort=dateDesc&clocks=true`,
+    `https://lichess.org/api/games/user/${usernameParam}?until=${Date.now()}&max=50&pgnInJson=true&sort=dateDesc&clocks=true`,
     { method: "GET", headers: { accept: "application/x-ndjson" }, signal }
   );
 

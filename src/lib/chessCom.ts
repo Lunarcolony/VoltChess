@@ -10,9 +10,10 @@ export const getChessComUserRecentGames = async (
   const year = date.getUTCFullYear();
   const month = date.getUTCMonth() + 1;
   const paddedMonth = getPaddedNumber(month);
+  const usernameParam = encodeURIComponent(username.trim().toLowerCase());
 
   const res = await fetch(
-    `https://api.chess.com/pub/player/${username}/games/${year}/${paddedMonth}`,
+    `https://api.chess.com/pub/player/${usernameParam}/games/${year}/${paddedMonth}`,
     { method: "GET", signal }
   );
 
@@ -33,7 +34,7 @@ export const getChessComUserRecentGames = async (
     const yearToFetch = previousMonth === 12 ? year - 1 : year;
 
     const resPreviousMonth = await fetch(
-      `https://api.chess.com/pub/player/${username}/games/${yearToFetch}/${previousPaddedMonth}`
+      `https://api.chess.com/pub/player/${usernameParam}/games/${yearToFetch}/${previousPaddedMonth}`
     );
 
     const dataPreviousMonth = await resPreviousMonth.json();

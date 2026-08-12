@@ -26,3 +26,25 @@ export const decodeBase64 = (encoded: string | null): string | null => {
     return null;
   }
 };
+
+/** Encode UTF-8 text as URL-safe base64 for share / extension links. */
+export const encodeBase64 = (text: string): string => {
+  const bytes = new TextEncoder().encode(text);
+  let binary = "";
+  bytes.forEach((b) => {
+    binary += String.fromCharCode(b);
+  });
+  return btoa(binary);
+};
+
+/** Decode base64 that may contain UTF-8 (extension / share links). */
+export const decodeBase64Utf8 = (encoded: string | null): string | null => {
+  if (!encoded) return null;
+  try {
+    const binary = atob(encoded);
+    const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
+  } catch {
+    return decodeBase64(encoded);
+  }
+};

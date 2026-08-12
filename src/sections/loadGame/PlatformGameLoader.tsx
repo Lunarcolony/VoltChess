@@ -10,6 +10,7 @@ import { GameOrigin } from "@/types/enums";
 import { boardOrientationAtom } from "@/sections/analysis/states";
 import { SAMPLE_GAME_PGN } from "@/data/sampleGame";
 import GamePgnInput from "@/sections/loadGame/gamePgnInput";
+import GameFenInput, { fenToPgn } from "@/sections/loadGame/gameFenInput";
 import PlatformTabs from "@/sections/loadGame/PlatformTabs";
 import UsernameGameSearch from "@/sections/loadGame/UsernameGameSearch";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -53,6 +54,7 @@ export default function PlatformGameLoader({
     }
   };
   const [pgn, setPgn] = useState("");
+  const [fen, setFen] = useState("");
   const [chessComUser, setChessComUser] = useState("");
   const [error, setError] = useState("");
   const setBoardOrientation = useSetAtom(boardOrientationAtom);
@@ -202,6 +204,37 @@ export default function PlatformGameLoader({
               }}
             >
               Analyze game
+            </Button>
+          </Box>
+        )}
+
+        {activeTab === GameOrigin.Fen && (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <GameFenInput fen={fen} setFen={setFen} />
+            <Button
+              variant="contained"
+              fullWidth
+              disabled={!fen.trim()}
+              onClick={() => {
+                try {
+                  loadGame(fenToPgn(fen.trim()));
+                } catch (e) {
+                  setError(
+                    e instanceof Error
+                      ? e.message
+                      : "Invalid FEN. Please check the input."
+                  );
+                }
+              }}
+              sx={{
+                py: 1.25,
+                borderRadius: 2,
+                bgcolor: palette.accent,
+                color: palette.onAccent,
+                fontWeight: 700,
+              }}
+            >
+              Analyze position
             </Button>
           </Box>
         )}

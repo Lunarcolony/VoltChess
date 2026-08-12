@@ -17,6 +17,12 @@ const Login = lazy(() => import("@/pages/login"));
 const Openings = lazy(() => import("@/pages/openings"));
 const Play = lazy(() => import("@/pages/play"));
 const Puzzles = lazy(() => import("@/pages/puzzles"));
+const Training = lazy(() => import("@/pages/training"));
+const Extension = lazy(() => import("@/pages/extension"));
+const ToolsIndex = lazy(() => import("@/pages/tools/index"));
+const NextMoveTool = lazy(() => import("@/pages/tools/next-move"));
+const EditorTool = lazy(() => import("@/pages/tools/editor"));
+const EloCalculatorTool = lazy(() => import("@/pages/tools/elo-calculator"));
 const Review = lazy(() => import("@/pages/review"));
 const Register = lazy(() => import("@/pages/register"));
 const TermsAndConditions = lazy(() => import("@/pages/terms-and-conditions"));
@@ -55,6 +61,15 @@ function App() {
             <Route path="/openings" element={<Openings />} />
             <Route path="/play" element={<Play />} />
             <Route path="/puzzles" element={<Puzzles />} />
+            <Route path="/training" element={<Training />} />
+            <Route path="/extension" element={<Extension />} />
+            <Route path="/tools" element={<ToolsIndex />} />
+            <Route path="/tools/next-move" element={<NextMoveTool />} />
+            <Route path="/tools/editor" element={<EditorTool />} />
+            <Route
+              path="/tools/elo-calculator"
+              element={<EloCalculatorTool />}
+            />
             <Route path="/review" element={<Review />} />
             <Route
               path="/reanalysis"
