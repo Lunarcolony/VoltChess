@@ -1,14 +1,14 @@
-# VoltChess
+# DawvioChess
 
-**VoltChess** is free Stockfish chess game analysis for Chess.com and Lichess — open source on GitHub.
+**DawvioChess** is free Stockfish chess game analysis for Chess.com and Lichess — open source on GitHub.
 
 | | |
 |---|---|
-| **Live app** | [voltchess.vercel.app](https://voltchess.vercel.app) |
+| **Live app** | [dawvio.com](https://www.dawvio.com) |
 | **Source (this repo)** | [github.com/Lunarcolony/VoltChess](https://github.com/Lunarcolony/VoltChess) |
-| **Domain notice** | [voltchess.me expired — we moved](https://voltchess.vercel.app/moved) |
+| **Domain notice** | [We moved to dawvio.com](https://www.dawvio.com/moved) |
 
-> **VoltChess moved.** `voltchess.me` expired — the free analyzer is now at **https://voltchess.vercel.app** (same app, no sign-up). Please update bookmarks.
+> **DawvioChess moved.** The free analyzer is now at **https://www.dawvio.com** (same app, no sign-up). The old addresses `voltchess.me` and `voltchess.vercel.app` are retired — please update bookmarks.
 
 Upload a PGN, review blunders, and improve your game. No sign-up required.
 
@@ -17,16 +17,13 @@ Upload a PGN, review blunders, and improve your game. No sign-up required.
 - Unlimited Stockfish game review (Chess.com, Lichess, PGN, FEN)
 - Move classification, accuracy scores, eval graph, best-move arrows
 - Next-move calculator, board editor, and Elo calculator (`/tools`)
-- Interactive opening trainer with repertoire drills
-- Elo-rated puzzles (local bank + Lichess daily)
-- AI training coach that builds a plan from your recent games
 - Play vs engine
 - Browser extension: one-click Analyze on Chess.com (`extension/`)
 - Dark UI with selectable color themes
 
 ## Browser extension
 
-Chess It Up–style Chrome/Edge extension lives in [`extension/`](extension/). Load it unpacked from `chrome://extensions` (Developer mode). It adds **Analyze** buttons on Chess.com game history and opens VoltChess with the game loaded.
+Chess It Up–style Chrome/Edge extension lives in [`extension/`](extension/). Load it unpacked from `chrome://extensions` (Developer mode). It adds **Analyze** buttons on Chess.com game history and opens DawvioChess with the game loaded.
 
 ## Development
 
@@ -45,7 +42,7 @@ Optional environment variables (`.env`):
 
 ## License & attribution
 
-VoltChess is based on [Chesskit](https://github.com/GuillaumeSD/Chesskit) and is licensed under the [GNU Affero General Public License v3.0](LICENCE).
+DawvioChess is based on [Chesskit](https://github.com/GuillaumeSD/Chesskit) and is licensed under the [GNU Affero General Public License v3.0](LICENCE).
 
 - **Source code:** AGPL-3.0 — see [LICENCE](LICENCE) for the full license text.
 - **Third-party assets** (chess piece sets, sounds, and other exceptions): see [COPYING.md](COPYING.md).

@@ -37,7 +37,7 @@ function ReviewPage() {
 
   return (
     <>
-      <PageTitle title="Game Report — VoltChess" noindex />
+      <PageTitle title="Game Report — DawvioChess" noindex />
 
       <AnalysisPageLayout useTabs panelFooter={<AnalysisBottomNav />}>
         <AnalysisPanelTabs

@@ -1,5 +1,5 @@
 /**
- * Barrel for the VoltChess backend API client modules.
+ * Barrel for the DawvioChess backend API client modules.
  *
  * Each file in this folder owns one backend domain (academies, classrooms,
  * assignments, games, …) and wraps the shared axios instance from `@/api`.

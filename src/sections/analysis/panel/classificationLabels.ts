@@ -24,7 +24,7 @@ export const BAD_CLASSIFICATIONS = [
   MoveClassification.Blunder,
 ] as const;
 
-/** VoltChess move-quality names shown in the UI */
+/** DawvioChess move-quality names shown in the UI */
 export const CLASSIFICATION_DISPLAY_LABELS: Record<MoveClassification, string> =
   {
     [MoveClassification.Splendid]: "Surge",

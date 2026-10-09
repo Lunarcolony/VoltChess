@@ -83,7 +83,7 @@ export default function EloCalculator() {
   return (
     <>
       <PageTitle
-        title="Elo Calculator — VoltChess"
+        title="Elo Calculator — DawvioChess"
         description="Calculate expected score, win probability, and rating change for any FIDE-style Elo matchup and K-factor."
       />
 
@@ -106,7 +106,7 @@ export default function EloCalculator() {
               mb: 0.75,
             }}
           >
-            VoltChess
+            DawvioChess
           </Typography>
           <Typography
             variant="h1"

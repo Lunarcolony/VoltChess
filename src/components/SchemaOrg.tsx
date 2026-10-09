@@ -35,7 +35,7 @@ const GITHUB_REPO_URL = "https://github.com/Lunarcolony/VoltChess";
 export const chessSoftwareSchema = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "VoltChess",
+  name: "DawvioChess",
   applicationCategory: "GameApplication",
   applicationSubCategory: "Chess Analysis Software",
   description:
@@ -53,13 +53,13 @@ export const chessSoftwareSchema = {
   },
   creator: {
     "@type": "Organization",
-    name: "VoltChess",
+    name: "DawvioChess",
     url: SITE_URL,
     logo: `${SITE_URL}/logo-512.png`,
     sameAs: [GITHUB_REPO_URL],
   },
   keywords: [
-    "VoltChess",
+    "DawvioChess",
     "chess game review",
     "chess analysis",
     "stockfish",
@@ -90,7 +90,7 @@ export const chessAnalysisServiceSchema = {
     "Free professional chess game review and analysis using the Stockfish engine. Analyze Chess.com, Lichess, and PGN games.",
   provider: {
     "@type": "Organization",
-    name: "VoltChess",
+    name: "DawvioChess",
   },
   serviceType: "Chess Game Analysis",
   areaServed: "Worldwide",

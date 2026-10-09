@@ -68,7 +68,7 @@ const Thanks: React.FC = () => {
               fontFamily: "Orbitron, sans-serif",
             }}
           >
-            ⚡ Thank You for Using VoltChess
+            ⚡ Thank You for Using DawvioChess
           </Typography>
           <Typography variant="subtitle1" sx={{ color: "#ccc" }}>
             Empowered by code, powered by community.
@@ -101,7 +101,7 @@ const Thanks: React.FC = () => {
                   real-time analysis.
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
-                  • <strong>VoltChess</strong>: Free chess game review and
+                  • <strong>DawvioChess</strong>: Free chess game review and
                   Stockfish analysis in your browser.
                 </Typography>
               </CardContent>
@@ -161,7 +161,7 @@ const Thanks: React.FC = () => {
                   🚀 Final Words
                 </Typography>
                 <Typography variant="body1">
-                  VoltChess is a community of creators. Stay sharp, stay
+                  DawvioChess is a community of creators. Stay sharp, stay
                   curious, and may your games be legendary.
                 </Typography>
               </CardContent>

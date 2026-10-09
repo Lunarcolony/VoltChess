@@ -1,7 +1,8 @@
 """
-VoltChess deploy — Pi backend + frontend build + voltchess.me.
+VoltChess deploy — Pi backend + frontend build + voltchess.me deploy repo.
 
-Production API: https://api.voltchess.me (named Cloudflare tunnel).
+Live site: https://www.dawvio.com (Vercel, served from github.com/Lunarcolony/voltchess.me).
+Production API: https://api.dawvio.com (named Cloudflare tunnel).
 
 Usage (or run deploy.bat from repo root):
   python scripts/deploy.py                    # full deploy + push
@@ -19,6 +20,7 @@ import getpass
 import importlib.util
 import io
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -35,7 +37,8 @@ LOCAL_BACKEND = REPO_ROOT / "backend"
 HOST = "192.168.8.132"
 USER = "jithesh"
 REMOTE = "/home/jithesh/VoltChess"
-PRODUCTION_API_URL = "https://api.voltchess.me"
+PRODUCTION_API_URL = "https://api.dawvio.com"
+LIVE_SITE_URL = "https://www.dawvio.com"
 
 SKIP_IN_TAR = {".env", ".venv", "db.sqlite3", "__pycache__", "staticfiles"}
 CURL_LOCAL = "curl -sf --connect-timeout 3 --max-time 8 http://127.0.0.1:8000/api/health/"
@@ -59,13 +62,15 @@ def ensure_node_toolchain() -> None:
             raise SystemExit(1)
 
 
-def run_command(cmd: str | list[str], *, cwd: Path, label: str) -> None:
+def run_command(
+    cmd: str | list[str], *, cwd: Path, label: str, env: dict[str, str] | None = None
+) -> None:
     print(f"  {label}...")
     try:
         if isinstance(cmd, str):
-            subprocess.run(cmd, cwd=cwd, check=True, shell=True)
+            subprocess.run(cmd, cwd=cwd, check=True, shell=True, env=env)
         else:
-            subprocess.run(cmd, cwd=cwd, check=True)
+            subprocess.run(cmd, cwd=cwd, check=True, env=env)
     except subprocess.CalledProcessError as exc:
         print()
         print(f"ERROR: {label} failed (exit {exc.returncode}).")
@@ -82,7 +87,16 @@ def verify_typescript() -> None:
 def build_frontend() -> None:
     ensure_node_toolchain()
     verify_typescript()
-    run_command("npm run build", cwd=REPO_ROOT, label="Production build (npm run build)")
+    env = os.environ.copy()
+    env.setdefault("VITE_SITE_URL", LIVE_SITE_URL)
+    env.setdefault("VITE_ENABLE_READING_ROOM", "true")
+    env.setdefault("VITE_ENABLE_UNRELEASED_FEATURES", "false")
+    run_command(
+        "npm run build",
+        cwd=REPO_ROOT,
+        label="Production build (npm run build)",
+        env=env,
+    )
 
 
 def copy_build_to_site() -> None:
@@ -149,7 +163,7 @@ def update_source_files(url: str = PRODUCTION_API_URL) -> None:
         print(f"  {site_config}")
 
 
-def check_tunnel_dns(hostname: str = "api.voltchess.me") -> str | None:
+def check_tunnel_dns(hostname: str = "api.dawvio.com") -> str | None:
     """Return a warning if hostname resolves to unreachable tunnel-only fd10: IPv6."""
     try:
         proc = subprocess.run(
@@ -164,7 +178,7 @@ def check_tunnel_dns(hostname: str = "api.voltchess.me") -> str | None:
         has_public_v4 = any(p in text for p in ("104.", "172.", "198.", "141."))
         if has_fd10 and not has_public_v4:
             return (
-                f"DNS for {hostname} resolves IPv6-only fd10:… (Namecheap CNAME to cfargotunnel.com). "
+                f"DNS for {hostname} resolves IPv6-only fd10:… (registrar CNAME to cfargotunnel.com). "
                 "Move nameservers to Cloudflare and add a Proxied CNAME — see backend/PI_CONTINUOUS_ANALYSIS.md"
             )
     except (OSError, subprocess.TimeoutExpired):
@@ -391,7 +405,7 @@ def main() -> int:
         try_public_health()
         deploy_frontend(push=not args.no_push, build=not args.no_build)
         print()
-        print("Done. Live site: https://voltchess.vercel.app")
+        print(f"Done. Live site: {LIVE_SITE_URL}")
         return 0
 
     password = args.password or getpass.getpass(f"Pi SSH password ({USER}@{HOST}): ")
@@ -426,7 +440,7 @@ def main() -> int:
         print()
         print("Done.")
         print(f"  API:       {PRODUCTION_API_URL}")
-        print("  Live site: https://voltchess.vercel.app")
+        print(f"  Live site: {LIVE_SITE_URL}")
         return 0
     finally:
         client.close()

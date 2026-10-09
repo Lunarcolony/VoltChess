@@ -92,19 +92,19 @@ export default function BlogIndexPage() {
   return (
     <>
       <PageTitle
-        title="Chess Game Review & Analysis Guides | VoltChess Blog"
-        description="Free guides on chess game review, Chess.com analysis, Stockfish game analysis, blunder finding, and PGN review. Learn how to study your games on VoltChess."
+        title="Chess Game Review & Analysis Guides | DawvioChess Blog"
+        description="Free guides on chess game review, Chess.com analysis, Stockfish game analysis, blunder finding, and PGN review. Learn how to study your games on DawvioChess."
         path="/blog"
       />
       <SchemaOrg
         data={{
           "@context": "https://schema.org",
           "@type": "Blog",
-          name: "VoltChess Guides",
+          name: "DawvioChess Guides",
           description:
             "Free chess game review and analysis guides powered by Stockfish.",
           url: `${SITE_URL}/blog`,
-          publisher: { "@type": "Organization", name: "VoltChess" },
+          publisher: { "@type": "Organization", name: "DawvioChess" },
         }}
       />
 

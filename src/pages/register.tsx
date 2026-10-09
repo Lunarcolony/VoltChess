@@ -116,7 +116,7 @@ function RegisterForm() {
   return (
     <AuthLayout
       title="Create your account"
-      subtitle="Tell us how you'll use VoltChess Academy, then set up your login."
+      subtitle="Tell us how you'll use DawvioChess Academy, then set up your login."
     >
       <Box component="form" onSubmit={handleSubmit} noValidate>
         <Typography
@@ -269,7 +269,7 @@ function RegisterForm() {
 export default function Register() {
   return (
     <GuestRoute>
-      <PageTitle title="Create Account — VoltChess Academy" noindex />
+      <PageTitle title="Create Account — DawvioChess Academy" noindex />
       <RegisterForm />
     </GuestRoute>
   );

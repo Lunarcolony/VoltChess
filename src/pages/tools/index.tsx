@@ -47,33 +47,6 @@ const GROUPS: ToolGroup[] = [
     ],
   },
   {
-    id: "train",
-    label: "Train",
-    tools: [
-      {
-        href: "/openings",
-        icon: "mdi:book-open-page-variant",
-        title: "Opening Trainer",
-        description:
-          "Drill repertoire lines move by move against common replies.",
-      },
-      {
-        href: "/puzzles",
-        icon: "mdi:puzzle",
-        title: "Puzzles",
-        description:
-          "Tactics puzzles matched to your rating, solved in the browser.",
-      },
-      {
-        href: "/training",
-        icon: "mdi:school-outline",
-        title: "Training Coach",
-        description:
-          "Import recent games and get a training plan from your patterns.",
-      },
-    ],
-  },
-  {
     id: "play",
     label: "Play",
     tools: [
@@ -97,7 +70,7 @@ const GROUPS: ToolGroup[] = [
     tools: [
       {
         href: "/extension",
-        icon: "mdi:puzzle-outline",
+        icon: "mdi:toy-brick-outline",
         title: "Browser Extension",
         description: "Adds an Analyze button to your Chess.com game history.",
       },
@@ -162,8 +135,8 @@ export default function ToolsHub() {
   return (
     <>
       <PageTitle
-        title="Chess Tools — VoltChess"
-        description="Stockfish tools that run in your browser: a next-move calculator, board editor, Elo calculator, opening trainer, puzzles, and more."
+        title="Chess Tools — DawvioChess"
+        description="Stockfish tools that run in your browser: a next-move calculator, board editor, Elo calculator, and more."
       />
       <Box
         sx={{
@@ -184,7 +157,7 @@ export default function ToolsHub() {
               mb: 0.75,
             }}
           >
-            VoltChess
+            DawvioChess
           </Typography>
           <Typography
             variant="h1"

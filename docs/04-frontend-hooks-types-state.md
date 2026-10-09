@@ -589,7 +589,7 @@ This file mixes a React hook (`useAnalysisSession`) with a few plain helper func
 **Functions, hooks, types & exports:**
 - `openings`: an array of objects, each `{ name, fen }` — where `name` is the opening's human-readable name and `fen` is the position (in FEN notation, board layout only) that identifies it.
 
-**Connections:** No imports. Used by opening-detection logic (`@/lib/engine/helpers/moveClassification.ts`), the openings page (`src/pages/openings.tsx`), and `useCurrentPosition`.
+**Connections:** No imports. Used by opening-detection logic (`@/lib/engine/helpers/moveClassification.ts`), and `useCurrentPosition`.
 
 ---
 
@@ -600,9 +600,9 @@ This file mixes a React hook (`useAnalysisSession`) with a few plain helper func
 **What it is & why it exists (plain English):** "SEO metadata" is the information search engines and social-media previews read about a page — its title, a short description, and keywords. This file stores the site-wide defaults so every page has sensible metadata unless it overrides them.
 
 **Functions, hooks, types & exports:**
-- `SITE_URL`: the canonical site address (from `VITE_SITE_URL`, default `"https://voltchess.vercel.app"`).
+- `SITE_URL`: the canonical site address (from `VITE_SITE_URL`, default `"https://www.dawvio.com"`).
 - `SITE_HOST`: hostname derived from `SITE_URL`.
-- `LEGACY_SITE_HOSTS`: former hosts (e.g. `voltchess.me`) kept for PGN compatibility.
+- `LEGACY_SITE_HOSTS`: alternate and former hosts (`dawvio.com`, `voltchess.vercel.app`, `voltchess.me`) kept for PGN compatibility.
 - `DEFAULT_SEO`: the default `{ title, description, keywords }`, where `keywords` is a comma-joined list of search terms. Marked `as const` (read-only).
 
 **Connections:** No imports. Used by the page-title/SEO component (`src/components/pageTitle.tsx`) and app bootstrap (`src/App.tsx`).

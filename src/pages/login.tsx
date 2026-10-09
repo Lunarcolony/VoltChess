@@ -152,7 +152,7 @@ function LoginForm() {
           sx={{ mt: 1.5, textAlign: "center" }}
         >
           <Link href="/" style={{ color: palette.textMuted }}>
-            ← Back to VoltChess
+            ← Back to DawvioChess
           </Link>
         </Typography>
       </Box>
@@ -163,7 +163,7 @@ function LoginForm() {
 export default function Login() {
   return (
     <GuestRoute>
-      <PageTitle title="Sign In — VoltChess Academy" noindex />
+      <PageTitle title="Sign In — DawvioChess Academy" noindex />
       <LoginForm />
     </GuestRoute>
   );

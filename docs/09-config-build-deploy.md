@@ -304,7 +304,7 @@ Raspberry Pi and builds/publishes the frontend.
 **What it is & why it exists (plain English):** This Python script automates the
 full release. The production setup is: a Django backend running on a Raspberry Pi
 (reachable via a Cloudflare tunnel / `VITE_API_URL`) plus the
-frontend hosted on Vercel at `https://voltchess.vercel.app`. The script can deploy both or either half.
+frontend hosted on Vercel at `https://www.dawvio.com`. The script can deploy both or either half.
 
 **How it works, step by step:** It checks the Node toolchain and `paramiko`
 (an SSH library for connecting to the Pi). For the **backend**, it packages the

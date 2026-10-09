@@ -569,14 +569,13 @@ export default function NextMoveTool() {
     <ToolsShell
       title="Next Move Calculator"
       subtitle="Play a position or paste a FEN — Stockfish suggests the best move, with eval, depth, and the top lines."
-      seoTitle="Next Move Calculator — VoltChess"
+      seoTitle="Next Move Calculator — DawvioChess"
       seoDescription="Paste a FEN or play moves on the board and let Stockfish find the best next move instantly, free and unlimited."
       board={board}
       panel={panel}
       related={[
         { href: "/tools/editor", label: "Board editor" },
         { href: "/analysis", label: "Full analysis" },
-        { href: "/openings", label: "Opening trainer" },
         { href: "/tools/elo-calculator", label: "Elo calculator" },
       ]}
     />

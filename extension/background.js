@@ -1,7 +1,7 @@
 /* global Chess */
 import { Chess } from "./vendor-chess.js";
 
-const DEFAULT_ANALYZER_URL = "https://voltchess.vercel.app";
+const DEFAULT_ANALYZER_URL = "https://www.dawvio.com";
 
 async function getAnalyzerBase() {
   try {

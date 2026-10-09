@@ -62,7 +62,7 @@ export default function CoachPlansPage() {
   return (
     <>
       <Head>
-        <title>Training plans · VoltChess Academy</title>
+        <title>Training plans · DawvioChess Academy</title>
       </Head>
       <CoachShell>
         <CoachPageHeader

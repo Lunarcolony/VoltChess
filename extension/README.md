@@ -1,13 +1,13 @@
-# VoltChess browser extension
+# DawvioChess browser extension
 
-Chess It Up–style one-click export from **Chess.com** into VoltChess Stockfish analysis.
+Chess It Up–style one-click export from **Chess.com** into DawvioChess Stockfish analysis.
 
 ## Features
 
 - **Analyze** buttons on Chess.com game history rows
-- Floating **Analyze with VoltChess** button on live/daily game pages
+- Floating **Analyze with DawvioChess** button on live/daily game pages
 - Post-game modal button when Chess.com shows the game-over UI
-- Opens VoltChess with the game PGN loaded — no copy/paste
+- Opens DawvioChess with the game PGN loaded — no copy/paste
 - Configurable analyzer URL (production or local `npm run dev`)
 
 ## Install (Chrome / Edge / Brave)
@@ -27,7 +27,7 @@ Chess It Up–style one-click export from **Chess.com** into VoltChess Stockfish
 
 1. Go to your Chess.com profile → Games / archive
 2. Click **Analyze** next to a game
-3. A VoltChess tab opens with the game ready for review
+3. A DawvioChess tab opens with the game ready for review
 
 ## Privacy
 

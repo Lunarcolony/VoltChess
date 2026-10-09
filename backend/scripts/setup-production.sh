@@ -4,7 +4,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-API_URL="${VOLTCHES_API_URL:-https://api.voltchess.me}"
+API_URL="${VOLTCHES_API_URL:-https://api.dawvio.com}"
 
 echo "==> VoltChess Pi production setup"
 bash "$SCRIPT_DIR/stabilize-env.sh"

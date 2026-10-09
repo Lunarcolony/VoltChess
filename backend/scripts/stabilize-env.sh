@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 ENV_FILE="$BACKEND_DIR/.env"
 BACKUP="$BACKEND_DIR/.env.secret_backup"
-API_HOST="${VOLTCHES_API_HOST:-api.voltchess.me}"
+API_HOST="${VOLTCHES_API_HOST:-api.dawvio.com}"
 
 if [[ ! -f "$ENV_FILE" ]]; then
   echo "ERROR: $ENV_FILE not found"
@@ -58,7 +58,7 @@ dedupe_cors() {
 
 if grep -q '^CORS_ALLOWED_ORIGINS=' "$ENV_FILE"; then
   current="$(grep '^CORS_ALLOWED_ORIGINS=' "$ENV_FILE" | cut -d= -f2-)"
-  for origin in "https://${API_HOST}" "https://voltchess.vercel.app"; do
+  for origin in "https://${API_HOST}" "https://dawvio.com" "https://www.dawvio.com"; do
     if [[ "$current" != *"$origin"* ]]; then
       current="${current},${origin}"
     fi
@@ -66,7 +66,7 @@ if grep -q '^CORS_ALLOWED_ORIGINS=' "$ENV_FILE"; then
   cleaned="$(dedupe_cors "$current")"
   sed -i "s|^CORS_ALLOWED_ORIGINS=.*|CORS_ALLOWED_ORIGINS=${cleaned}|" "$ENV_FILE"
 else
-  echo "CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,https://voltchess.vercel.app,https://${API_HOST}" >>"$ENV_FILE"
+  echo "CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,https://dawvio.com,https://www.dawvio.com,https://${API_HOST}" >>"$ENV_FILE"
 fi
 
 echo "==> Environment stabilized for ${API_HOST}"

@@ -1,6 +1,6 @@
 import { PageTitle } from "@/components/pageTitle";
 import { useRouter } from "@/hooks/useRouter";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Chess } from "chess.js";
 import {
@@ -27,7 +27,12 @@ import type { Game } from "@/types/game";
 import HomeGameLoader from "@/sections/home/HomeGameLoader";
 import FeatureCard from "@/sections/home/FeatureCard";
 import WelcomeModal from "@/sections/onboarding/WelcomeModal";
-import { DEFAULT_SEO, TRUST_BULLETS, isVoltChessSiteHost } from "@/data/seo";
+import {
+  BRAND_NAME,
+  DEFAULT_SEO,
+  TRUST_BULLETS,
+  isVoltChessSiteHost,
+} from "@/data/seo";
 import {
   isOnboardingComplete,
   markOnboardingComplete,
@@ -39,6 +44,61 @@ import { ENGINE_DEFAULTS } from "@/constants/engineDefaults";
 import { preloadEngine } from "@/lib/engine/sharedEngine";
 import { track } from "@vercel/analytics";
 import { recordGameLoaded, recordOnboardingComplete } from "@/lib/telemetry";
+
+function SectionHeading({
+  eyebrow,
+  title,
+  subtitle,
+  action,
+}: {
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  action?: ReactNode;
+}) {
+  const palette = usePalette();
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: { xs: "flex-start", sm: "flex-end" },
+        justifyContent: "space-between",
+        flexDirection: { xs: "column", sm: "row" },
+        gap: 1.5,
+        mb: 2.5,
+      }}
+    >
+      <Box sx={{ maxWidth: 640 }}>
+        <Typography
+          variant="overline"
+          sx={{
+            color: palette.accent,
+            fontWeight: 700,
+            letterSpacing: "0.12em",
+            lineHeight: 1.6,
+          }}
+        >
+          {eyebrow}
+        </Typography>
+        <Typography
+          variant="h2"
+          sx={{
+            fontSize: { xs: "1.35rem", md: "1.6rem" },
+            fontWeight: 800,
+            color: palette.text,
+            mb: 0.75,
+          }}
+        >
+          {title}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" lineHeight={1.6}>
+          {subtitle}
+        </Typography>
+      </Box>
+      {action}
+    </Box>
+  );
+}
 
 function Home() {
   const palette = usePalette();
@@ -174,31 +234,87 @@ function Home() {
         path="/"
       />
 
-      <Box sx={{ maxWidth: 960, mx: "auto" }}>
-        <Box sx={{ mb: 3 }}>
+      <Box
+        sx={{
+          maxWidth: 1120,
+          mx: "auto",
+          px: { xs: 0, sm: 1 },
+          pt: { xs: 2, md: 5 },
+          pb: { xs: 4, md: 8 },
+        }}
+      >
+        <Box
+          component="header"
+          sx={{
+            textAlign: "center",
+            maxWidth: 760,
+            mx: "auto",
+            mb: { xs: 3.5, md: 5 },
+          }}
+        >
+          <Chip
+            icon={<Icon icon="mdi:chess-knight" width={16} />}
+            label={`${BRAND_NAME} · Free Stockfish analysis`}
+            size="small"
+            sx={{
+              mb: 2,
+              px: 0.5,
+              fontWeight: 600,
+              bgcolor: alpha(palette.accent, 0.12),
+              border: `1px solid ${alpha(palette.accent, 0.3)}`,
+              color: palette.accent,
+              "& .MuiChip-icon": { color: palette.accent },
+            }}
+          />
           <Typography
             variant="h1"
             sx={{
-              mb: 1,
+              mb: 1.5,
               color: palette.text,
-              fontSize: { xs: "1.85rem", sm: "2.35rem" },
+              fontSize: { xs: "2rem", sm: "2.6rem", md: "3rem" },
               fontWeight: 800,
-              lineHeight: 1.15,
+              lineHeight: 1.1,
+              letterSpacing: "-0.02em",
             }}
           >
-            {isReturning
-              ? "Welcome back"
-              : "Free Chess.com & Lichess Game Analysis"}
+            {isReturning ? (
+              <>
+                Welcome back to{" "}
+                <Box component="span" sx={{ color: palette.accent }}>
+                  {BRAND_NAME}
+                </Box>
+              </>
+            ) : (
+              <>
+                Free Chess.com &amp; Lichess{" "}
+                <Box component="span" sx={{ color: palette.accent }}>
+                  Game Analysis
+                </Box>
+              </>
+            )}
           </Typography>
           <Typography
             variant="body1"
             color="text.secondary"
-            sx={{ mb: 2, lineHeight: 1.65, maxWidth: 720 }}
+            sx={{
+              mb: 2.5,
+              mx: "auto",
+              maxWidth: 620,
+              lineHeight: 1.7,
+              fontSize: { xs: "0.95rem", md: "1.05rem" },
+            }}
           >
             {DEFAULT_SEO.description}
           </Typography>
 
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              gap: 1,
+            }}
+          >
             {TRUST_BULLETS.map((bullet) => (
               <Chip
                 key={bullet}
@@ -230,73 +346,132 @@ function Home() {
           />
         )}
 
-        <Box sx={{ mb: 3 }}>
+        <Box
+          component="section"
+          aria-label="Analyze a game"
+          sx={{ maxWidth: 920, mx: "auto", mb: { xs: 5, md: 7 } }}
+        >
           <HomeGameLoader onGameLoaded={startAnalysis} />
         </Box>
 
-        <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <FeatureCard
-              title="Free Chess.com Analysis"
-              description="Analyze Chess.com games without Premium — accuracy, blunders, and eval graph."
-              icon="mdi:chess-pawn"
-              href="/free-chess-com-analysis"
-              actionLabel="Analyze Chess.com games"
-            />
+        <Box component="section" sx={{ mb: { xs: 5, md: 7 } }}>
+          <SectionHeading
+            eyebrow="Platforms"
+            title="Review games from where you play"
+            subtitle="Pull in your recent games by username and get a full engine report in seconds."
+          />
+          <Grid container spacing={2.5}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <FeatureCard
+                title="Free Chess.com Analysis"
+                description="Analyze Chess.com games without Premium — accuracy, blunders, and eval graph."
+                icon="mdi:chess-pawn"
+                href="/free-chess-com-analysis"
+                actionLabel="Analyze Chess.com games"
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <FeatureCard
+                title="Free Lichess Review"
+                description="Import Lichess games by username and get a full Stockfish report in seconds."
+                icon="mdi:horse"
+                href="/free-lichess-game-review"
+                actionLabel="Review Lichess games"
+              />
+            </Grid>
           </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <FeatureCard
-              title="Free Lichess Review"
-              description="Import Lichess games by username and get a full Stockfish report in seconds."
-              icon="mdi:horse"
-              href="/free-lichess-game-review"
-              actionLabel="Review Lichess games"
-            />
-          </Grid>
-        </Grid>
+        </Box>
 
-        <Box
-          sx={{
-            p: 2.5,
-            borderRadius: 2,
-            bgcolor: palette.surface,
-            border: `1px solid ${palette.border}`,
-          }}
-        >
-          <Typography
-            variant="h2"
-            sx={{ fontSize: "1.1rem", fontWeight: 700, mb: 1 }}
-          >
-            Chess game review & analysis guides
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Learn how to review games free, import from Chess.com and Lichess,
-            and use Stockfish to find blunders.
-          </Typography>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            {BLOG_POSTS.slice(0, 5).map((post) => (
-              <NavLink key={post.slug} href={`/blog/${post.slug}`}>
+        <Box component="section">
+          <SectionHeading
+            eyebrow="Guides"
+            title="Chess game review & analysis guides"
+            subtitle="Learn how to review games free, import from Chess.com and Lichess, and use Stockfish to find blunders."
+            action={
+              <NavLink href="/blog" fullWidth={false}>
                 <Typography
-                  fontSize="0.85rem"
+                  fontSize="0.9rem"
+                  fontWeight={600}
                   sx={{
-                    color: palette.textMuted,
-                    "&:hover": { color: palette.accent },
+                    color: palette.accent,
+                    whiteSpace: "nowrap",
+                    "&:hover": { textDecoration: "underline" },
                   }}
                 >
-                  {post.title}
+                  View all guides →
                 </Typography>
               </NavLink>
-            ))}
-            <NavLink href="/blog">
-              <Typography
-                fontSize="0.85rem"
-                fontWeight={600}
-                sx={{ color: palette.accent, mt: 0.5 }}
+            }
+          />
+          <Grid container spacing={2}>
+            {BLOG_POSTS.slice(0, 6).map((post) => (
+              <Grid
+                key={post.slug}
+                size={{ xs: 12, sm: 6, md: 4 }}
+                sx={{ "& > a": { height: "100%" } }}
               >
-                View all guides →
-              </Typography>
-            </NavLink>
-          </Box>
+                <NavLink href={`/blog/${post.slug}`}>
+                  <Box
+                    sx={{
+                      height: "100%",
+                      p: 2.25,
+                      borderRadius: 2,
+                      bgcolor: palette.surface,
+                      border: `1px solid ${palette.border}`,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 1,
+                      transition:
+                        "border-color 0.15s ease, transform 0.15s ease",
+                      "&:hover": {
+                        borderColor: alpha(palette.accent, 0.4),
+                        transform: "translateY(-2px)",
+                      },
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 1.25,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        bgcolor: alpha(palette.accent, 0.1),
+                        color: palette.accent,
+                      }}
+                    >
+                      <Icon
+                        icon={post.icon ?? "mdi:book-open-page-variant-outline"}
+                        width={18}
+                      />
+                    </Box>
+                    <Typography
+                      fontSize="0.95rem"
+                      fontWeight={700}
+                      lineHeight={1.35}
+                      sx={{ color: palette.text }}
+                    >
+                      {post.title}
+                    </Typography>
+                    <Typography
+                      fontSize="0.82rem"
+                      lineHeight={1.55}
+                      color="text.secondary"
+                      sx={{
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {post.excerpt}
+                    </Typography>
+                  </Box>
+                </NavLink>
+              </Grid>
+            ))}
+          </Grid>
         </Box>
       </Box>
     </>

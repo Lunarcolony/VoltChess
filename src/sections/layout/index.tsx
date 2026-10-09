@@ -10,6 +10,9 @@ const FULL_BLEED_ROUTES = ["/analysis", "/review"];
 /** Auth entry — no sidebar (Academy sign-in / register) */
 const AUTH_ROUTES = ["/login", "/register", "/sign-in"];
 
+/** Personal reading room — no chess sidebar */
+const READING_ROUTES = ["/reading"];
+
 function MainContent({ children }: PropsWithChildren) {
   const muiTheme = useTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("md"));
@@ -45,8 +48,11 @@ export default function Layout({ children }: PropsWithChildren) {
   const isAuthRoute = AUTH_ROUTES.some((route) =>
     router.pathname.startsWith(route)
   );
+  const isReadingRoute = READING_ROUTES.some((route) =>
+    router.pathname.startsWith(route)
+  );
 
-  if (isAuthRoute) {
+  if (isAuthRoute || isReadingRoute) {
     return <AppThemeProvider>{children}</AppThemeProvider>;
   }
 

@@ -57,7 +57,7 @@ export default function CoachMessagesPage() {
   return (
     <>
       <Head>
-        <title>Messages · VoltChess Academy</title>
+        <title>Messages · DawvioChess Academy</title>
       </Head>
       <CoachShell>
         <CoachPageHeader

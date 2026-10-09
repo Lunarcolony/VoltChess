@@ -1,6 +1,6 @@
 /** Shared public URLs for sitemap.xml and IndexNow submissions. */
 
-const DEFAULT_SITE_URL = "https://voltchess.vercel.app";
+const DEFAULT_SITE_URL = "https://www.dawvio.com";
 
 export const SITE_URL = (
   process.env.VITE_SITE_URL?.trim() ||
@@ -33,8 +33,6 @@ export const staticPaths = [
   "/free-chess-game-analysis",
   "/blog",
   "/analysis",
-  "/openings",
-  "/puzzles",
   "/terms-and-conditions",
   "/moved",
 ];

@@ -14,7 +14,7 @@ import LearnFromMistakes from "./LearnFromMistakes";
 
 /**
  * Advanced "Computer analysis" tab: lichess-style chart + advice summary +
- * retro training on top, VoltChess's own report insights below.
+ * retro training on top, DawvioChess's own report insights below.
  */
 export default function ComputerAnalysisPanel() {
   const palette = usePalette();
@@ -47,7 +47,7 @@ export default function ComputerAnalysisPanel() {
           color="text.secondary"
           sx={{ textTransform: "uppercase", letterSpacing: "0.08em" }}
         >
-          VoltChess insights
+          DawvioChess insights
         </Typography>
       </Divider>
 

@@ -20,7 +20,7 @@ const FEATURES = [
     icon: "mdi:rocket-launch-outline",
     title: "Floating button on live games",
     description:
-      "A floating Analyze with VoltChess button appears on live and daily game pages while you play.",
+      "A floating Analyze with DawvioChess button appears on live and daily game pages while you play.",
   },
   {
     icon: "mdi:trophy-outline",
@@ -32,13 +32,13 @@ const FEATURES = [
     icon: "mdi:content-paste",
     title: "No copy/paste required",
     description:
-      "The extension opens VoltChess with the full PGN already loaded — no manual export step.",
+      "The extension opens DawvioChess with the full PGN already loaded — no manual export step.",
   },
   {
     icon: "mdi:cog-outline",
     title: "Configurable analyzer URL",
     description:
-      "Point the extension at production VoltChess or your local npm run dev server from the options page.",
+      "Point the extension at production DawvioChess or your local npm run dev server from the options page.",
   },
   {
     icon: "mdi:shield-check-outline",
@@ -64,12 +64,12 @@ const INSTALL_STEPS = [
   {
     label: "Select the extension/ folder",
     description:
-      "Pick the extension/ folder from your local clone of the VoltChess repository.",
+      "Pick the extension/ folder from your local clone of the DawvioChess repository.",
   },
   {
     label: "Pin it and go analyze",
     description:
-      "Pin the VoltChess icon to your toolbar, then head to Chess.com to see Analyze buttons appear.",
+      "Pin the DawvioChess icon to your toolbar, then head to Chess.com to see Analyze buttons appear.",
   },
 ] as const;
 
@@ -80,8 +80,8 @@ export default function ExtensionPage() {
   return (
     <>
       <PageTitle
-        title="Browser Extension — VoltChess"
-        description="Install the free VoltChess browser extension for one-click Stockfish analysis of your Chess.com games, Chess It Up style."
+        title="Browser Extension — DawvioChess"
+        description="Install the free DawvioChess browser extension for one-click Stockfish analysis of your Chess.com games, Chess It Up style."
       />
 
       <PageContainer
@@ -115,11 +115,11 @@ export default function ExtensionPage() {
                 color: palette.accent,
               }}
             >
-              <Icon icon="mdi:puzzle-outline" width={24} />
+              <Icon icon="mdi:toy-brick-outline" width={24} />
             </Box>
             <Box>
               <Typography variant="h3" sx={{ fontSize: "1.1rem" }}>
-                VoltChess — Analyze Chess.com Games
+                DawvioChess — Analyze Chess.com Games
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Free, open-source, unlimited. No accounts, no analytics.
@@ -274,7 +274,7 @@ export default function ExtensionPage() {
               Prefer to analyze right here?
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              You don&apos;t need the extension to use VoltChess — every tool
+              You don&apos;t need the extension to use DawvioChess — every tool
               runs free and unlimited in your browser.
             </Typography>
           </Box>

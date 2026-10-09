@@ -46,7 +46,7 @@ function AnalysisPage() {
 
   return (
     <>
-      <PageTitle title="Game Analysis — VoltChess" />
+      <PageTitle title="Game Analysis — DawvioChess" />
 
       <AnalyzeButton />
 

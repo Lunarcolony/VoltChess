@@ -8,7 +8,7 @@ echo.
 echo VoltChess - deploy everything
 echo =============================
 echo.
-echo One pipeline: Pi backend -^> https://api.voltchess.me -^> build -^> voltchess.me -^> Vercel
+echo One pipeline: Pi backend -^> https://api.dawvio.com -^> build -^> voltchess.me deploy repo -^> Vercel (dawvio.com)
 echo.
 
 where python >nul 2>&1
@@ -69,7 +69,7 @@ echo Default: full deploy + git push to Vercel
 echo.
 echo   deploy.bat              Pi backend + frontend + push
 echo   deploy.bat backend      Pi backend only (no frontend build)
-echo   deploy.bat sync         Frontend only (no Pi SSH; uses api.voltchess.me)
+echo   deploy.bat sync         Frontend only (no Pi SSH; uses api.dawvio.com)
 echo   deploy.bat no-push      Full deploy without git push
 echo.
 

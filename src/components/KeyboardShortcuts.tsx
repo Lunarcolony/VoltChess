@@ -148,7 +148,8 @@ export function KeyboardShortcuts({ onShortcut }: KeyboardShortcutsProps) {
 
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Use these keyboard shortcuts to navigate VoltChess more efficiently:
+            Use these keyboard shortcuts to navigate DawvioChess more
+            efficiently:
           </Typography>
 
           {["navigation", "analysis", "game"].map((category) => (

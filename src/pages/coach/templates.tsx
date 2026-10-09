@@ -100,7 +100,7 @@ export default function CoachTemplatesPage() {
   return (
     <>
       <Head>
-        <title>Lesson templates · VoltChess Academy</title>
+        <title>Lesson templates · DawvioChess Academy</title>
       </Head>
       <CoachShell>
         <CoachPageHeader

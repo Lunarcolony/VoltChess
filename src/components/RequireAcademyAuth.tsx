@@ -13,7 +13,7 @@ export default function RequireAcademyAuth() {
   }
 
   if (loading) {
-    return <LoadingSpinner message="Loading VoltChess Academy…" />;
+    return <LoadingSpinner message="Loading DawvioChess Academy…" />;
   }
 
   if (!isAuthenticated) {

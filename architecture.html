@@ -542,7 +542,7 @@
         <p>Routes live in <code>App.tsx</code> inside <code>ErrorBoundary</code> → <code>Layout</code> → <code>Suspense</code> (pages are lazy-loaded). Three tiers:</p>
         <ul>
           <li><strong>Public:</strong> <code>/login</code>, <code>/register</code>, <code>/blog</code>, <code>/blog/:slug</code>, <code>/terms-and-conditions</code>, <code>/thanks</code>.</li>
-          <li><strong>Authenticated</strong> (wrapped by <code>RequireAuth</code>): <code>/</code>, <code>/analysis</code>, <code>/database</code>, <code>/openings</code>, <code>/play</code>, <code>/puzzles</code>, <code>/review</code>.</li>
+          <li><strong>Authenticated</strong> (wrapped by <code>RequireAuth</code>): <code>/</code>, <code>/analysis</code>, <code>/database</code>, <code>/play</code>, <code>/review</code>.</li>
           <li><strong>Role-scoped</strong> (inside <code>RequireAuth</code>, additionally wrapped by <code>RoleRoute</code>): <code>/coach/*</code> (Coach/Admin) and <code>/student</code> (Student).</li>
         </ul>
         <p>
@@ -663,7 +663,7 @@
         <h4><code>src/pages/</code> (routed screens)</h4>
         <ul>
           <li><strong>Auth:</strong> <code>login.tsx</code>, <code>register.tsx</code> (with RoleSelector, auto-login after signup)</li>
-          <li><strong>Core product:</strong> <code>index.tsx</code>, <code>analysis.tsx</code>, <code>review.tsx</code>, <code>database.tsx</code>, <code>play.tsx</code>, <code>puzzles.tsx</code>, <code>openings.tsx</code></li>
+          <li><strong>Core product:</strong> <code>index.tsx</code>, <code>analysis.tsx</code>, <code>review.tsx</code>, <code>database.tsx</code>, <code>play.tsx</code></li>
           <li><strong>Marketing:</strong> <code>thanks.tsx</code>, <code>terms-and-conditions.tsx</code>, <code>blog/</code></li>
           <li><strong>Coach:</strong> <code>pages/coach/*</code> — dashboard, students, assignments, templates, messages, plans, analytics</li>
           <li><strong>Student:</strong> <code>pages/student/index.tsx</code> — My Hub (synced reports, assignments, <code>StudentPlatformCard</code>, <code>JoinClassroomCard</code>)</li>

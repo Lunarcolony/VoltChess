@@ -38,16 +38,6 @@ export function winProbability(rating: number, opponentRating: number): number {
   return expectedScore(rating, opponentRating);
 }
 
-/** Puzzle Elo update (similar to Lichess-style single-attempt rating). */
-export function updatePuzzleElo(
-  playerElo: number,
-  puzzleElo: number,
-  solved: boolean,
-  kFactor = 32
-): number {
-  return newRating(playerElo, puzzleElo, solved ? "win" : "loss", kFactor);
-}
-
 export const K_FACTOR_PRESETS = [
   { id: "fide-new", label: "FIDE new (K=40)", k: 40 },
   { id: "fide-standard", label: "FIDE standard (K=20)", k: 20 },

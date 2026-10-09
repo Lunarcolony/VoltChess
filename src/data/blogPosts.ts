@@ -93,9 +93,9 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "free-chess-game-review",
     title: "Free Chess Game Review — Analyze Every Move with Stockfish",
     metaTitle:
-      "Free Chess Game Review Online | VoltChess — Stockfish Game Analysis",
+      "Free Chess Game Review Online | DawvioChess — Stockfish Game Analysis",
     metaDescription:
-      "Get a free chess game review for every game you play. VoltChess uses Stockfish to score accuracy, flag blunders, and show where you won or lost the game. No subscription.",
+      "Get a free chess game review for every game you play. DawvioChess uses Stockfish to score accuracy, flag blunders, and show where you won or lost the game. No subscription.",
     keywords:
       "free chess game review, chess game review free, online game review chess, stockfish game review",
     publishedAt: "2025-06-12",
@@ -114,7 +114,7 @@ export const BLOG_POSTS: BlogPost[] = [
         type: "prose",
         paragraphs: [
           "A chess game review is not a wall of engine lines. It is a structured report that answers three questions: where did the evaluation swing, which moves were mistakes or blunders, and how closely did you play the engine's top choices?",
-          "VoltChess builds that report in your browser with Stockfish. You import a Chess.com link, a Lichess game, or a PGN, then step through the board with accuracy scores, classified moves, and an evaluation graph in one panel.",
+          "DawvioChess builds that report in your browser with Stockfish. You import a Chess.com link, a Lichess game, or a PGN, then step through the board with accuracy scores, classified moves, and an evaluation graph in one panel.",
         ],
       },
       {
@@ -125,7 +125,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         type: "checklist",
-        heading: "Anatomy of a VoltChess game review",
+        heading: "Anatomy of a DawvioChess game review",
         items: [
           {
             title: "Evaluation graph",
@@ -189,7 +189,7 @@ export const BLOG_POSTS: BlogPost[] = [
         type: "callout",
         title: "Free browser review vs paywalled Game Review",
         variant: "note",
-        body: "Sites like Chess.com often gate full Game Review behind Premium. VoltChess runs Stockfish locally via WebAssembly: no daily review cap, no account required to start, and your PGN is not sent to a remote analysis queue.",
+        body: "Sites like Chess.com often gate full Game Review behind Premium. DawvioChess runs Stockfish locally via WebAssembly: no daily review cap, no account required to start, and your PGN is not sent to a remote analysis queue.",
       },
       {
         type: "faq",
@@ -209,7 +209,7 @@ export const BLOG_POSTS: BlogPost[] = [
             question:
               "Is the review the same as Chess.com Premium Game Review?",
             answer:
-              "You get the same study essentials: accuracy, move grades, blunder highlighting, and an evaluation graph powered by Stockfish. Chess.com Premium adds platform-native visuals; VoltChess focuses on unlimited free review across Chess.com, Lichess, and PGN.",
+              "You get the same study essentials: accuracy, move grades, blunder highlighting, and an evaluation graph powered by Stockfish. Chess.com Premium adds platform-native visuals; DawvioChess focuses on unlimited free review across Chess.com, Lichess, and PGN.",
           },
           {
             question: "Where does Stockfish run?",
@@ -224,9 +224,9 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "chesscom-game-review-free",
     title: "Free Chess.com Game Review — No Premium Required",
     metaTitle:
-      "Free Chess.com Game Review Alternative | VoltChess — No Premium",
+      "Free Chess.com Game Review Alternative | DawvioChess — No Premium",
     metaDescription:
-      "Analyze Chess.com games for free without Chess.com Premium. Import by link or PGN and get Stockfish game review, accuracy, and blunder detection on VoltChess.",
+      "Analyze Chess.com games for free without Chess.com Premium. Import by link or PGN and get Stockfish game review, accuracy, and blunder detection on DawvioChess.",
     keywords:
       "chess.com game review free, free chess.com analysis, chess.com alternative game review, analyze chess.com games free",
     publishedAt: "2025-06-12",
@@ -244,7 +244,7 @@ export const BLOG_POSTS: BlogPost[] = [
       {
         type: "prose",
         paragraphs: [
-          "Chess.com Game Review is useful, but full access often requires Premium. VoltChess is built for the same feedback loop — accuracy, move grades, evaluation graph — using Stockfish in your browser, with no subscription gate on public games.",
+          "Chess.com Game Review is useful, but full access often requires Premium. DawvioChess is built for the same feedback loop — accuracy, move grades, evaluation graph — using Stockfish in your browser, with no subscription gate on public games.",
         ],
       },
       {
@@ -263,7 +263,7 @@ export const BLOG_POSTS: BlogPost[] = [
           },
           {
             title: "Wait for Stockfish to finish the pass",
-            body: "VoltChess loads the PGN with player names and ratings, then evaluates every position locally. Progress shows while the engine works.",
+            body: "DawvioChess loads the PGN with player names and ratings, then evaluates every position locally. Progress shows while the engine works.",
           },
           {
             title: "Jump to the Bad moves list",
@@ -302,9 +302,9 @@ export const BLOG_POSTS: BlogPost[] = [
         heading: "Chess.com import FAQ",
         items: [
           {
-            question: "Do I need Chess.com Premium to use VoltChess?",
+            question: "Do I need Chess.com Premium to use DawvioChess?",
             answer:
-              "No. You only need a public Chess.com username or game link. VoltChess does not require Chess.com Premium.",
+              "No. You only need a public Chess.com username or game link. DawvioChess does not require Chess.com Premium.",
           },
           {
             question: "Are private Chess.com games supported?",
@@ -324,7 +324,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "how-to-analyze-chess-games",
     title: "How to Analyze Your Chess Games (Step-by-Step Guide)",
     metaTitle:
-      "How to Analyze Chess Games — Free Step-by-Step Guide | VoltChess",
+      "How to Analyze Chess Games — Free Step-by-Step Guide | DawvioChess",
     metaDescription:
       "Learn how to analyze chess games effectively. Import your PGN, read the evaluation graph, find blunders, and build a study routine with free Stockfish analysis.",
     keywords:
@@ -345,7 +345,7 @@ export const BLOG_POSTS: BlogPost[] = [
         type: "prose",
         paragraphs: [
           "Analyzing your own games is the highest-leverage habit for players under 2000. The goal is not to memorize Stockfish's first line in every position. The goal is to find the two or three moments where the evaluation changed, understand why, and leave with a concrete takeaway you can reuse next game.",
-          "This walkthrough uses VoltChess as the review board: import → evaluation graph → accuracy and classifications → critical positions → short notes.",
+          "This walkthrough uses DawvioChess as the review board: import → evaluation graph → accuracy and classifications → critical positions → short notes.",
         ],
       },
       {
@@ -418,14 +418,14 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "free-chess-analysis-stockfish",
     title: "Free Chess Analysis with Stockfish — In Your Browser",
     metaTitle:
-      "Free Chess Analysis with Stockfish | VoltChess — Browser Engine",
+      "Free Chess Analysis with Stockfish | DawvioChess — Browser Engine",
     metaDescription:
       "Run Stockfish chess analysis free in your browser. Deep evaluation, multi-PV lines, game review, and blunder detection. No download, no subscription.",
     keywords:
       "free chess analysis, stockfish analysis free, stockfish online, chess engine analysis browser",
     publishedAt: "2025-06-12",
     excerpt:
-      "Stockfish 17 runs in your browser on VoltChess — full-game review, multi-PV lines, and no install.",
+      "Stockfish 17 runs in your browser on DawvioChess — full-game review, multi-PV lines, and no install.",
     icon: "mdi:chip",
     showGameLoader: true,
     defaultLoaderTab: "pgn",
@@ -438,7 +438,7 @@ export const BLOG_POSTS: BlogPost[] = [
       {
         type: "prose",
         paragraphs: [
-          "Stockfish is the strongest widely used open-source chess engine. VoltChess ships Stockfish builds as WebAssembly so analysis happens on your device — no desktop install, no waiting for a shared server queue.",
+          "Stockfish is the strongest widely used open-source chess engine. DawvioChess ships Stockfish builds as WebAssembly so analysis happens on your device — no desktop install, no waiting for a shared server queue.",
         ],
       },
       {
@@ -449,7 +449,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         type: "checklist",
-        heading: "What Stockfish powers on VoltChess",
+        heading: "What Stockfish powers on DawvioChess",
         items: [
           {
             title: "Position evaluation",
@@ -483,9 +483,9 @@ export const BLOG_POSTS: BlogPost[] = [
         type: "faq",
         items: [
           {
-            question: "Which Stockfish version does VoltChess use?",
+            question: "Which Stockfish version does DawvioChess use?",
             answer:
-              "VoltChess bundles modern Stockfish builds including Stockfish 17 and lighter variants. You can switch engines in Settings based on device speed.",
+              "DawvioChess bundles modern Stockfish builds including Stockfish 17 and lighter variants. You can switch engines in Settings based on device speed.",
           },
           {
             question: "Do I need to download Stockfish separately?",
@@ -505,14 +505,14 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "find-chess-blunders-free",
     title: "Find Chess Blunders Free — Spot Mistakes Instantly",
     metaTitle:
-      "Find Chess Blunders Free | VoltChess Blunder & Mistake Detection",
+      "Find Chess Blunders Free | DawvioChess Blunder & Mistake Detection",
     metaDescription:
-      "Find blunders and mistakes in your chess games for free. VoltChess classifies every move and lets you jump to the worst errors with one click.",
+      "Find blunders and mistakes in your chess games for free. DawvioChess classifies every move and lets you jump to the worst errors with one click.",
     keywords:
       "chess blunder finder, find chess mistakes, blunder detection chess, chess mistake analyzer",
     publishedAt: "2025-06-12",
     excerpt:
-      "Jump straight to the moves that cost you the game. VoltChess tags blunders and mistakes automatically.",
+      "Jump straight to the moves that cost you the game. DawvioChess tags blunders and mistakes automatically.",
     icon: "mdi:alert-octagon-outline",
     showGameLoader: true,
     defaultLoaderTab: "chesscom",
@@ -525,7 +525,7 @@ export const BLOG_POSTS: BlogPost[] = [
       {
         type: "prose",
         paragraphs: [
-          "Most games are decided by a handful of moves. After a loss, open the Bad list first — not the opening. VoltChess tags every move by how much evaluation you lost compared with Stockfish's top choice, then lets you click straight to that position on the board.",
+          "Most games are decided by a handful of moves. After a loss, open the Bad list first — not the opening. DawvioChess tags every move by how much evaluation you lost compared with Stockfish's top choice, then lets you click straight to that position on the board.",
         ],
       },
       {
@@ -536,7 +536,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         type: "grades",
-        heading: "How VoltChess labels mistakes",
+        heading: "How DawvioChess labels mistakes",
         items: [
           {
             classification: "inaccuracy",
@@ -600,7 +600,7 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "analyze-pgn-online-free",
     title: "Analyze PGN Files Online Free",
-    metaTitle: "Analyze PGN Online Free | VoltChess PGN Chess Analyzer",
+    metaTitle: "Analyze PGN Online Free | DawvioChess PGN Chess Analyzer",
     metaDescription:
       "Upload or paste a PGN file and analyze it free online. Stockfish game review, accuracy, and move list — no software install required.",
     keywords:
@@ -620,7 +620,7 @@ export const BLOG_POSTS: BlogPost[] = [
       {
         type: "prose",
         paragraphs: [
-          "PGN is the universal chess game format. Whether your file comes from Chess.com export, Lichess, ChessBase, or a tournament arbiter, VoltChess accepts pasted text or file upload and runs a full Stockfish review in the browser.",
+          "PGN is the universal chess game format. Whether your file comes from Chess.com export, Lichess, ChessBase, or a tournament arbiter, DawvioChess accepts pasted text or file upload and runs a full Stockfish review in the browser.",
         ],
       },
       {
@@ -638,7 +638,7 @@ export const BLOG_POSTS: BlogPost[] = [
             body: "From Chess.com or Lichess, use Share / Export PGN. From ChessBase or other tools, save a standard .pgn file.",
           },
           {
-            title: "Paste into VoltChess or choose the file",
+            title: "Paste into DawvioChess or choose the file",
             body: "Open the PGN tab, paste the text or upload the file, then confirm the load.",
           },
           {
@@ -651,7 +651,7 @@ export const BLOG_POSTS: BlogPost[] = [
         type: "faq",
         items: [
           {
-            question: "Does VoltChess support multi-game PGN files?",
+            question: "Does DawvioChess support multi-game PGN files?",
             answer:
               "Load one game at a time for analysis. If your file contains multiple games, paste the game you want to study or split the file first.",
           },
@@ -667,9 +667,9 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "lichess-game-review-free",
     title: "Free Lichess Game Review & Analysis",
-    metaTitle: "Free Lichess Game Review | VoltChess — Analyze Lichess Games",
+    metaTitle: "Free Lichess Game Review | DawvioChess — Analyze Lichess Games",
     metaDescription:
-      "Analyze Lichess games for free with Stockfish on VoltChess. Paste a Lichess game URL or PGN export for full game review and accuracy scores.",
+      "Analyze Lichess games for free with Stockfish on DawvioChess. Paste a Lichess game URL or PGN export for full game review and accuracy scores.",
     keywords:
       "lichess game review, lichess analysis free, analyze lichess games, lichess game analysis tool",
     publishedAt: "2025-06-12",
@@ -687,7 +687,7 @@ export const BLOG_POSTS: BlogPost[] = [
       {
         type: "prose",
         paragraphs: [
-          "Lichess already offers strong free analysis. VoltChess is useful when you want the same review layout across Chess.com and Lichess games, a dedicated report panel, or unlimited imports in one place.",
+          "Lichess already offers strong free analysis. DawvioChess is useful when you want the same review layout across Chess.com and Lichess games, a dedicated report panel, or unlimited imports in one place.",
         ],
       },
       {
@@ -698,7 +698,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         type: "checklist",
-        heading: "Why review Lichess games on VoltChess",
+        heading: "Why review Lichess games on DawvioChess",
         items: [
           {
             title: "Same UI as Chess.com imports",
@@ -707,7 +707,7 @@ export const BLOG_POSTS: BlogPost[] = [
           },
           {
             title: "Local Stockfish pass",
-            body: "Engine analysis runs in your browser with no VoltChess account required.",
+            body: "Engine analysis runs in your browser with no DawvioChess account required.",
             icon: "mdi:laptop",
           },
           {
@@ -728,7 +728,7 @@ export const BLOG_POSTS: BlogPost[] = [
           {
             question: "Do I need a Lichess account?",
             answer:
-              "Not to review public games on VoltChess. You only need a username or URL.",
+              "Not to review public games on DawvioChess. You only need a username or URL.",
           },
         ],
       },
@@ -737,9 +737,10 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "chess-move-accuracy-scores",
     title: "Chess Move Accuracy — What Your Score Really Means",
-    metaTitle: "Chess Move Accuracy Explained | VoltChess Game Analysis Guide",
+    metaTitle:
+      "Chess Move Accuracy Explained | DawvioChess Game Analysis Guide",
     metaDescription:
-      "Understand chess move accuracy scores from engine analysis. Learn how VoltChess calculates accuracy and how to use it to improve your play.",
+      "Understand chess move accuracy scores from engine analysis. Learn how DawvioChess calculates accuracy and how to use it to improve your play.",
     keywords:
       "chess move accuracy, accuracy score chess, chess accuracy analysis, move accuracy chess.com",
     publishedAt: "2025-06-12",
@@ -762,7 +763,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         type: "checklist",
-        heading: "How to use accuracy on VoltChess",
+        heading: "How to use accuracy on DawvioChess",
         items: [
           {
             title: "Compare sides, not just yourself",
@@ -823,9 +824,9 @@ export const BLOG_POSTS: BlogPost[] = [
         type: "faq",
         items: [
           {
-            question: "Is VoltChess accuracy the same as Chess.com accuracy?",
+            question: "Is DawvioChess accuracy the same as Chess.com accuracy?",
             answer:
-              "Both summarize closeness to engine choices, but exact formulas differ by platform. Treat the number as a relative signal inside VoltChess, then study the classified moves.",
+              "Both summarize closeness to engine choices, but exact formulas differ by platform. Treat the number as a relative signal inside DawvioChess, then study the classified moves.",
           },
           {
             question: "Why is my accuracy high if I lost?",
@@ -839,7 +840,7 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "chess-game-analysis-for-beginners",
     title: "Chess Game Analysis for Beginners",
-    metaTitle: "Chess Game Analysis for Beginners | Free Guide | VoltChess",
+    metaTitle: "Chess Game Analysis for Beginners | Free Guide | DawvioChess",
     metaDescription:
       "New to chess game review? Learn how beginners can use free Stockfish analysis to find mistakes, understand evaluations, and improve faster.",
     keywords:
@@ -912,9 +913,9 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "unlimited-free-chess-game-analysis",
     title: "Unlimited Free Chess Game Analysis — No Daily Caps",
-    metaTitle: "Unlimited Free Chess Game Analysis | VoltChess — No Limits",
+    metaTitle: "Unlimited Free Chess Game Analysis | DawvioChess — No Limits",
     metaDescription:
-      "Analyze unlimited chess games for free with no daily caps. VoltChess offers full Stockfish game review, PGN import, and blunder detection without a paywall.",
+      "Analyze unlimited chess games for free with no daily caps. DawvioChess offers full Stockfish game review, PGN import, and blunder detection without a paywall.",
     keywords:
       "unlimited chess analysis free, free chess analysis no limit, chess analysis without subscription",
     publishedAt: "2025-06-12",
@@ -932,7 +933,7 @@ export const BLOG_POSTS: BlogPost[] = [
       {
         type: "prose",
         paragraphs: [
-          "Many tools limit free users to one or two analyses per day. VoltChess does not. Load a tournament batch, review every game from a weekend blitz session, or re-run a position at higher depth — the product stays free because Stockfish runs on your device.",
+          "Many tools limit free users to one or two analyses per day. DawvioChess does not. Load a tournament batch, review every game from a weekend blitz session, or re-run a position at higher depth — the product stays free because Stockfish runs on your device.",
         ],
       },
       {
@@ -962,7 +963,7 @@ export const BLOG_POSTS: BlogPost[] = [
           },
           {
             title: "Chess.com, Lichess, and PGN",
-            body: "Unlimited applies across the import methods VoltChess supports.",
+            body: "Unlimited applies across the import methods DawvioChess supports.",
             icon: "mdi:swap-horizontal",
           },
         ],
@@ -973,12 +974,12 @@ export const BLOG_POSTS: BlogPost[] = [
           {
             question: "Is there really no premium analysis tier?",
             answer:
-              "Public game review on VoltChess is free. Optional Academy features for coaches and students are separate from the unlimited analysis tool.",
+              "Public game review on DawvioChess is free. Optional Academy features for coaches and students are separate from the unlimited analysis tool.",
           },
           {
             question: "Why do some sites cap free analysis?",
             answer:
-              "Server-side engines cost money per game. VoltChess shifts that work to your browser, so there is no shared queue to meter.",
+              "Server-side engines cost money per game. DawvioChess shifts that work to your browser, so there is no shared queue to meter.",
           },
         ],
       },
@@ -986,15 +987,16 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "voltchess-vs-chesscom-premium",
-    title: "VoltChess vs Chess.com Premium — Free Game Review Alternative",
-    metaTitle: "VoltChess vs Chess.com Premium Game Review | Free Alternative",
+    title: "DawvioChess vs Chess.com Premium — Free Game Review Alternative",
+    metaTitle:
+      "DawvioChess vs Chess.com Premium Game Review | Free Alternative",
     metaDescription:
-      "Compare VoltChess free game review to Chess.com Premium analysis. Same Stockfish-powered accuracy, blunders, and eval graph — no subscription required.",
+      "Compare DawvioChess free game review to Chess.com Premium analysis. Same Stockfish-powered accuracy, blunders, and eval graph — no subscription required.",
     keywords:
       "voltchess vs chess.com premium, chess.com game review free alternative, free chess.com analysis",
     publishedAt: "2026-06-21",
     excerpt:
-      "Side-by-side: what Chess.com Premium Game Review includes versus free VoltChess review.",
+      "Side-by-side: what Chess.com Premium Game Review includes versus free DawvioChess review.",
     icon: "mdi:scale-balance",
     showGameLoader: true,
     defaultLoaderTab: "chesscom",
@@ -1007,14 +1009,14 @@ export const BLOG_POSTS: BlogPost[] = [
       {
         type: "prose",
         paragraphs: [
-          "Chess.com Premium includes Game Review with move classification, accuracy, and an evaluation graph. VoltChess offers the same core study loop for free: import a public Chess.com game, run Stockfish in your browser, and open a full report without a subscription.",
+          "Chess.com Premium includes Game Review with move classification, accuracy, and an evaluation graph. DawvioChess offers the same core study loop for free: import a public Chess.com game, run Stockfish in your browser, and open a full report without a subscription.",
         ],
       },
       {
         type: "compare",
         heading: "Feature comparison",
         leftLabel: "Chess.com Premium",
-        rightLabel: "VoltChess",
+        rightLabel: "DawvioChess",
         rows: [
           {
             feature: "Move grades & blunders",
@@ -1055,7 +1057,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         type: "loader",
-        heading: "Try VoltChess on a Chess.com game",
+        heading: "Try DawvioChess on a Chess.com game",
         caption:
           "Enter your Chess.com username or paste a game link — no Premium required.",
       },
@@ -1063,20 +1065,20 @@ export const BLOG_POSTS: BlogPost[] = [
         type: "callout",
         title: "When Premium still makes sense",
         variant: "note",
-        body: "If you want Chess.com-native lessons, bots, and platform integration, Premium may still be worth it. If your goal is studying your own games without another subscription, VoltChess covers that job.",
+        body: "If you want Chess.com-native lessons, bots, and platform integration, Premium may still be worth it. If your goal is studying your own games without another subscription, DawvioChess covers that job.",
       },
       {
         type: "faq",
         items: [
           {
-            question: "Can VoltChess replace Chess.com Premium entirely?",
+            question: "Can DawvioChess replace Chess.com Premium entirely?",
             answer:
-              "For game review and blunder study, yes for many players. Premium still includes other Chess.com features VoltChess does not try to copy.",
+              "For game review and blunder study, yes for many players. Premium still includes other Chess.com features DawvioChess does not try to copy.",
           },
           {
             question: "How do I switch a review workflow?",
             answer:
-              "Play on Chess.com as usual, then open /free-chess-com-analysis on VoltChess, load the game, and review there.",
+              "Play on Chess.com as usual, then open /free-chess-com-analysis on DawvioChess, load the game, and review there.",
           },
         ],
       },

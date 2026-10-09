@@ -235,7 +235,7 @@ export function buildBlogPostBody(post, allPosts = []) {
     <p>${escapeHtml(post.excerpt)}</p>
     ${sections}
     ${relatedBlock}
-    <p><a href="${abs(ctaPath)}">Try free chess analysis on VoltChess</a></p>
+    <p><a href="${abs(ctaPath)}">Try free chess analysis on DawvioChess</a></p>
   </article>
 </main>`;
 }
@@ -260,24 +260,14 @@ const APP_PAGE_BODIES = {
   <p>Analyze chess games free with Stockfish in your browser. Import from Chess.com, Lichess, or paste a PGN file to get move classifications, accuracy scores, blunder detection, and an evaluation graph.</p>
   <p><a href="${abs("/free-chess-game-analysis")}">Start a free game review</a> · <a href="${abs("/blog/how-to-analyze-chess-games")}">How to analyze your games</a></p>
 </main>`,
-  "/openings": `<main>
-  <h1>Chess Openings Explorer</h1>
-  <p>Explore chess openings and build your repertoire on VoltChess. Study opening lines alongside free Stockfish game analysis.</p>
-  <p><a href="${abs("/analysis")}">Analyze a game</a> · <a href="${abs("/blog")}">Analysis guides</a></p>
-</main>`,
-  "/puzzles": `<main>
-  <h1>Chess Puzzles</h1>
-  <p>Practice tactics with chess puzzles on VoltChess. Improve calculation and pattern recognition alongside free game review.</p>
-  <p><a href="${abs("/analysis")}">Analyze a game</a> · <a href="${abs("/blog/find-chess-blunders-free")}">Find blunders in your games</a></p>
-</main>`,
   "/terms-and-conditions": `<main>
   <h1>Terms and Conditions</h1>
-  <p>Terms of use for VoltChess — free chess game analysis and optional Academy coaching features.</p>
-  <p><a href="${abs("/")}">Back to VoltChess home</a></p>
+  <p>Terms of use for DawvioChess — free chess game analysis and optional Academy coaching features.</p>
+  <p><a href="${abs("/")}">Back to DawvioChess home</a></p>
 </main>`,
   "/moved": `<main>
-  <h1>VoltChess moved</h1>
-  <p>The old domain voltchess.me expired. The free Stockfish analyzer is now at <a href="${abs("/")}">${SITE_URL.replace("https://", "")}</a> — same app, no sign-up. Please update bookmarks.</p>
+  <h1>DawvioChess moved</h1>
+  <p>DawvioChess has a new home. The old addresses voltchess.me and voltchess.vercel.app are retired. The free Stockfish analyzer is now at <a href="${abs("/")}">${SITE_URL.replace("https://", "")}</a> — same app, no sign-up. Please update bookmarks.</p>
   <p><a href="${abs("/")}">Open the analyzer</a></p>
 </main>`,
 };

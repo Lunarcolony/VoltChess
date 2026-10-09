@@ -66,8 +66,8 @@ class ErrorBoundary extends Component<Props, State> {
           >
             <Alert severity="error" sx={{ mb: 3 }}>
               <AlertTitle>Something went wrong</AlertTitle>
-              An unexpected error occurred in VoltChess. Don't worry, your data
-              is safe!
+              An unexpected error occurred in DawvioChess. Don't worry, your
+              data is safe!
             </Alert>
 
             <Typography variant="h5" gutterBottom>

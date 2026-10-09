@@ -15,8 +15,6 @@ const staticMeta = {
   "/free-chess-game-analysis": { priority: "0.95", changefreq: "weekly" },
   "/blog": { priority: "0.95", changefreq: "weekly" },
   "/analysis": { priority: "0.9", changefreq: "weekly" },
-  "/openings": { priority: "0.7", changefreq: "monthly" },
-  "/puzzles": { priority: "0.7", changefreq: "monthly" },
   "/terms-and-conditions": { priority: "0.3", changefreq: "yearly" },
   "/moved": { priority: "0.4", changefreq: "yearly" },
 };
@@ -27,7 +25,7 @@ function urlEntry(path, priority, changefreq, image = false) {
     ? `
     <image:image>
       <image:loc>${SITE_URL}/og-image.png</image:loc>
-      <image:title>VoltChess — Free Chess Game Analysis</image:title>
+      <image:title>DawvioChess — Free Chess Game Analysis</image:title>
       <image:caption>Free chess game review and analysis powered by Stockfish</image:caption>
     </image:image>`
     : "";
@@ -71,6 +69,7 @@ Disallow: /student
 Disallow: /play
 Disallow: /review
 Disallow: /thanks
+Disallow: /reading
 
 # Sitemaps
 Sitemap: ${SITE_URL}/sitemap.xml

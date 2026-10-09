@@ -22,6 +22,17 @@ export const ENABLE_AUTHENTICATION =
 export const SHOW_SIGN_IN_BUTTON =
   import.meta.env.VITE_SHOW_SIGN_IN_BUTTON === "true";
 
+/** Personal science reading room at /reading (URL-only, not in nav). */
+export const ENABLE_READING_ROOM =
+  import.meta.env.VITE_ENABLE_READING_ROOM === "true";
+
+/**
+ * Training, extension, and tools routes from PR #24.
+ * Set VITE_ENABLE_UNRELEASED_FEATURES=false on production until ready to ship.
+ */
+export const ENABLE_UNRELEASED_FEATURES =
+  import.meta.env.VITE_ENABLE_UNRELEASED_FEATURES === "true";
+
 export const CLASSIFICATION_COLORS: Record<MoveClassification, string> = {
   [MoveClassification.Opening]: "#dbac86",
   [MoveClassification.Forced]: "#dbac86",

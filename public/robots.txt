@@ -9,9 +9,10 @@ Disallow: /student
 Disallow: /play
 Disallow: /review
 Disallow: /thanks
+Disallow: /reading
 
 # Sitemaps
-Sitemap: https://voltchess.vercel.app/sitemap.xml
+Sitemap: https://www.dawvio.com/sitemap.xml
 
 User-agent: Googlebot
 Allow: /

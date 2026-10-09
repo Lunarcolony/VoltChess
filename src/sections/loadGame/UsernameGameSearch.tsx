@@ -228,9 +228,14 @@ export default function UsernameGameSearch({
                 display: "grid",
                 gridTemplateColumns: gridColumns,
                 gap: { xs: 1.25, sm: 1.5 },
-                maxHeight: fillHeight ? "100%" : undefined,
-                overflowY: fillHeight ? "auto" : "visible",
-                pr: fillHeight ? 0.5 : 0,
+                maxHeight: fillHeight
+                  ? "100%"
+                  : variant === "home"
+                    ? { xs: 440, md: 520 }
+                    : undefined,
+                overflowY:
+                  fillHeight || variant === "home" ? "auto" : "visible",
+                pr: fillHeight || variant === "home" ? 0.5 : 0,
                 "&::-webkit-scrollbar": { width: 6 },
                 "&::-webkit-scrollbar-thumb": {
                   bgcolor: palette.border,

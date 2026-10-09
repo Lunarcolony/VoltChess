@@ -1,9 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="VoltChess">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="DawvioChess">
   <rect width="1200" height="630" fill="#0a0c0a"/>
-  <rect x="80" y="80" width="120" height="120" rx="20" fill="#0e110e"/>
-  <rect x="100" y="100" width="40" height="40" rx="6" fill="#1a221a"/>
-  <rect x="156" y="156" width="40" height="40" rx="6" fill="#243024"/>
-  <path d="M158 108 L128 168 H148 L138 198 L178 138 H158 Z" fill="#6a9a6a"/>
-  <text x="240" y="175" fill="#e4ece4" font-family="system-ui,Segoe UI,sans-serif" font-size="72" font-weight="700">VoltChess</text>
+  <g transform="translate(80 80) scale(1.875)">
+    <rect width="64" height="64" rx="14" fill="#0e110e"/>
+    <rect x="8" y="8" width="20" height="20" rx="3" fill="#1a221a"/>
+    <rect x="36" y="36" width="20" height="20" rx="3" fill="#243024"/>
+    <path
+      fill-rule="evenodd"
+      d="M19 13 H32 C44 13 51 21 51 32 C51 43 44 51 32 51 H19 Z M26.5 20.5 V43.5 H32 C39 43.5 43.5 39 43.5 32 C43.5 25 39 20.5 32 20.5 Z"
+      fill="#6a9a6a"
+    />
+  </g>
+  <text x="240" y="175" fill="#e4ece4" font-family="system-ui,Segoe UI,sans-serif" font-size="72" font-weight="700">DawvioChess</text>
   <text x="240" y="240" fill="#889088" font-family="system-ui,Segoe UI,sans-serif" font-size="36">Free Chess.com &amp; Lichess analysis — no premium</text>
 </svg>

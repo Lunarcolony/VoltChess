@@ -175,7 +175,7 @@ export default function StudentHome() {
   return (
     <>
       <Head>
-        <title>My Hub · VoltChess</title>
+        <title>My Hub · DawvioChess</title>
       </Head>
       <Box sx={{ maxWidth: 1180, mx: "auto" }}>
         <Typography variant="h4" fontWeight={700} sx={{ mb: 0.5 }}>

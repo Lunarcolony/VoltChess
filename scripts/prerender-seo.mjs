@@ -23,10 +23,10 @@ function articleSchema(headline, description, datePublished) {
     headline,
     description,
     datePublished,
-    author: { "@type": "Organization", name: "VoltChess" },
+    author: { "@type": "Organization", name: "DawvioChess" },
     publisher: {
       "@type": "Organization",
-      name: "VoltChess",
+      name: "DawvioChess",
       logo: { "@type": "ImageObject", url: `${SITE_URL}/logo-512.png` },
     },
   };
@@ -38,7 +38,7 @@ function homeJsonLd() {
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      name: "VoltChess",
+      name: "DawvioChess",
       applicationCategory: "GameApplication",
       description:
         "Free chess game review and analysis powered by Stockfish. Import Chess.com or Lichess games, find blunders, check accuracy, and improve your play.",
@@ -53,7 +53,7 @@ function homeJsonLd() {
       },
       creator: {
         "@type": "Organization",
-        name: "VoltChess",
+        name: "DawvioChess",
         url: SITE_URL,
         logo: `${SITE_URL}/logo-512.png`,
         sameAs: [github],
@@ -73,7 +73,7 @@ function homeJsonLd() {
     {
       "@context": "https://schema.org",
       "@type": "Organization",
-      name: "VoltChess",
+      name: "DawvioChess",
       url: SITE_URL,
       logo: `${SITE_URL}/logo-512.png`,
       sameAs: [github],
@@ -81,33 +81,33 @@ function homeJsonLd() {
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      name: "VoltChess",
+      name: "DawvioChess",
       url: `${SITE_URL}/`,
       description:
         "Free unlimited chess game analysis and review powered by Stockfish.",
       publisher: {
         "@type": "Organization",
-        name: "VoltChess",
+        name: "DawvioChess",
         sameAs: [github],
       },
     },
     {
       "@context": "https://schema.org",
       "@type": "SoftwareSourceCode",
-      name: "VoltChess",
+      name: "DawvioChess",
       description:
-        "Open-source VoltChess — free Stockfish chess game analysis for Chess.com and Lichess.",
+        "Open-source DawvioChess — free Stockfish chess game analysis for Chess.com and Lichess.",
       url: github,
       codeRepository: github,
       programmingLanguage: ["TypeScript", "Python"],
       runtimePlatform: "Web browser",
       license: "https://www.gnu.org/licenses/agpl-3.0.html",
-      isPartOf: { "@type": "WebApplication", name: "VoltChess", url: SITE_URL },
+      isPartOf: { "@type": "WebApplication", name: "DawvioChess", url: SITE_URL },
     },
     {
       "@context": "https://schema.org",
       "@type": "ItemList",
-      name: "VoltChess main sections",
+      name: "DawvioChess main sections",
       itemListElement: [
         {
           "@type": "SiteNavigationElement",
@@ -136,7 +136,7 @@ function homeJsonLd() {
         {
           "@type": "SiteNavigationElement",
           position: 5,
-          name: "VoltChess on GitHub",
+          name: "DawvioChess on GitHub",
           url: github,
         },
       ],
@@ -147,32 +147,20 @@ function homeJsonLd() {
 const APP_PAGES = [
   {
     path: "/analysis",
-    title: "Chess Game Analysis — Free Stockfish Review | VoltChess",
+    title: "Chess Game Analysis — Free Stockfish Review | DawvioChess",
     description:
       "Analyze chess games free with Stockfish in your browser. Import Chess.com, Lichess, or PGN files for move grades, accuracy, and blunder detection.",
   },
   {
-    path: "/openings",
-    title: "Chess Openings Explorer | VoltChess",
-    description:
-      "Explore chess openings and build your repertoire on VoltChess alongside free Stockfish game analysis.",
-  },
-  {
-    path: "/puzzles",
-    title: "Chess Puzzles | VoltChess",
-    description:
-      "Practice chess tactics and puzzles on VoltChess. Improve alongside free Stockfish game review.",
-  },
-  {
     path: "/terms-and-conditions",
-    title: "Terms and Conditions | VoltChess",
-    description: "Terms of use for VoltChess free chess analysis and Academy features.",
+    title: "Terms and Conditions | DawvioChess",
+    description: "Terms of use for DawvioChess free chess analysis and Academy features.",
   },
   {
     path: "/moved",
-    title: "VoltChess moved — new official URL | VoltChess",
+    title: "DawvioChess moved — new official URL | DawvioChess",
     description:
-      "voltchess.me expired. VoltChess free chess analysis is now at voltchess.vercel.app — same app, no sign-up.",
+      "DawvioChess free chess analysis has moved to dawvio.com — same app, no sign-up.",
   },
 ];
 
@@ -185,7 +173,7 @@ async function buildPages() {
     {
       path: "/",
       title:
-        "Free Chess Game Analysis — Chess.com & Lichess, No Premium | VoltChess",
+        "Free Chess Game Analysis — Chess.com & Lichess, No Premium | DawvioChess",
       description:
         "Free Stockfish analysis for Chess.com and Lichess games. Enter your username, get blunders, accuracy, and eval graph — no premium, unlimited, no sign-up.",
       bodyHtml: buildHomeBody(),
@@ -199,18 +187,18 @@ async function buildPages() {
     })),
     {
       path: "/blog",
-      title: "Chess Game Review & Analysis Guides | VoltChess Blog",
+      title: "Chess Game Review & Analysis Guides | DawvioChess Blog",
       description:
-        "Free guides on chess game review, Chess.com analysis, Stockfish game analysis, blunder finding, and PGN review. Learn how to study your games on VoltChess.",
+        "Free guides on chess game review, Chess.com analysis, Stockfish game analysis, blunder finding, and PGN review. Learn how to study your games on DawvioChess.",
       bodyHtml: buildBlogIndexBody(blogPosts),
       jsonLd: {
         "@context": "https://schema.org",
         "@type": "Blog",
-        name: "VoltChess Guides",
+        name: "DawvioChess Guides",
         description:
           "Free chess game review and analysis guides powered by Stockfish.",
         url: `${SITE_URL}/blog`,
-        publisher: { "@type": "Organization", name: "VoltChess" },
+        publisher: { "@type": "Organization", name: "DawvioChess" },
       },
     },
     ...blogPosts.map((post) => {
@@ -264,7 +252,7 @@ function buildHeadTags(page) {
     <meta property="og:image" content="${OG_IMAGE}" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:site_name" content="VoltChess" />
+    <meta property="og:site_name" content="DawvioChess" />
     <meta property="og:locale" content="en_US" />
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="${canonical}" />

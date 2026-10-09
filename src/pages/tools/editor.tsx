@@ -686,14 +686,13 @@ export default function BoardEditor() {
     <ToolsShell
       title="Board Editor"
       subtitle="Stamp pieces onto the board, set castling rights and side to move, then copy the FEN or hand it off to analysis."
-      seoTitle="Board Editor — VoltChess"
+      seoTitle="Board Editor — DawvioChess"
       seoDescription="Set up any chess position piece by piece, configure castling rights and side to move, then copy the FEN or send it straight to analysis."
       board={board}
       panel={panel}
       related={[
         { href: "/tools/next-move", label: "Next move calculator" },
         { href: "/analysis", label: "Full analysis" },
-        { href: "/openings", label: "Opening trainer" },
         { href: "/tools/elo-calculator", label: "Elo calculator" },
       ]}
     />

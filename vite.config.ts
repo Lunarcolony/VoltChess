@@ -1,11 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { viteSingleFile } from "vite-plugin-singlefile";
 import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), viteSingleFile()],
+  plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -32,14 +31,16 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
-    assetsDir: "", // Place assets in root to avoid path issues
+    // JS/CSS ship as external files so index.html stays small: crawlers such as
+    // Bingbot stop reading large HTML documents before reaching <body>.
+    assetsDir: "assets",
     rollupOptions: {
       output: {
         inlineDynamicImports: true,
-        manualChunks: undefined, // Disable code splitting for single file output
+        manualChunks: undefined,
       },
     },
-    cssCodeSplit: false, // Inline CSS into JS bundle
+    cssCodeSplit: false,
     // Ensure all assets are copied to output
     copyPublicDir: true,
   },

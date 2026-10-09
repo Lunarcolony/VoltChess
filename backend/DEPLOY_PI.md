@@ -26,7 +26,7 @@ After `setup-pi.sh`, these services are **enabled** and start when the Pi powers
 | Service | What it does |
 |---------|----------------|
 | `voltchess-api` | Django API on port 8000 |
-| `voltchess-tunnel` | HTTPS Cloudflare tunnel for voltchess.me |
+| `voltchess-tunnel` | HTTPS Cloudflare tunnel for dawvio.com |
 | `voltchess.target` | Starts both together |
 
 You do **not** need to SSH in or run any commands after a reboot.
@@ -39,7 +39,7 @@ sudo systemctl status voltchess-api voltchess-tunnel
 bash backend/scripts/ensure-autostart.sh
 ```
 
-**Note:** The free Cloudflare *quick* tunnel URL can change after a reboot. If voltchess.me login breaks, check the new URL:
+**Note:** The free Cloudflare *quick* tunnel URL can change after a reboot. If dawvio.com login breaks, check the new URL:
 
 ```bash
 cat ~/VoltChess/backend/PUBLIC_API_URL.txt
@@ -66,7 +66,7 @@ In Vercel → Project → Settings → Environment Variables:
 
 Redeploy. **Note:** Browsers on the same network can reach the Pi; users on the public internet cannot use a private LAN IP.
 
-### Production (voltchess.me → Pi)
+### Production (dawvio.com → Pi)
 
 Use **Cloudflare Tunnel** (recommended — no router port forwarding):
 
@@ -85,7 +85,7 @@ See `backend/.env.example`. Important:
 
 - `GUNICORN_BIND=0.0.0.0:8000` — listen on all interfaces (LAN + tunnel)
 - `DJANGO_ALLOWED_HOSTS` — Pi IP, tunnel hostname, `localhost`
-- `CORS_ALLOWED_ORIGINS` — `https://voltchess.me`, local dev URLs
+- `CORS_ALLOWED_ORIGINS` — `https://www.dawvio.com`, local dev URLs
 - `USE_SQLITE=true` — fine for testing; use Postgres for heavier load
 
 ## Manual commands

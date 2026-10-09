@@ -16,6 +16,21 @@
   ],
   "routes": [
     {
+      "src": "/(.*)",
+      "has": [{ "type": "host", "value": "voltchess.vercel.app" }],
+      "status": 308,
+      "headers": {
+        "Location": "https://www.dawvio.com/$1"
+      }
+    },
+    {
+      "src": "/(puzzles|openings|training)/?",
+      "status": 308,
+      "headers": {
+        "Location": "/"
+      }
+    },
+    {
       "src": "/github",
       "status": 307,
       "headers": {
@@ -31,6 +46,12 @@
       "headers": [
         { "key": "Cross-Origin-Embedder-Policy", "value": "require-corp" },
         { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     },
     {

@@ -10,14 +10,12 @@ import TelemetryProvider from "@/components/TelemetryProvider";
 import { Analytics } from "@vercel/analytics/react";
 import { UserRole } from "@/types/user";
 import { LANDING_PAGES } from "@/data/landingPages";
+import { ENABLE_READING_ROOM, ENABLE_UNRELEASED_FEATURES } from "@/constants";
 
 const Home = lazy(() => import("@/pages/index"));
 const Analysis = lazy(() => import("@/pages/analysis"));
 const Login = lazy(() => import("@/pages/login"));
-const Openings = lazy(() => import("@/pages/openings"));
 const Play = lazy(() => import("@/pages/play"));
-const Puzzles = lazy(() => import("@/pages/puzzles"));
-const Training = lazy(() => import("@/pages/training"));
 const Extension = lazy(() => import("@/pages/extension"));
 const ToolsIndex = lazy(() => import("@/pages/tools/index"));
 const NextMoveTool = lazy(() => import("@/pages/tools/next-move"));
@@ -41,6 +39,8 @@ const CoachAnalytics = lazy(() => import("@/pages/coach/analytics"));
 const CoachStudentDetail = lazy(() => import("@/pages/coach/student-detail"));
 const StudentHome = lazy(() => import("@/pages/student/index"));
 const OpsDashboard = lazy(() => import("@/pages/ops/index"));
+const ReadingIndex = lazy(() => import("@/pages/reading/index"));
+const ReadingView = lazy(() => import("@/pages/reading/view"));
 
 function App() {
   return (
@@ -51,25 +51,55 @@ function App() {
       <Layout>
         <Suspense
           fallback={
-            <LoadingSpinner message="Loading VoltChess..." variant="skeleton" />
+            <LoadingSpinner
+              message="Loading DawvioChess..."
+              variant="skeleton"
+            />
           }
         >
           <Routes>
             {/* Public analysis & SEO landing pages */}
             <Route path="/" element={<Home />} />
             <Route path="/analysis" element={<Analysis />} />
-            <Route path="/openings" element={<Openings />} />
             <Route path="/play" element={<Play />} />
-            <Route path="/puzzles" element={<Puzzles />} />
-            <Route path="/training" element={<Training />} />
-            <Route path="/extension" element={<Extension />} />
-            <Route path="/tools" element={<ToolsIndex />} />
-            <Route path="/tools/next-move" element={<NextMoveTool />} />
-            <Route path="/tools/editor" element={<EditorTool />} />
-            <Route
-              path="/tools/elo-calculator"
-              element={<EloCalculatorTool />}
-            />
+            {ENABLE_UNRELEASED_FEATURES ? (
+              <>
+                <Route path="/extension" element={<Extension />} />
+                <Route path="/tools" element={<ToolsIndex />} />
+                <Route path="/tools/next-move" element={<NextMoveTool />} />
+                <Route path="/tools/editor" element={<EditorTool />} />
+                <Route
+                  path="/tools/elo-calculator"
+                  element={<EloCalculatorTool />}
+                />
+              </>
+            ) : (
+              <>
+                <Route
+                  path="/extension"
+                  element={<Navigate to="/" replace />}
+                />
+                <Route path="/tools" element={<Navigate to="/" replace />} />
+                <Route
+                  path="/tools/next-move"
+                  element={<Navigate to="/" replace />}
+                />
+                <Route
+                  path="/tools/editor"
+                  element={<Navigate to="/" replace />}
+                />
+                <Route
+                  path="/tools/elo-calculator"
+                  element={<Navigate to="/" replace />}
+                />
+              </>
+            )}
+            {ENABLE_READING_ROOM && (
+              <>
+                <Route path="/reading" element={<ReadingIndex />} />
+                <Route path="/reading/view" element={<ReadingView />} />
+              </>
+            )}
             <Route path="/review" element={<Review />} />
             <Route
               path="/reanalysis"

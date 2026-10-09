@@ -21,7 +21,7 @@ interface ToolsShellProps extends PropsWithChildren {
 
 /**
  * Chessigma-inspired board-first layout: one composition, large board,
- * quiet side panel, premium restraint within VoltChess dark palette.
+ * quiet side panel, premium restraint within DawvioChess dark palette.
  */
 export default function ToolsShell({
   title,
@@ -57,7 +57,7 @@ export default function ToolsShell({
               mb: 0.75,
             }}
           >
-            VoltChess
+            DawvioChess
           </Typography>
           <Typography
             variant="h1"

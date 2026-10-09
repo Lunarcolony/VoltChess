@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Stable Cloudflare named tunnel → https://api.voltchess.me (no more ephemeral trycloudflare URLs).
+# Stable Cloudflare named tunnel → https://api.dawvio.com (no more ephemeral trycloudflare URLs).
 #
 # Option A (recommended): Cloudflare Zero Trust dashboard
 #   1. https://one.dash.cloudflare.com → Networks → Tunnels → Create tunnel
-#   2. Public hostname: api.voltchess.me → http://127.0.0.1:8000
+#   2. Public hostname: api.dawvio.com → http://127.0.0.1:8000
 #   3. Copy the tunnel token → add to backend/.env:
 #        CLOUDFLARE_TUNNEL_TOKEN=eyJ...
 #   4. DNS must be on Cloudflare (nameservers) with Proxied CNAME api → <tunnel-id>.cfargotunnel.com
-#      A Namecheap-only CNAME resolves to fd10:… (IPv6-only, unreachable) — see PI_CONTINUOUS_ANALYSIS.md
+#      A registrar-only CNAME resolves to fd10:… (IPv6-only, unreachable) — see PI_CONTINUOUS_ANALYSIS.md
 #   5. Re-run: bash backend/scripts/setup-named-tunnel.sh
 #
 # Option B: CLI (domain must be on Cloudflare DNS)
@@ -23,7 +23,7 @@ PI_USER="${SUDO_USER:-$USER}"
 PI_HOME="$(eval echo "~$PI_USER")"
 CLOUDFLARED="${CLOUDFLARED:-/usr/local/bin/cloudflared}"
 TUNNEL_NAME="${VOLTCHES_TUNNEL_NAME:-voltchess}"
-API_HOST="${VOLTCHES_API_HOST:-api.voltchess.me}"
+API_HOST="${VOLTCHES_API_HOST:-api.dawvio.com}"
 API_URL="https://${API_HOST}"
 CF_DIR="$PI_HOME/.cloudflared"
 CONFIG="$CF_DIR/config.yml"
@@ -157,9 +157,9 @@ check_tunnel_dns() {
   fi
   if [[ "$lookup" == *"fd10:"* ]] && [[ "$lookup" != *"104."* ]] && [[ "$lookup" != *"172."* ]]; then
     echo ""
-    echo "ERROR: ${API_HOST} resolves to unreachable fd10:… (Namecheap CNAME without Cloudflare proxy)."
+    echo "ERROR: ${API_HOST} resolves to unreachable fd10:… (registrar CNAME without Cloudflare proxy)."
     echo "  Tunnel is healthy in Zero Trust, but public HTTPS cannot work until DNS is fixed."
-    echo "  Fix: move voltchess.me nameservers to Cloudflare; add Proxied CNAME api → ${TUNNEL_ID:-<tunnel-id>}.cfargotunnel.com"
+    echo "  Fix: move dawvio.com nameservers to Cloudflare; add Proxied CNAME api → ${TUNNEL_ID:-<tunnel-id>}.cfargotunnel.com"
     echo "  See backend/PI_CONTINUOUS_ANALYSIS.md"
     return 1
   fi
@@ -181,6 +181,6 @@ done
 
 echo "WARNING: ${API_HOST} not reachable yet."
 echo "  Tunnel may be healthy but DNS is wrong if nslookup shows fd10:… (IPv6-only)."
-echo "  Fix: move voltchess.me nameservers to Cloudflare; add Proxied CNAME api → tunnel-id.cfargotunnel.com"
+echo "  Fix: move dawvio.com nameservers to Cloudflare; add Proxied CNAME api → tunnel-id.cfargotunnel.com"
 echo "  See backend/PI_CONTINUOUS_ANALYSIS.md — then: curl ${API_URL}/api/health/"
 exit 0

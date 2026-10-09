@@ -35,8 +35,10 @@
     "react-chessboard": "^4.7.3",
     "react-confetti": "^6.4.0",
     "react-dom": "18.3.1",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.6.3",
     "recharts": "^2.15.0",
+    "remark-gfm": "^4.0.1",
     "tinycolor2": "^1.6.0"
   },
   "devDependencies": {

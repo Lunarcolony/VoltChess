@@ -62,7 +62,7 @@ coach-student links / classrooms (`academies`), stored games and evaluations
 [`02-frontend-lib-and-api.md`](02-frontend-lib-and-api.md) — The framework-free
 logic in `src/lib/` (chess helpers, auth/session storage, error formatting,
 Chess.com/Lichess clients, game sync, math/stats, sounds) and the typed backend
-API client modules in `src/lib/api/`. **(25 files)**
+API client modules in `src/lib/api/`. **(24 files)**
 
 ### 3. Frontend — Chess engine
 [`03-frontend-engine.md`](03-frontend-engine.md) — `src/lib/engine/`: how
@@ -85,9 +85,9 @@ loaders, SEO helpers, background workers) plus the app-entry files (`App.tsx`,
 
 ### 6. Frontend — Pages & theme
 [`06-frontend-pages-and-theme.md`](06-frontend-pages-and-theme.md) — Every routed
-screen in `src/pages/` (home, login/register, analysis, database, play, puzzles,
+screen in `src/pages/` (home, login/register, analysis, database, play,
 the coach pages, the student hub, blog, legal) and the color/theme system in
-`src/theme/`. **(26 files)**
+`src/theme/`. **(24 files)**
 
 ### 7. Frontend — Analysis feature
 [`07-sections-analysis.md`](07-sections-analysis.md) — `src/sections/analysis/`:

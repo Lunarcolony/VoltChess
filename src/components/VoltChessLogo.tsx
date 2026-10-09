@@ -5,13 +5,13 @@ interface Props {
   sx?: SxProps<Theme>;
 }
 
-/** VoltChess brand mark — lightning on chess squares */
+/** DawvioChess brand mark — "D" monogram on chess squares */
 export default function VoltChessLogo({ size = 28, sx }: Props) {
   return (
     <Box
       component="img"
       src="/logo.svg"
-      alt="VoltChess"
+      alt="DawvioChess"
       sx={{ width: size, height: size, display: "block", flexShrink: 0, ...sx }}
     />
   );

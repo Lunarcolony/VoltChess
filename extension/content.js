@@ -22,7 +22,7 @@
     btn.type = "button";
     btn.className = BTN_CLASS;
     btn.textContent = label;
-    btn.title = "Analyze this game with VoltChess (Stockfish)";
+    btn.title = "Analyze this game with DawvioChess (Stockfish)";
     btn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -42,12 +42,12 @@
       { type: "ANALYZE_CHESSCOM", gameId, gameType },
       (response) => {
         if (chrome.runtime.lastError || !response?.ok) {
-          setBusy(btn, false, "Retry VoltChess");
+          setBusy(btn, false, "Retry DawvioChess");
           const msg =
             response?.error ||
             chrome.runtime.lastError?.message ||
             "Failed to open analysis";
-          console.warn("[VoltChess extension]", msg);
+          console.warn("[DawvioChess extension]", msg);
           return;
         }
         setBusy(btn, false, "Analyze");
@@ -101,7 +101,7 @@
     const pageGame = currentPageGame();
     if (!pageGame) return;
 
-    const btn = createButton("Analyze with VoltChess", (b) =>
+    const btn = createButton("Analyze with DawvioChess", (b) =>
       analyzeChessCom(pageGame.gameId, pageGame.gameType, b)
     );
     btn.classList.add("voltchess-analyze-btn--large");
@@ -123,7 +123,7 @@
 
     const bar = document.createElement("div");
     bar.id = "voltchess-floating-bar";
-    const btn = createButton("Analyze with VoltChess", (b) =>
+    const btn = createButton("Analyze with DawvioChess", (b) =>
       analyzeChessCom(pageGame.gameId, pageGame.gameType, b)
     );
     btn.classList.add("voltchess-analyze-btn--large");
@@ -137,7 +137,7 @@
       injectPostGameModal();
       injectGamePageBar();
     } catch (err) {
-      console.warn("[VoltChess extension] inject error", err);
+      console.warn("[DawvioChess extension] inject error", err);
     }
   }
 

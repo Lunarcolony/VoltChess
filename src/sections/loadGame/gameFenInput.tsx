@@ -69,10 +69,10 @@ export default function GameFenInput({ fen, setFen }: Props) {
   );
 }
 
-/** Convert a FEN into a minimal PGN VoltChess can load into analysis. */
+/** Convert a FEN into a minimal PGN DawvioChess can load into analysis. */
 export function fenToPgn(fen: string): string {
   const chess = new Chess(fen);
-  chess.setHeader("Event", "VoltChess Position");
+  chess.setHeader("Event", "DawvioChess Position");
   chess.setHeader("FEN", fen);
   chess.setHeader("SetUp", "1");
   chess.setHeader("Result", "*");

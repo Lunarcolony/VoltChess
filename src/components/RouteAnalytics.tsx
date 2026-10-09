@@ -8,6 +8,7 @@ export default function RouteAnalytics() {
   const location = useLocation();
 
   useEffect(() => {
+    if (location.pathname.startsWith("/reading")) return;
     const path = location.pathname + location.search;
     debug.log("route", "navigation", { path });
     track("pageview", { path });

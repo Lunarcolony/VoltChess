@@ -130,7 +130,7 @@ export default function CoachStudentDetail() {
   return (
     <>
       <Head>
-        <title>{stats?.username ?? "Student"} · VoltChess Academy</title>
+        <title>{stats?.username ?? "Student"} · DawvioChess Academy</title>
       </Head>
       <CoachShell>
         <NavLink href="/coach/students">

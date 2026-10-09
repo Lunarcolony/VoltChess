@@ -50,7 +50,7 @@ export default function AuthLayout({
               letterSpacing: "-0.02em",
             }}
           >
-            VoltChess Academy
+            DawvioChess Academy
           </Typography>
           <Typography
             variant="body2"

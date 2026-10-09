@@ -34,7 +34,7 @@ export default function CoachDashboardPage() {
   return (
     <>
       <Head>
-        <title>Coach Command Center · VoltChess Academy</title>
+        <title>Coach Command Center · DawvioChess Academy</title>
       </Head>
       <CoachShell>
         <CoachPageHeader

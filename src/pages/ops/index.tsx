@@ -61,7 +61,7 @@ export default function OpsDashboardPage() {
   return (
     <>
       <Head>
-        <title>Ops · VoltChess</title>
+        <title>Ops · DawvioChess</title>
       </Head>
       <Box sx={{ maxWidth: 1100, mx: "auto", px: { xs: 2, md: 3 }, py: 3 }}>
         <CoachPageHeader

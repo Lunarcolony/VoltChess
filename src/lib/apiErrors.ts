@@ -14,9 +14,9 @@ export function getApiErrorMessage(err: unknown): string {
       return "Cannot connect: the site uses HTTPS but the API URL is HTTP.";
     }
     if (!apiUrl) {
-      return "Cannot reach the VoltChess API. Set VITE_API_URL or check your connection.";
+      return "Cannot reach the DawvioChess API. Set VITE_API_URL or check your connection.";
     }
-    return "Cannot reach the VoltChess API. The server may be offline or the API URL may need updating.";
+    return "Cannot reach the DawvioChess API. The server may be offline or the API URL may need updating.";
   }
 
   const data = err.response.data;

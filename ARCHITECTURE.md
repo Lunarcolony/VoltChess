@@ -392,7 +392,7 @@ Routes live in `App.tsx` inside `ErrorBoundary` → `Layout` → `Suspense`
 - **Public:** `/login`, `/register`, `/blog`, `/blog/:slug`,
   `/terms-and-conditions`, `/thanks`.
 - **Authenticated** (wrapped by the `RequireAuth` layout route): `/`,
-  `/analysis`, `/database`, `/openings`, `/play`, `/puzzles`, `/review`.
+  `/analysis`, `/database`, `/play`, `/review`.
 - **Role-scoped** (inside `RequireAuth`, additionally wrapped by `RoleRoute`):
   `/coach/*` (Coach/Admin) and `/student` (Student).
 
@@ -597,8 +597,7 @@ visibility, inline confirmation, and **auto-login** after signup.
 **Core product:** `index.tsx` (authenticated home with onboarding + game
 loader), `analysis.tsx` (the full Stockfish analysis workspace), `review.tsx`
 (read-only saved-report viewer), `database.tsx` (DataGrid of local + server
-games), `play.tsx` (play-vs-engine, work-in-progress), `puzzles.tsx` (tactics
-trainer), and `openings.tsx` (an opening study catalog). **Marketing/legal:**
+games), `play.tsx` (play-vs-engine, work-in-progress). **Marketing/legal:**
 `thanks.tsx`, `terms-and-conditions.tsx`, and `blog/index.tsx` + `blog/post.tsx`.
 
 **`pages/coach/`** — all wrapped in `RoleRoute([Coach, Admin])` and rendered

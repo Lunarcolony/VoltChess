@@ -618,10 +618,10 @@ export default function BlogArticle({ post }: Props) {
       headline: post.title,
       description: post.metaDescription,
       datePublished: post.publishedAt,
-      author: { "@type": "Organization", name: "VoltChess" },
+      author: { "@type": "Organization", name: "DawvioChess" },
       publisher: {
         "@type": "Organization",
-        name: "VoltChess",
+        name: "DawvioChess",
         logo: { "@type": "ImageObject", url: `${SITE_URL}/logo-512.png` },
       },
       mainEntityOfPage: url,

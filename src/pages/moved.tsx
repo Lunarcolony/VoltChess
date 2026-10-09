@@ -23,8 +23,8 @@ export default function Moved() {
   return (
     <>
       <PageTitle
-        title="VoltChess moved — new official URL"
-        description="voltchess.me expired. VoltChess free chess analysis is now at voltchess.vercel.app — same app, no sign-up."
+        title="DawvioChess moved — new official URL"
+        description="DawvioChess free chess analysis has moved to dawvio.com — same app, no sign-up."
         path="/moved"
       />
       <Box
@@ -44,10 +44,12 @@ export default function Moved() {
             gutterBottom
             sx={{ color: palette.accent }}
           >
-            VoltChess moved
+            DawvioChess moved
           </Typography>
           <Typography variant="body1" sx={{ color: "text.secondary", mb: 2 }}>
-            The old domain <strong>voltchess.me</strong> expired. The free
+            DawvioChess has a new home. The old addresses{" "}
+            <strong>voltchess.me</strong> and{" "}
+            <strong>voltchess.vercel.app</strong> are retired. The free
             Stockfish analyzer is the same app — now at:
           </Typography>
           <Typography

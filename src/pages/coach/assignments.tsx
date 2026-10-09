@@ -215,7 +215,7 @@ export default function CoachAssignmentsPage() {
   return (
     <>
       <Head>
-        <title>Assignments · VoltChess Academy</title>
+        <title>Assignments · DawvioChess Academy</title>
       </Head>
       <CoachShell>
         <CoachPageHeader

@@ -1,14 +1,14 @@
 {
   "manifest_version": 3,
-  "name": "VoltChess — Analyze Chess.com Games",
+  "name": "DawvioChess — Analyze Chess.com Games",
   "version": "1.0.0",
-  "description": "One-click Stockfish analysis for Chess.com games. Export any game to VoltChess instantly — like Chess It Up.",
+  "description": "One-click Stockfish analysis for Chess.com games. Export any game to DawvioChess instantly — like Chess It Up.",
   "icons": {
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
   "action": {
-    "default_title": "Analyze with VoltChess",
+    "default_title": "Analyze with DawvioChess",
     "default_popup": "popup.html",
     "default_icon": {
       "48": "icons/icon48.png",
@@ -21,7 +21,8 @@
     "https://chess.com/*",
     "https://api.chess.com/*",
     "https://lichess.org/*",
-    "https://voltchess.vercel.app/*"
+    "https://dawvio.com/*",
+    "https://www.dawvio.com/*"
   ],
   "background": {
     "service_worker": "background.js",

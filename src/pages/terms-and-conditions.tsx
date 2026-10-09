@@ -14,13 +14,13 @@ export default function TermsAndConditions() {
       <div style={{ lineHeight: 1.6, marginBottom: 32 }}>
         <h2>1. Acceptance of Terms</h2>
         <p>
-          By accessing and using VoltChess, you accept and agree to be bound by
-          the terms and provision of this agreement.
+          By accessing and using DawvioChess, you accept and agree to be bound
+          by the terms and provision of this agreement.
         </p>
 
         <h2>2. Use License</h2>
         <p>
-          Permission is granted to temporarily download one copy of VoltChess
+          Permission is granted to temporarily download one copy of DawvioChess
           for personal, non-commercial transitory viewing only. This is the
           grant of a license, not a transfer of title, and under this license
           you may not:
@@ -32,7 +32,7 @@ export default function TermsAndConditions() {
             display;
           </li>
           <li>
-            attempt to reverse engineer any software contained in VoltChess;
+            attempt to reverse engineer any software contained in DawvioChess;
           </li>
           <li>
             remove any copyright or other proprietary notations from the
@@ -86,10 +86,10 @@ export default function TermsAndConditions() {
 
         <h2>7. Limitations</h2>
         <p>
-          In no event shall VoltChess or its suppliers be liable for any damages
-          (including, without limitation, damages for loss of data or profit, or
-          due to business interruption) arising out of the use or inability to
-          use VoltChess.
+          In no event shall DawvioChess or its suppliers be liable for any
+          damages (including, without limitation, damages for loss of data or
+          profit, or due to business interruption) arising out of the use or
+          inability to use DawvioChess.
         </p>
 
         <h2>8. Changes to Terms</h2>

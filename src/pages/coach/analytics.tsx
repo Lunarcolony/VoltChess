@@ -38,7 +38,7 @@ export default function CoachAnalyticsPage() {
   return (
     <>
       <Head>
-        <title>Analytics · VoltChess Academy</title>
+        <title>Analytics · DawvioChess Academy</title>
       </Head>
       <CoachShell>
         <CoachPageHeader

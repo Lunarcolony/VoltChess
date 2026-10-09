@@ -58,7 +58,7 @@ export const setGameHeaders = (
   game: Chess,
   params: { white?: Player; black?: Player; resigned?: Color } = {}
 ): Chess => {
-  game.setHeader("Event", "VoltChess Game");
+  game.setHeader("Event", "DawvioChess Game");
   game.setHeader("Site", SITE_HOST);
   game.setHeader(
     "Date",

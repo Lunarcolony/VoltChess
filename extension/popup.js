@@ -1,4 +1,4 @@
-const DEFAULT_URL = "https://voltchess.vercel.app";
+const DEFAULT_URL = "https://www.dawvio.com";
 
 async function init() {
   const stored = await chrome.storage.sync.get(["analyzerUrl"]);

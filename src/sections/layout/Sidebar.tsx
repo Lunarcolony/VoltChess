@@ -22,24 +22,16 @@ import { alpha } from "@mui/material/styles";
 import { SidebarAccount, MobileHeaderAccount } from "./SidebarAccount";
 import { UserRole } from "@/types/user";
 import { useAuth } from "@/contexts/AuthContext";
+import { ENABLE_UNRELEASED_FEATURES } from "@/constants";
 
 type NavItem = { label: string; icon: string; href: string };
+
+const UNRELEASED_NAV_HREFS = new Set(["/tools"]);
 
 const BASE_NAV: NavItem[] = [
   { label: "Home", icon: "mdi:home-outline", href: "/" },
   { label: "Analysis", icon: "mdi:magnify", href: "/analysis" },
   { label: "Tools", icon: "mdi:toolbox-outline", href: "/tools" },
-  {
-    label: "Openings",
-    icon: "mdi:book-open-page-variant-outline",
-    href: "/openings",
-  },
-  { label: "Puzzles", icon: "mdi:puzzle-outline", href: "/puzzles" },
-  {
-    label: "Training",
-    icon: "mdi:school-outline",
-    href: "/training",
-  },
   {
     label: "Guides",
     icon: "mdi:notebook-outline",
@@ -51,9 +43,13 @@ function navForRole(
   role: UserRole | undefined,
   isAuthenticated: boolean
 ): NavItem[] {
-  if (!isAuthenticated || !role) return BASE_NAV;
+  const base = ENABLE_UNRELEASED_FEATURES
+    ? BASE_NAV
+    : BASE_NAV.filter((item) => !UNRELEASED_NAV_HREFS.has(item.href));
 
-  const items = [...BASE_NAV];
+  if (!isAuthenticated || !role) return base;
+
+  const items = [...base];
   if (role === UserRole.Coach || role === UserRole.Admin) {
     items.splice(1, 0, {
       label: "Coach Hub",
@@ -115,7 +111,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           variant="h6"
           sx={{ fontWeight: 700, fontSize: "1.05rem", color: palette.text }}
         >
-          VoltChess
+          DawvioChess
         </Typography>
       </Box>
 
@@ -275,7 +271,7 @@ export default function Sidebar() {
               noWrap
               sx={{ minWidth: 0 }}
             >
-              VoltChess
+              DawvioChess
             </Typography>
           </Box>
           <MobileHeaderAccount />

@@ -1,4 +1,6 @@
-const DEFAULT_SITE_URL = "https://voltchess.vercel.app";
+export const BRAND_NAME = "DawvioChess";
+
+const DEFAULT_SITE_URL = "https://www.dawvio.com";
 
 export const SITE_URL = (
   import.meta.env.VITE_SITE_URL?.trim() || DEFAULT_SITE_URL
@@ -6,8 +8,12 @@ export const SITE_URL = (
 
 export const SITE_HOST = new URL(SITE_URL).host;
 
-/** Former production host — keep for PGN / session compatibility. */
-export const LEGACY_SITE_HOSTS = ["voltchess.me"] as const;
+/** Former production hosts — keep for PGN / session compatibility. */
+export const LEGACY_SITE_HOSTS = [
+  "dawvio.com",
+  "voltchess.vercel.app",
+  "voltchess.me",
+] as const;
 
 export function isVoltChessSiteHost(host: string | undefined | null): boolean {
   if (!host) return false;
@@ -22,7 +28,7 @@ export const OG_IMAGE = `${SITE_URL}/og-image.png`;
 
 export const DEFAULT_SEO = {
   title:
-    "Free Chess Game Analysis — Chess.com & Lichess, No Premium | VoltChess",
+    "Free Chess Game Analysis — Chess.com & Lichess, No Premium | DawvioChess",
   description:
     "Free Stockfish analysis for Chess.com and Lichess games. Enter your username, get blunders, accuracy, and eval graph — no premium, unlimited, no sign-up.",
   keywords: [

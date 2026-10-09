@@ -31,21 +31,6 @@ interface LichessClock {
   totalTime: number;
 }
 
-export interface LichessDailyPuzzleResponse {
-  game: {
-    id?: string;
-    pgn: string;
-  };
-  puzzle: {
-    id: string;
-    rating: number;
-    plays: number;
-    solution: string[];
-    themes: string[];
-    initialPly: number;
-  };
-}
-
 export interface LichessGame {
   id: string;
   createdAt: number;

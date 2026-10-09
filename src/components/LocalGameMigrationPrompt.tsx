@@ -74,7 +74,7 @@ export default function LocalGameMigrationPrompt() {
         ) : (
           <Typography color="text.secondary">
             You have {games.length} game{games.length !== 1 ? "s" : ""} saved
-            locally. Upload them to the VoltChess server so your coach can
+            locally. Upload them to the DawvioChess server so your coach can
             review them?
           </Typography>
         )}

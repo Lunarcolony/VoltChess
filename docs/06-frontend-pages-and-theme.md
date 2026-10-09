@@ -31,8 +31,6 @@ With that vocabulary in hand, the rest of the document walks through every file.
 - [`src/pages/analysis.tsx`](#srcpagesanalysistsx)
 - [`src/pages/database.tsx`](#srcpagesdatabasetsx)
 - [`src/pages/play.tsx`](#srcpagesplaytsx)
-- [`src/pages/puzzles.tsx`](#srcpagespuzzlestsx)
-- [`src/pages/openings.tsx`](#srcpagesopeningstsx)
 - [`src/pages/review.tsx`](#srcpagesreviewtsx)
 - [`src/pages/thanks.tsx`](#srcpagesthankstsx)
 - [`src/pages/terms-and-conditions.tsx`](#srcpagesterms-and-conditionstsx)
@@ -64,9 +62,9 @@ With that vocabulary in hand, the rest of the document walks through every file.
 
 ## `src/pages/index.tsx`
 
-**In one sentence:** The home screen — a "welcome back" landing page that lets you load a chess game to analyze, jump to Play or Puzzles, and browse analysis guides.
+**In one sentence:** The home screen — a "welcome back" landing page that lets you load a chess game to analyze, jump to Play, and browse analysis guides.
 
-**What it is & why it exists (plain English):** This is the page you see at the root address `/` after signing in. It is the front door of the app. Its main job is to get a game *into* the analyzer: you can paste a game, import one, or pick a saved one, and the page then sends you to the Analysis screen with that game loaded. It also shows two big "feature cards" (Play vs Engine, Tactical Puzzles) and a short list of blog guides for newcomers.
+**What it is & why it exists (plain English):** This is the page you see at the root address `/` after signing in. It is the front door of the app. Its main job is to get a game *into* the analyzer: you can paste a game, import one, or pick a saved one, and the page then sends you to the Analysis screen with that game loaded. It also shows a "feature card" for Play vs Engine and a short list of blog guides for newcomers.
 
 For brand-new visitors, the page also runs an **onboarding** experience: a welcome pop-up (a "modal" — a small window that floats over the page) that helps a first-time user load their first game. Whether onboarding has already been completed is stored on the device, so returning users skip it and instead see the "Welcome back" heading.
 
@@ -75,7 +73,7 @@ For brand-new visitors, the page also runs an **onboarding** experience: a welco
 2. The page can auto-load a game from the web address itself. If the URL contains a saved game id (`gameFromUrl`), it loads that game; if the URL contains a `pgn=` value (Base64-encoded game text), it decodes and loads that instead. It also reads an `orientation` value to decide whether the board faces White or Black.
 3. The central `HomeGameLoader` component lets you supply a game. When a game is loaded, `startAnalysis` runs: it figures out the PGN, sets board orientation, resets evaluation, prepares a fresh analysis session, and navigates to `/analysis` (or `/analysis?tour=1` if it came from onboarding, which triggers a guided tour there).
 4. While an evaluation is already running (`evaluationProgress` is non-zero), the page renders nothing (`return null`) to avoid flicker.
-5. Below the loader sit two `FeatureCard`s linking to `/play` and `/puzzles`, then a panel listing the first five blog posts with a "View all guides" link.
+5. Below the loader sit a `FeatureCard` linking to `/play`, then a panel listing the first five blog posts with a "View all guides" link.
 
 **Functions, components & exports:**
 - **`Home` (default export, a React component):** Takes no props. Renders the full home screen described above. Internally it wires together several helpers:
@@ -203,58 +201,6 @@ The data is shown in a **DataGrid** (a spreadsheet-like table component from MUI
 - **`Play` (default export):** No props. Reads game-in-progress state and arranges the board + control panel. Uses `useCardSx()` for the themed card styling.
 
 **Connections:** Uses `isGameInProgressAtom` from `src/sections/play/states`, `useCardSx`, `PageContainer`, `PageTitle`, and the play-section components `Board`, `GameInProgress`, `GameRecap`, `GameSettingsButton`. Routed at `/play` and wrapped in `RequireAuth`.
-
----
-
-## `src/pages/puzzles.tsx`
-
-**In one sentence:** A tactical-puzzle trainer where you drag pieces to find the best move on a small built-in set of puzzles, with hints, scoring, and progress — marked as under development.
-
-**What it is & why it exists (plain English):** This page lets you practice chess tactics. It shows a position and asks you to find the winning move; you drag the right piece to the right square, and the page checks your move against the known solution. It tracks a running score and shows a progress bar through the moves of each puzzle. The puzzles here are a small hard-coded set (back-rank mate, queen mate, knight fork, pin) used as a starting point; a banner notes the feature is still evolving.
-
-**How it works, step by step:**
-1. Four puzzles are defined in code, each with a starting `fen` (position), a `rating` (difficulty), themes, a `solution` (a list of moves in UCI notation alternating player/opponent), and a description.
-2. When a puzzle loads (`initializePuzzle`), the board is set to its FEN and progress is reset.
-3. You make a move by dragging a piece (`onDrop`). The page converts your move to UCI and compares it to the expected next move:
-   - If wrong, it shows "That's not the best move. Try again." and refuses the move.
-   - If right, it plays your move, then auto-plays the opponent's scripted replies (`playOpponentReplies`), and advances the solution pointer.
-4. When the last move is reached, the puzzle is marked solved, points are added to your score (rating ÷ 100, rounded), and a success message appears.
-5. A **Hint** button reveals the next correct move in human-readable form (e.g. "Hint: try Qf8"). A **Reset** button restarts the current puzzle. A **Next puzzle** button (enabled only after solving) cycles to the next one (wrapping back to the first).
-6. The right-hand card shows the themes, a progress bar, and the buttons; small pop-up "snackbar" messages give feedback. A difficulty-colored chip (green/amber/red) shows the puzzle's rating, and the board faces whichever side is to move.
-
-**Functions, components & exports:**
-- **`Puzzles` (default export):** No props. Manages all puzzle state (current index, board position, solution pointer, completion, hint, score, feedback) and renders the board + control card.
-  - `onDrop(sourceSquare, targetSquare)` — validates and applies the player's dragged move; returns `true`/`false` to accept/reject the drag.
-  - `playOpponentReplies(gameCopy, startIndex)` — auto-plays the opponent's scripted replies; returns the updated game and next solution index.
-  - `initializePuzzle()` — (re)loads the current puzzle's starting position.
-  - `nextPuzzle()` — advances to the next puzzle (wrapping).
-  - `getDifficultyColor(rating)` — maps a rating to a chip color.
-- `moveToUci(chess, from, to, promotion?)` — helper that applies a move and returns its UCI string (or `null`).
-
-**Connections:** Uses `chess.js` (`Chess`), `react-chessboard` (`Chessboard`), `usePalette`/`useCardSx`, `uciMoveParams` from `@/lib/chess`, plus `PageTitle` and `PageContainer`. Routed at `/puzzles` and wrapped in `RequireAuth`. The puzzle data is local to this file (no server calls).
-
----
-
-## `src/pages/openings.tsx`
-
-**In one sentence:** A searchable, filterable catalog of famous chess openings — each shown as a card with its moves, ECO code, difficulty, popularity, themes, and famous games.
-
-**What it is & why it exists (plain English):** This page is a reference library of well-known openings (Italian Game, Ruy Lopez, Sicilian, Queen's Gambit, etc.). For each one it shows the opening moves, its **ECO code** (a standard chess classification code like "C50-C59"), a short description, a difficulty level, a popularity percentage, the strategic themes, and a collapsible list of famous historical games. It exists as a learning aid so players can browse and study openings.
-
-**How it works, step by step:**
-1. A fixed list of eight openings is defined in code (`openingsDatabase`).
-2. At the top, a search box and three difficulty chips (beginner/intermediate/advanced) act as filters.
-3. `filteredOpenings` recomputes whenever the search text or selected difficulty changes: it matches the search against the name, ECO, moves, or themes, and matches the difficulty filter if one is selected.
-4. A line reports how many openings matched ("5 openings found").
-5. Each matching opening renders as a `Card`: title + ECO chip, the moves in a monospace box, the description, a difficulty chip and popularity star, theme chips, and — if it has famous games — an accordion that expands to list them.
-6. If nothing matches, a friendly "No openings found" empty state appears.
-
-**Functions, components & exports:**
-- **`OpeningsDatabase` (default export):** No props. Manages `searchTerm`, `selectedDifficulty`, and `expandedOpening` state; computes `filteredOpenings`; and renders the search/filter bar plus the grid of opening cards.
-  - `getDifficultyColor(difficulty)` — maps "beginner"/"intermediate"/"advanced" to a chip color.
-- `OpeningData` (type) and `openingsDatabase` (the data array) describe and hold the catalog.
-
-**Connections:** Uses `usePalette`/`useCardSx`, plus `PageTitle` and `PageContainer`. All data is local to the file (no server calls). Routed at `/openings` and wrapped in `RequireAuth`.
 
 ---
 
@@ -437,7 +383,7 @@ Like all coach pages, it is rendered inside a shared `CoachShell` (the coach-are
 
 **In one sentence:** The assignment workspace — create assignments, view them as a Kanban board or due-date calendar or full list, bulk-assign to many students, and edit/advance each one's status.
 
-**What it is & why it exists (plain English):** Coaches give students homework — review a game, study an opening, solve puzzles. This page is the full workflow for that. It has four tabs: **Create** (a form to make one assignment), **Kanban** (columns by status: pending / in progress / completed / cancelled), **Calendar** (grouped by due date), and **All list** (everything). A **Bulk assign** button hands the same task to several students at once. Each assignment card can be edited or moved through its lifecycle. It exists so a coach can plan and track student work in one place.
+**What it is & why it exists (plain English):** Coaches give students homework — review a game, study an opening, drill tactics. This page is the full workflow for that. It has four tabs: **Create** (a form to make one assignment), **Kanban** (columns by status: pending / in progress / completed / cancelled), **Calendar** (grouped by due date), and **All list** (everything). A **Bulk assign** button hands the same task to several students at once. Each assignment card can be edited or moved through its lifecycle. It exists so a coach can plan and track student work in one place.
 
 **How it works, step by step:**
 1. It fetches the coach's student links (for the student dropdowns) and all assignments (`["assignments"]`).
@@ -650,7 +596,7 @@ Like all coach pages, it is rendered inside a shared `CoachShell` (the coach-are
 - `createVoltChessTheme()` *(deprecated)* — builds the MUI theme for the default palette.
 - `cardSx` *(deprecated)* — card style for the default palette.
 
-**Connections:** Imports `createTheme`/`alpha` from MUI, and `COLOR_THEMES`/`DEFAULT_COLOR_THEME`/`ColorPalette` from `themes.ts`. `createAppTheme` is what the app's top-level theme provider uses to apply the active palette; `getCardSx` mirrors the logic exposed through `useCardSx()`, which pages like Play, Puzzles, Openings, the student hub, and the coach dossier use for their cards.
+**Connections:** Imports `createTheme`/`alpha` from MUI, and `COLOR_THEMES`/`DEFAULT_COLOR_THEME`/`ColorPalette` from `themes.ts`. `createAppTheme` is what the app's top-level theme provider uses to apply the active palette; `getCardSx` mirrors the logic exposed through `useCardSx()`, which pages like Play, the student hub, and the coach dossier use for their cards.
 
 ---
 
@@ -675,6 +621,6 @@ Like all coach pages, it is rendered inside a shared `CoachShell` (the coach-are
 
 ## Summary
 
-**Pages** are the routed screens of VoltChess. The public ones (`login`, `register`, `blog/*`, `terms-and-conditions`, `thanks`) need no account; the rest require sign-in via `RequireAuth`, and the `coach/*` and `student` pages additionally require the right role via `RoleRoute`. Coach pages are tools for *managing students* (dashboard, roster, dossiers, assignments, templates, messages, plans, analytics); the student page is one learner's *personal hub*. The chess pages (`analysis`, `review`, `database`, `play`, `puzzles`, `openings`) and the home page revolve around loading and reviewing games with the in-browser Stockfish engine.
+**Pages** are the routed screens of VoltChess. The public ones (`login`, `register`, `blog/*`, `terms-and-conditions`, `thanks`) need no account; the rest require sign-in via `RequireAuth`, and the `coach/*` and `student` pages additionally require the right role via `RoleRoute`. Coach pages are tools for *managing students* (dashboard, roster, dossiers, assignments, templates, messages, plans, analytics); the student page is one learner's *personal hub*. The chess pages (`analysis`, `review`, `database`, `play`) and the home page revolve around loading and reviewing games with the in-browser Stockfish engine.
 
 **Theming** is centralized in `src/theme/`: `themes.ts` defines ~25 named palettes, `colorThemeAtom.ts` remembers the chosen one (persisted in the browser), `voltchessTheme.ts` translates a palette into a full MUI theme, and `buttonStyles.ts` provides consistent accent-button styling. Pages read the active colors through `usePalette()` / `useCardSx()`.

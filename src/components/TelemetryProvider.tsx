@@ -61,6 +61,7 @@ export default function TelemetryProvider() {
 
   useEffect(() => {
     if (!started.current) return;
+    if (location.pathname.startsWith("/reading")) return;
     const path = location.pathname + location.search;
     onRouteChange(path);
   }, [location.pathname, location.search]);
